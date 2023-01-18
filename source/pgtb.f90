@@ -550,7 +550,16 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    if(iter.eq.2.and.prop.eq.4) mode = 3     ! stda write
    if(iter.eq.2.and.prop.eq.5) mode = 4     ! TM write
    if(              prop.lt.0) mode = -iter ! IR/Raman  
-   call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+   if (iter .eq.1) then
+      call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+   else
+      call nonorthogonal_gcp(Hmat,ndim,S,P)
+      !call nonorthogonal_cp(ndim,S,P)
+
+   end if
+
+   call check_electrons(ndim,S,P)
+   
    if(fail) stop 'diag error'
 
    if(iter.eq.1) gap1 = (eps(homo+1)-eps(homo))*au2ev
@@ -1431,3 +1440,206 @@ subroutine shscalP(iter,n,at,psh,scal)
    enddo
 
 end
+
+subroutine check_electrons(ndim,S,P)
+   use iso_fortran_env, only : wp => real64
+   implicit none
+   integer, intent(in)    :: ndim                  ! number of AOs       
+   real(wp), intent(in) :: S(ndim*(ndim+1)/2) 
+   real(wp), intent(in) :: P(ndim*(ndim+1)/2)
+   
+   real(wp) :: U(ndim,ndim), sdum(ndim,ndim), PS(ndim,ndim) 
+   real(wp) :: check_nel
+   integer :: i,j 
+   
+   check_nel=0.0_wp
+   call blowsym(ndim,S,sdum)
+   call blowsym(ndim,P,U)
+   PS=matmul(U,sdum)
+   
+   do i=1, ndim
+      do j=1, ndim
+         if (i==j) check_nel=check_nel+PS(i,j)
+      enddo
+   enddo
+   write(*,101), "Number of electrons: ", check_nel
+   101 FORMAT (A,X,F8.4)
+end subroutine check_electrons
+
+subroutine nonorthogonal_gcp(hmat,ndim,S,P)
+   use iso_fortran_env, only : wp => real64
+   implicit none
+   integer, intent(in)    :: ndim                  ! number of AOs       
+   real(wp), intent(in) :: S(ndim*(ndim+1)/2) 
+   real(wp), intent(inout) :: P(ndim*(ndim+1)/2)
+   real(wp),intent(in)   :: Hmat(ndim*(ndim+1)/2) ! Hamiltonian matrix
+
+   real(wp) :: U(ndim,ndim), sdum(ndim,ndim), SP(ndim,ndim), Htmp(ndim,ndim)
+   real(wp) :: PSP(ndim,ndim), res(ndim,ndim), PSPSP(ndim,ndim), Utmp(ndim,ndim)
+   real(wp) :: S_intguess (ndim,ndim)
+   
+   
+   real(wp) :: hmax, hmax1, hmin, hmin1 ! upper and lower bounds of H spectrum
+   real(wp) :: hsumm ! sum of non-diagonal elements for one row
+   real(wp) :: sigma,sigma_min,sigma_max ! coef
+   real(wp) :: chempot ! chemical potential
+   real(wp) :: a_1(ndim),a_inf(ndim)
+   integer :: i,j ,num1,num2
+   
+
+   call blowsym(ndim,S,sdum)
+   call blowsym(ndim,P,U)
+   call blowsym(ndim,Hmat,Htmp)
+   
+   hmax=0.0_wp
+   hmin=0.0_wp
+   hsumm=0.0_wp
+   
+   write (*,*) "Hamiltonian Matrix"
+   write (*,101) (Htmp(:,i),i=1,ndim)
+   101 FORMAT(10F8.3,X)
+
+   !> Gershgorin formulas to obtain lower and upper bounds of the pectrum of H
+   
+   do i=1,ndim
+      
+      do j=1,ndim
+         if (i.ne.j) then 
+            hsumm=hsumm+abs(Htmp(i,j))
+         else
+            hmax1=Htmp(i,j)
+            hmin1=Htmp(i,j)
+         endif
+      enddo
+
+      hmax1 = hmax1 + hsumm
+      hmin1 = hmin1 - hsumm
+      hsumm=0.0_wp
+
+      if (i==1) then
+         hmax=hmax1
+         hmin=hmin1
+      else
+         if (hmax1>hmax) hmax=hmax1
+         if (hmin1>hmin) hmin=hmin1
+     endif
+  
+   enddo
+   
+   print *, "Lower bound", hmin
+   print*, "Upper bound", hmax
+   
+   chempot=hmin
+   
+   write (*,*) "Overlap matrix"
+   write (*,101) (sdum(:,i),i=1,ndim)
+!-------------------------------------------------
+!                       (27)
+!-------------------------------------------------
+   !> initial guess for S^-1
+   !do i=1,10
+      do j=1,ndim
+         a_1(j)=sum(abs(sdum(:,j)))
+         a_inf(j)=sum(abs(sdum(j,:)))
+      enddo
+   !enddo
+
+   write (*,*) "a1", maxval(a_1)  
+   write (*,*) "ainf ", maxval(a_inf)
+   
+   S_intguess = (1.0_wp/(maxval(a_1) * maxval(a_inf))) * sdum
+
+   write (*,*) "S_initial guess"
+   write (*,101) (S_intguess(:,i),i=1,ndim)
+   
+!-------------------------------------------------
+!                       (25)
+!-------------------------------------------------
+   
+   stop
+   !> Find optimal chemical potential
+   do num1=1,10
+      
+      !chempot+=0.5
+      print*,chempot
+      
+      sigma_max=1.0_wp/(hmax-chempot)
+      sigma_min=1.0_wp/(hmin-chempot)
+      if (sigma_max>sigma_min) then
+         sigma=sigma_min
+      else
+         sigma=sigma_max
+      endif
+
+      Utmp=U
+      do num2=1,10 
+          
+         SP=matmul(sdum,Utmp)
+         PSP=matmul(Utmp,SP) 
+         PSPSP=matmul(PSP,SP)
+         res=3*PSP-2*PSPSP
+         write (*,*) "Purified P"
+         write (*,101) (res(:,i),i=1,ndim)
+         Utmp=res
+      
+      enddo
+
+   enddo
+   
+   
+
+   call packsym(ndim,res,P)
+
+end subroutine nonorthogonal_gcp
+
+subroutine nonorthogonal_cp(ndim,S,P)
+   use iso_fortran_env, only : wp => real64
+   implicit none
+   integer, intent(in)    :: ndim                  ! number of AOs       
+   real(wp), intent(in) :: S(ndim*(ndim+1)/2) 
+   real(wp), intent(inout) :: P(ndim*(ndim+1)/2)
+
+   real(wp) :: cn,tr1,tr2
+   real(wp) :: U(ndim,ndim), sdum(ndim,ndim), SP(ndim,ndim), PSP(ndim,ndim),PSPSP(ndim,ndim), res(ndim,ndim)
+   real(wp) :: matr1(ndim,ndim),matr2(ndim,ndim)
+   integer :: i,j,num
+   
+   
+   call blowsym(ndim,S,sdum)
+   call blowsym(ndim,P,U)
+   
+   do num=1,10 
+      SP=matmul(sdum,U)
+      PSP=matmul(U,SP)
+      PSPSP=matmul(PSP,SP)
+      matr1=PSP-PSPSP
+      matr2=U-PSP
+      tr1=0.0_wp
+      tr2=0.0_wp
+      do i=1, ndim
+         do j=1, ndim
+            if (i==j) then
+               tr1=tr1+matr1(i,j)
+               tr2=tr2+matr2(i,j)
+            endif
+         enddo
+      enddo
+   
+      cn=tr1/tr2
+      print*,cn
+      if(cn>=0.5_wp) then
+         res=((1.0_wp+cn)*PSP-PSPSP)/cn
+         print*,"bigger"
+      else
+         res=((1.0_wp-2.0_wp*cn)*U+(1.0_wp+cn)*PSP-PSPSP)/(1-cn)
+         print*,"smaller"
+      endif
+      
+      write (*,*) "Purified P"
+      write (*,101) (res(:,i),i=1,ndim)
+      101 FORMAT(10F8.3,X)
+      U=res
+   enddo
+
+   call packsym(ndim,res,P)
+end subroutine nonorthogonal_cp
