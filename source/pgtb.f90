@@ -1476,8 +1476,10 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
 
    real(wp) :: U(ndim,ndim), sdum(ndim,ndim), SP(ndim,ndim), Htmp(ndim,ndim)
    real(wp) :: PSP(ndim,ndim), res(ndim,ndim), PSPSP(ndim,ndim), Utmp(ndim,ndim)
-   real(wp) :: S_intguess (ndim,ndim)
-   
+   real(wp) :: S_inverse (ndim,ndim)
+      !! S^(-1)
+   real(wp) :: Identity(ndim,ndim)
+      !! Identity matrix
    
    real(wp) :: hmax, hmax1, hmin, hmin1 ! upper and lower bounds of H spectrum
    real(wp) :: hsumm ! sum of non-diagonal elements for one row
@@ -1495,6 +1497,18 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
    hmin=0.0_wp
    hsumm=0.0_wp
    
+   !> Setup identity matrix
+   do i=1,ndim
+      do j=1,ndim
+         if(i==j) then
+            identity(i,j) = 1
+         else
+            identity(i,j) = 0
+         endif
+      enddo
+   enddo
+
+
    write (*,*) "Hamiltonian Matrix"
    write (*,101) (Htmp(:,i),i=1,ndim)
    101 FORMAT(10F8.3,X)
@@ -1533,25 +1547,28 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
    
    write (*,*) "Overlap matrix"
    write (*,101) (sdum(:,i),i=1,ndim)
+
 !-------------------------------------------------
 !                       (27)
 !-------------------------------------------------
    !> initial guess for S^-1
-   !do i=1,10
-      do j=1,ndim
-         a_1(j)=sum(abs(sdum(:,j)))
-         a_inf(j)=sum(abs(sdum(j,:)))
-      enddo
-   !enddo
+   do j=1,ndim
+      a_1(j)=sum(abs(sdum(:,j)))
+      a_inf(j)=sum(abs(sdum(j,:)))
+   enddo
 
    write (*,*) "a1", maxval(a_1)  
    write (*,*) "ainf ", maxval(a_inf)
    
-   S_intguess = (1.0_wp/(maxval(a_1) * maxval(a_inf))) * sdum
+   S_inverse = (1.0_wp/(maxval(a_1) * maxval(a_inf))) * sdum
 
-   write (*,*) "S_initial guess"
-   write (*,101) (S_intguess(:,i),i=1,ndim)
+   write (*,*) "S^(-1) initial guess"
+   write (*,101) (S_inverse(:,i),i=1,ndim)
    
+   !> check 
+   print*,"Is the largest spectral norm of intial guess bigger < 1? ", 1 > maxval(identity - matmul(S_inverse,sdum))
+
+
 !-------------------------------------------------
 !                       (25)
 !-------------------------------------------------
