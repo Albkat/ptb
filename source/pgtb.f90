@@ -1466,31 +1466,49 @@ subroutine check_electrons(ndim,S,P)
    101 FORMAT (A,X,F8.4)
 end subroutine check_electrons
 
+!--------------------------------------------------------------
+! Nonorthogonal grand-canonical purification
+!--------------------------------------------------------------
 subroutine nonorthogonal_gcp(hmat,ndim,S,P)
    use iso_fortran_env, only : wp => real64
    implicit none
-   integer, intent(in)    :: ndim                  ! number of AOs       
-   real(wp), intent(in) :: S(ndim*(ndim+1)/2) 
-   real(wp), intent(inout) :: P(ndim*(ndim+1)/2)
-   real(wp),intent(in)   :: Hmat(ndim*(ndim+1)/2) ! Hamiltonian matrix
-
-   real(wp) :: U(ndim,ndim), sdum(ndim,ndim), SP(ndim,ndim), Htmp(ndim,ndim)
-   real(wp) :: PSP(ndim,ndim), res(ndim,ndim), PSPSP(ndim,ndim), Utmp(ndim,ndim)
+   integer, intent(in)      :: ndim                  
+      !! number of AOs       
+   real(wp), intent(in)     :: S(ndim*(ndim+1)/2) 
+      !! array form of overlap matrix 
+   real(wp), intent(inout)  :: P(ndim*(ndim+1)/2)
+      !! array form of density matrix
+   real(wp), intent(in)     :: Hmat(ndim*(ndim+1)/2) 
+      !! array form of Hamiltonian matrix
+   
+   !> All the temporary arrays
+   real(wp) :: Psym(ndim,ndim) 
+   real(wp) :: Ssym(ndim,ndim)
+      !! Overlap matrix
+   real(wp) :: SP(ndim,ndim), Htmp(ndim,ndim)
+   real(wp) :: PSP(ndim,ndim), res(ndim,ndim), PSPSP(ndim,ndim), Psymtmp(ndim,ndim)
    real(wp) :: S_inverse (ndim,ndim)
       !! S^(-1)
    real(wp) :: Identity(ndim,ndim)
       !! Identity matrix
+   real(wp) :: check(ndim,ndim)
+      !! Validation matrix 
    
-   real(wp) :: hmax, hmax1, hmin, hmin1 ! upper and lower bounds of H spectrum
-   real(wp) :: hsumm ! sum of non-diagonal elements for one row
-   real(wp) :: sigma,sigma_min,sigma_max ! coef
-   real(wp) :: chempot ! chemical potential
+   real(wp) :: hmax, hmax1, hmin, hmin1 
+      !! upper and lower bounds of H spectrum
+   real(wp) :: hsumm 
+      !! sum of non-diagonal elements for one row
+   real(wp) :: sigma,sigma_min,sigma_max 
+      !! coefficient
+   real(wp) :: chempot 
+      !! chemical potential
    real(wp) :: a_1(ndim),a_inf(ndim)
    integer :: i,j ,num1,num2
    
 
-   call blowsym(ndim,S,sdum)
-   call blowsym(ndim,P,U)
+   !> Transform from array form to matrix form
+   call blowsym(ndim,S,Ssym)
+   call blowsym(ndim,P,Psym)
    call blowsym(ndim,Hmat,Htmp)
    
    hmax=0.0_wp
@@ -1509,12 +1527,19 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
    enddo
 
 
+   write (*,*) "Density Matrix"
+   write (*,101) (Psym(:,i),i=1,ndim)
+   101 FORMAT(10F8.3,X)
+   
+   write (*,*) "Overlap Matrix"
+   write (*,101) (Ssym(:,i),i=1,ndim)
+   
    write (*,*) "Hamiltonian Matrix"
    write (*,101) (Htmp(:,i),i=1,ndim)
-   101 FORMAT(10F8.3,X)
-
-   !> Gershgorin formulas to obtain lower and upper bounds of the pectrum of H
-   
+   !-------------------------------------------------
+   !                       (13a/b)
+   !-------------------------------------------------
+   !> Gershgorin formulas to obtain lower and upper bounds of the spectrum of H 
    do i=1,ndim
       
       do j=1,ndim
@@ -1543,35 +1568,47 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
    print *, "Lower bound", hmin
    print*, "Upper bound", hmax
    
+   stop
    chempot=hmin
    
    write (*,*) "Overlap matrix"
-   write (*,101) (sdum(:,i),i=1,ndim)
+   write (*,101) (Ssym(:,i),i=1,ndim)
 
 !-------------------------------------------------
 !                       (27)
 !-------------------------------------------------
    !> initial guess for S^-1
    do j=1,ndim
-      a_1(j)=sum(abs(sdum(:,j)))
-      a_inf(j)=sum(abs(sdum(j,:)))
+      a_1(j)=sum(abs(Ssym(:,j)))
+      a_inf(j)=sum(abs(Ssym(j,:)))
    enddo
 
    write (*,*) "a1", maxval(a_1)  
    write (*,*) "ainf ", maxval(a_inf)
    
-   S_inverse = (1.0_wp/(maxval(a_1) * maxval(a_inf))) * sdum
+   S_inverse = (1.0_wp/(maxval(a_1) * maxval(a_inf))) * Ssym
 
    write (*,*) "S^(-1) initial guess"
    write (*,101) (S_inverse(:,i),i=1,ndim)
    
    !> check 
-   print*,"Is the largest spectral norm of intial guess bigger < 1? ", 1 > maxval(identity - matmul(S_inverse,sdum))
+   print*,"Is the largest spectral norm of intial guess bigger < 1? ", 1 > maxval(identity - matmul(S_inverse,Ssym))
 
 
 !-------------------------------------------------
 !                       (25)
 !-------------------------------------------------
+   
+   !> The Newton-Schulz iteration
+   !do i=1,2
+      S_inverse=(2*S_inverse - matmul(S_inverse,S_inverse) * Ssym) 
+   !enddo
+
+   write (*,*) "S^(-1)"
+   write (*,101) (S_inverse(:,i),i=1,ndim)
+   check=matmul(Ssym,S_inverse)
+   write (*,*) "S*S**(^2)"
+   write (*,101) (check(:,i),i=1,ndim)
    
    stop
    !> Find optimal chemical potential
@@ -1588,16 +1625,16 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
          sigma=sigma_max
       endif
 
-      Utmp=U
+      Psymtmp=Psym
       do num2=1,10 
           
-         SP=matmul(sdum,Utmp)
-         PSP=matmul(Utmp,SP) 
+         SP=matmul(Ssym,Psymtmp)
+         PSP=matmul(Psymtmp,SP) 
          PSPSP=matmul(PSP,SP)
          res=3*PSP-2*PSPSP
          write (*,*) "Purified P"
          write (*,101) (res(:,i),i=1,ndim)
-         Utmp=res
+         Psymtmp=res
       
       enddo
 
