@@ -3883,7 +3883,7 @@ module multicharge_lapack
    implicit none
    private
 
-   public :: sytrf, sytrs, sytri
+   public :: sytrf, sytrs, sytri, lapack_sytri, lapack_sytrf
 
    interface sytrf
       module procedure :: mchrg_ssytrf
