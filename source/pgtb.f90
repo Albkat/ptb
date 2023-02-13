@@ -386,10 +386,10 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    real(wp),parameter :: au2ev = 27.2113957_wp
    real(wp) :: r,tmp,pol,hi,hj,hij,xk,t8,t9,qa,qb,keav,eh1,tmp2
    real(wp) :: xiter(2),yiter(2),ziter(2),ssh,gap1,gap2
-   real(wp) :: t0,t1,w0,w1
+   real(wp) :: t0,t1,w0,w1, check_electrons,ch
    real(wp), allocatable :: SSS(:)
    real(wp), allocatable :: vs(:),vd(:,:),vq(:,:)
-   real(wp), allocatable :: gq(:),xab(:),scal(:,:)
+   real(wp), allocatable :: gq(:),xab(:),scal(:,:),ptmp(:,:), stmp(:,:)
 
 !  special overlap matrix for XC term
    call modbas(n,at,2) 
@@ -551,14 +551,33 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    if(iter.eq.2.and.prop.eq.5) mode = 4     ! TM write
    if(              prop.lt.0) mode = -iter ! IR/Raman  
    if (iter .eq.1) then
+      !call nonorthogonal_gcp(Hmat,ndim,S,P)
       call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
-   else
-      call nonorthogonal_gcp(Hmat,ndim,S,P)
+      !allocate(ptmp(ndim,ndim))
+      !allocate(stmp(ndim,ndim))
+      !call blowsym(ndim,P,ptmp)
+      !call blowsym(ndim,S,stmp)
+      !print *,"After PTB"
+      !write (*,103) (ptmp(:,i), i=1,ndim) 
+      !103 format (10F8.3)
+      !print*, check_electrons(ndim,stmp,ptmp)
       !call nonorthogonal_cp(ndim,S,P)
-
+      !stop
+   else
+      !call nonorthogonal_gcp(Hmat,ndim,S,P)
+      !call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+      !allocate(ptmp(ndim,ndim))
+      !allocate(stmp(ndim,ndim))
+      !call blowsym(ndim,P,ptmp)
+      !call blowsym(ndim,S,stmp)
+      !print *,"After PTB"
+      !write (*,103) (ptmp(:,i), i=1,ndim) 
+      !103 format (10F8.3)
+      !print*, check_electrons(ndim,stmp,ptmp)
+      call nonorthogonal_cp(ndim,S,P)
+      stop
    end if
-
-   !call check_electrons(ndim,S,P)
+   
    
    if(fail) stop 'diag error'
 
@@ -1533,6 +1552,8 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
       !! if purification went wrong for certain chempot 
    logical :: conv
       !! if purification converged
+   logical :: is_defined
+      !! if chem potential is defined
    real(wp) :: norm
       !! norm of matrix
    real(wp) :: nel,check_electrons
@@ -1633,7 +1654,6 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
    call la_syev('N','U',ndim,H_syev,ndim,w,work,lwork,info)
    hmax = maxval(w)
    hmin = minval(w)
-   print*,w
    !2 appr
    !-------------------------------------------------
    !                       (13a/b)
@@ -1673,11 +1693,13 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
    !write (*,101) (Ssym(:,i),i=1,ndim)
 
    !> Intial values
-   chempot=-10_wp
+   chempot=-2.15_wp
    error=.false.
+   is_defined=.true.
+
 
    !> Find optimal chemical potential
-   chemp: do num1=1,100
+   chemp: do num1=1,2000
 
       
       
@@ -1713,7 +1735,6 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
       P0=term5
       
       
-
       !P0=Psym
          !! if intial guess taken from ptb
       
@@ -1779,14 +1800,18 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
       chempot=chempot+0.1_wp
       error=.false.
       conv=.false.
-   
+      
+      if (is_defined) exit chemp
+
    enddo chemp
    
+   write (*,*) "Purified"
+   write (*,101) (P0(:,i),i=1,ndim)
    
-   stop     
    
 
-   call packsym(ndim,res,P)
+   !call packsym(ndim,P0,P)
+
 
 end subroutine nonorthogonal_gcp
 
