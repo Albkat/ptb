@@ -551,6 +551,7 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    if(iter.eq.2.and.prop.eq.5) mode = 4     ! TM write
    if(              prop.lt.0) mode = -iter ! IR/Raman  
    if (iter .eq.1) then
+      !call nonorthogonal_cp(ndim,S,P)
       !call nonorthogonal_gcp(Hmat,ndim,S,P)
       call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
       !allocate(ptmp(ndim,ndim))
@@ -561,20 +562,20 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
       !write (*,103) (ptmp(:,i), i=1,ndim) 
       !103 format (10F8.3)
       !print*, check_electrons(ndim,stmp,ptmp)
-      !call nonorthogonal_cp(ndim,S,P)
       !stop
    else
+      !call nonorthogonal_cp(Hmat,ndim,S,P)
       !call nonorthogonal_gcp(Hmat,ndim,S,P)
-      !call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
-      !allocate(ptmp(ndim,ndim))
-      !allocate(stmp(ndim,ndim))
-      !call blowsym(ndim,P,ptmp)
-      !call blowsym(ndim,S,stmp)
-      !print *,"After PTB"
-      !write (*,103) (ptmp(:,i), i=1,ndim) 
-      !103 format (10F8.3)
-      !print*, check_electrons(ndim,stmp,ptmp)
-      call nonorthogonal_cp(ndim,S,P)
+      call purification(Hmat,ndim,S,P)
+      call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+      allocate(ptmp(ndim,ndim))
+      allocate(stmp(ndim,ndim))
+      call blowsym(ndim,P,ptmp)
+      call blowsym(ndim,S,stmp)
+      print *,"After PTB"
+      write (*,103) (ptmp(:,i), i=1,ndim) 
+      103 format (10F8.3)
+      print*, check_electrons(ndim,stmp,ptmp)
       stop
    end if
    
@@ -1486,12 +1487,11 @@ real function check_electrons(ndim,S,P) result(check_nel)
 end function check_electrons
 
 !--------------------------------------------------------------
-! Nonorthogonal grand-canonical purification
+! Nonorthogonal purification
 !--------------------------------------------------------------
-subroutine nonorthogonal_gcp(hmat,ndim,S,P)
+subroutine purification(hmat,ndim,S,P)
    use iso_fortran_env, only : wp => real64
    use ieee_arithmetic, only : ieee_is_NaN
-   use gtb_la, only : la_syev
    use multicharge_lapack, only : sytri,sytrf
    
    implicit none
@@ -1513,8 +1513,6 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
       !! S*P
    real(wp) :: Hsym(ndim,ndim)
       !! Hamiltonian matrix 
-   real(wp) :: H_syev(ndim,ndim)
-      !! Hamiltonian matrix for eigenvaluefor eigenvalues
    real(wp) :: PSP(ndim,ndim)
       !! P*S*P
    real(wp) :: PSPSP(ndim,ndim)
@@ -1529,47 +1527,37 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
       !! Identity matrices
    real(wp) :: term1(ndim,ndim), term2(ndim,ndim), term3(ndim,ndim), term4(ndim,ndim), term5(ndim,ndim)
       !! the diffrent terms for 11a equation 
-   real(wp) :: check(ndim,ndim)
-      !! Validation matrix 
    
-   integer  :: ipiv(ndim), info
-   real(wp), allocatable :: work(:)
-      !! workspace
-   integer  :: lwork
-      !! dimension of workspace
-   real(wp) :: w(ndim)
-      !! eigenvalues
-   real(wp) :: hmax, hmax1, hmin, hmin1 
+      real(wp) :: hmax, hmin 
       !! upper and lower bounds of H spectrum
-   real(wp) :: hsumm 
-      !! sum of non-diagonal elements for one row
    real(wp) :: alpha,alpha_min,alpha_max 
       !! coefficient
    real(wp) :: chempot 
       !! chemical potential
-   real(wp) :: a_1(ndim),a_inf(ndim)
    logical :: error
       !! if purification went wrong for certain chempot 
    logical :: conv
       !! if purification converged
    logical :: is_defined
       !! if chem potential is defined
+   logical :: is_cp
+      !! if canonical purification should be used, otherwise gcp
    real(wp) :: norm
       !! norm of matrix
    real(wp) :: nel,check_electrons
       !! number of electrons
-   integer :: i,j,ic,jc,num1,purificator,iter
+   real(wp) ::step
+   integer :: i,j,ic,jc,num1,purificator,iter, upper_limit
 
    
+   hmax=0.0_wp
+   hmin=0.0_wp
 
    !> Transform from array form to matrix form
    call blowsym(ndim,S,Ssym)
    call blowsym(ndim,P,Psym)
    call blowsym(ndim,Hmat,Hsym)
    
-   hmax=0.0_wp
-   hmin=0.0_wp
-   hsumm=0.0_wp
    
    !> Setup identity matrix
    do i=1,ndim
@@ -1581,125 +1569,28 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
          endif
       enddo
    enddo
-
-
-   101 FORMAT(10F8.3,X)
    
-   
-   !1
-   !> get S_inverse from LAPACK
-   S_inverse=Ssym
-   call sytrf(S_inverse, ipiv, info=info, uplo='l')
-   if (info == 0) then
-         call sytri(S_inverse, ipiv, info=info, uplo='l')
-         if (info == 0) then
-            do ic = 1, ndim
-               do jc = ic+1, ndim
-                  S_inverse(ic, jc) = S_inverse(jc, ic)
-               end do
-            end do
-         end if
-   end if
-   check=matmul(S_inverse,Ssym)
-   
-   !2
-   !-------------------------------------------------
-   !                       (27)
-   !-------------------------------------------------
-   !> initial guess for S^-1
-   !do j=1,ndim
-   !   a_1(j)=sum(abs(Ssym(:,j)))
-   !   a_inf(j)=sum(abs(Ssym(j,:)))
-   !enddo
+   call inverse_(ndim,Ssym,S_inverse)
 
-   !write (*,*) "a1", maxval(a_1)  
-   !write (*,*) "ainf ", maxval(a_inf)
+   call eigs(ndim,Hsym,hmax,hmin)
    
-   !S_inverse = (1.0_wp/(maxval(a_1) * maxval(a_inf))) * Ssym
-
-   !write (*,*) "S^(-1) initial guess"
-  ! write (*,101) (S_inverse(:,i),i=1,ndim)
-   
-   !> check 
-   !print*,"Is the largest spectral norm of intial guess bigger < 1? ", 1 > maxval(identity - matmul(S_inverse,Ssym))
-
-
-   !-------------------------------------------------
-   !                       (25)
-   !-------------------------------------------------
-   
-   !> The Newton-Schulz iteration
-   !do i=1,2
-   !   S_inverse=(2*S_inverse - matmul(S_inverse,S_inverse) * Ssym) 
-   !enddo
-
-   !write (*,*) "S^(-1)"
-   !write (*,101) (S_inverse(:,i),i=1,ndim)
-   !check=matmul(Ssym,S_inverse)
-   !write (*,*) "S*S**(^2)"
-   !write (*,101) (check(:,i),i=1,ndim)
-   
-   
-   !> get spectrum bounds of H matrix 
-   !1 direct
-
-   H_syev=Hsym
-   allocate(work(1))
-   lwork=-1
-   call la_syev('N','U',ndim,H_syev,ndim,w,work,lwork,info)
-   lwork=idint(work(1))
-   deallocate(work)
-   allocate(work(lwork))
-
-   call la_syev('N','U',ndim,H_syev,ndim,w,work,lwork,info)
-   hmax = maxval(w)
-   hmin = minval(w)
-   !2 appr
-   !-------------------------------------------------
-   !                       (13a/b)
-   !-------------------------------------------------
-   !> Gershgorin formulas to obtain lower and upper bounds of the spectrum of H 
-   !do i=1,ndim
-      
-   !   do j=1,ndim
-   !      if (i.ne.j) then 
-   !         hsumm=hsumm+abs(Hsym(i,j))
-   !      else
-   !         hmax1=Hsym(i,j)
-   !         hmin1=Hsym(i,j)
-   !      endif
-   !   enddo
-
-   !   hmax1 = hmax1 + hsumm
-   !   hmin1 = hmin1 - hsumm
-   !   hsumm=0.0_wp
-
-   !   if (i==1) then
-   !      hmax=hmax1
-   !      hmin=hmin1
-   !   else
-   !      if (hmax1>hmax) hmax=hmax1
-   !      if (hmin1>hmin) hmin=hmin1
-   !  endif
-  
-   !enddo
-   
-   !print *, "Lower bound", hmin
-   !print*, "Upper bound", hmax
-   
-   !stop
-   
-   !write (*,*) "Overlap matrix"
-   !write (*,101) (Ssym(:,i),i=1,ndim)
-
    !> Intial values
-   chempot=-2.15_wp
+   chempot=-4.1834015_wp
+   upper_limit=100
+   step=0.00000001_wp
+   is_cp=.false. 
+   is_defined=.false.
+   
+   if (is_cp)
+      call cp_purification()
+   else
+      call gcp_purification()
+   endif
+
+
    error=.false.
-   is_defined=.true.
-
-
    !> Find optimal chemical potential
-   chemp: do num1=1,2000
+   chemp: do num1=1,upper_limit
 
       
       
@@ -1789,7 +1680,7 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
          if (conv) then
             nel=check_electrons(ndim,Ssym,res)
             write(*,102) "chemical potential = ", chempot, ", iterations = ", iter, ", electrons = ", nel
-            102 format(a,F10.4,a,I0,a,F6.3)
+            102 format(a,F14.9,a,I0,a,F14.9)
          else
             write(*,103) "chemical potential = ", chempot, ', converged = ', conv
             103 format(a,F8.4,a,l)
@@ -1797,7 +1688,7 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
       endif
       
       !> Preparation for the next iteration
-      chempot=chempot+0.1_wp
+      chempot=chempot+step
       error=.false.
       conv=.false.
       
@@ -1805,38 +1696,320 @@ subroutine nonorthogonal_gcp(hmat,ndim,S,P)
 
    enddo chemp
    
-   write (*,*) "Purified"
-   write (*,101) (P0(:,i),i=1,ndim)
    
+   stop
+   write (*,101) (P0(:,i),i=1,ndim)
+
+   
+   !> Format for matrix dimensionality
+   101 FORMAT(56F8.3,X)
    
 
    !call packsym(ndim,P0,P)
 
 
-end subroutine nonorthogonal_gcp
+end subroutine purification
 
-subroutine nonorthogonal_cp(ndim,S,P)
+subroutine gcp_purification()
+
+end subroutine gcp_purification
+
+subroutine eigs(ndim,matrix,maxim,minim)
+   
+   use gtb_la, only : la_syev
+   use iso_fortran_env, only : wp => real64
+   
+   integer, intent(in) :: ndim
+   real(wp), intent(in) :: matrix(ndim,ndim)
+   real(wp), intent(out) :: maxim, minim
+   
+   real(wp), allocatable :: work(:)
+      !! workspace
+   integer  :: lwork
+      !! dimension of workspace
+   real(wp) :: w(ndim)
+      !! eigenvalues
+
+   real(wp) :: matrix_syev(ndim,ndim), maxim1,minim1, hsumm 
+   integer  :: ipiv(ndim), info
+   integer :: i,j
+   logical :: lapack 
+   
+   lapack=.true.
+   
+   if (lapack) then
+      matrix_syev=matrix
+      allocate(work(1))
+      lwork=-1
+      call la_syev('N','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+      lwork=idint(work(1))
+      deallocate(work)
+      allocate(work(lwork))
+
+      call la_syev('N','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+      maxim = maxval(w)
+      minim = minval(w)
+
+   else
+    
+      !-------------------------------------------------
+      !                       (13a/b)
+      !-------------------------------------------------
+      !> Gershgorin formulas to obtain lower and upper bounds of the spectrum of H 
+      do i=1,ndim      
+         do j=1,ndim
+            if (i.ne.j) then 
+               hsumm=hsumm+abs(Hsym(i,j))
+            else
+               hmaxim1=Hsym(i,j)
+               hminim1=Hsym(i,j)
+            endif
+         enddo
+
+         hmaxim1 = hmaxim1 + hsumm
+         hminim1 = hminim1 - hsumm
+         hsumm=0.0_wp
+
+         if (i==1) then
+            hmaxim=hmaxim1
+            hminim=hminim1
+         else
+            if (hmaxim1>hmaxim) maxim=maxim1
+            if (hminim1>hminim) minim=minim1
+        endif
+      enddo
+  
+  endif
+
+end subroutine eigs
+
+subroutine inverse_(ndim,matrix,inverse) 
+   
+   use iso_fortran_env, only : wp => real64
+   use multicharge_lapack, only : sytri,sytrf
+
+   real(wp), intent(in)     :: matrix (ndim,ndim)             
+   integer, intent(in)      :: ndim                           ! number of AOs       
+   real(wp)    :: inverse (ndim,ndim)             
+   
+   real(wp)    :: check (ndim,ndim)             
+   real(wp)    :: identity (ndim,ndim)             
+      !! identity matrix
+   character(len=1) :: uplo
+   integer :: info, ipiv(ndim)
+   integer :: i, j, ic, jc
+
+   logical :: lapack
+      !! if lapack should be used   
+   
+   real(wp) :: a_1(ndim)
+      !! max absolute column sum of matrix
+   real(wp) :: a_inf(ndim)
+      !! max absolute row sum of matrix
+
+   lapack=.true.
+   
+   if (lapack) then
+      !! get inverse of matrix from the LAPACK
+      
+      inverse=matrix
+
+      call sytrf(inverse, ipiv, info=info, uplo='l')
+      if (info == 0) then
+            call sytri(inverse, ipiv, info=info, uplo='l')
+            if (info == 0) then
+               do ic = 1, ndim
+                  do jc = ic+1, ndim
+                     inverse(ic, jc) = inverse(jc, ic)
+                  end do
+               end do
+            end if
+      end if
+      check=matmul(inverse,matrix)
+      
+      
+   else
+       
+      !> Setup identity matrix
+      do i=1,ndim
+         do j=1,ndim
+            if(i==j) then
+               identity(i,j) = 1
+            else
+               identity(i,j) = 0
+            endif
+         enddo
+      enddo
+     
+      !-------------------------------------------------
+      !                       (27)
+      !-------------------------------------------------
+      !> initial guess
+      do j=1,ndim
+         a_1(j)=sum(abs(matrix(:,j)))
+         a_inf(j)=sum(abs(matrix(j,:)))
+      enddo
+
+      write (*,*) "a1", maxval(a_1)  
+      write (*,*) "ainf ", maxval(a_inf)
+      
+      inverse = (1.0_wp/(maxval(a_1) * maxval(a_inf))) * matrix
+
+      write (*,*) "S^(-1) initial guess"
+      write (*,1001) (inverse(:,i),i=1,ndim)
+      
+      !> check 
+      print*,"Is the largest spectral norm of intial guess bigger < 1? ", 1 > maxval(identity - matmul(inverse,matrix))
+
+
+      !-------------------------------------------------
+      !                       (25)
+      !-------------------------------------------------
+      
+      !> The Newton-Schulz iteration
+      do i=1,2
+         inverse=(2*inverse - matmul(inverse,inverse) * matrix) 
+      enddo
+
+      write (*,*) "S^(-1)"
+      write (*,1001) (inverse(:,i),i=1,ndim)
+      check=matmul(matrix,inverse)
+      write (*,*) "S*S**(^2)"
+      write (*,1001) (check(:,i),i=1,ndim)
+   
+   endif 
+
+   !> Format for matrix dimensionality
+   1001 FORMAT(56F8.3,X)
+   
+end subroutine inverse_
+
+subroutine cp_purification(Hmat,ndim,S,P)
+   use gtb_la, only : la_syev
+   use multicharge_lapack, only : sytri,sytrf
    use iso_fortran_env, only : wp => real64
    implicit none
    integer, intent(in)    :: ndim                  ! number of AOs       
    real(wp), intent(in) :: S(ndim*(ndim+1)/2) 
+   real(wp), intent(in) :: Hmat(ndim*(ndim+1)/2) 
    real(wp), intent(inout) :: P(ndim*(ndim+1)/2)
 
    real(wp) :: cn,tr1,tr2
    real(wp) :: U(ndim,ndim), sdum(ndim,ndim), SP(ndim,ndim), PSP(ndim,ndim),PSPSP(ndim,ndim), res(ndim,ndim)
-   real(wp) :: matr1(ndim,ndim),matr2(ndim,ndim)
-   integer :: i,j,num
+   real(wp) :: matr1(ndim,ndim),matr2(ndim,ndim),s_inverse(ndim,ndim),identity(ndim,ndim)
+   integer :: i,j,num,jc,ic
+   real(wp) :: P0(ndim,ndim)
+      !! intial guess for density matrix
+   real(wp) :: H(ndim,ndim)
+      !! full Hamiltonian
+   real(wp) :: alpha
+      !! scaling parameter
+   real(wp) :: chempot
+      !! chempot
+   real(wp) :: tr
+      !! trace
+   real(wp) :: nel, check_electrons
+      !! number of electrons
+
+   !> Terms of 15 equation
+   real(wp), dimension(ndim,ndim) :: term1,term2,term3,term4
    
-   
+   !> Terms for syev
+   real(wp) :: H_syev(ndim,ndim)
+   real(wp), allocatable :: w(:),work(:)
+   integer :: lwork,info, ipiv(ndim)
+
+   real(wp) :: hmax, hmax1, hmin, hmin1 
+      !! upper and lower bounds of H spectrum
+
+   tr=0.0_wp
+
    call blowsym(ndim,S,sdum)
    call blowsym(ndim,P,U)
+   call blowsym(ndim,Hmat,H)
    
+   
+   !-----------------------------------------------
+   !                    (17)
+   !             Chemical potential 
+   !-----------------------------------------------
+   !> get trace of H
+   do i=1,ndim
+      do j=1,ndim
+         if (i==j) tr = tr + H(i,j)
+      enddo
+   enddo
+
+   chempot = tr/ndim
+   print*, chempot
+   
+   !-----------------------------------------------
+   !                    (16)
+   !               Scaling factor
+   !-----------------------------------------------
+   nel= check_electrons(ndim,sdum,U)
+   H_syev=H
+   
+   allocate(w(ndim))
+   allocate(work(1))
+   lwork=-1
+   call la_syev('N','U',ndim,H_syev,ndim,w,work,lwork,info)
+   lwork=idint(work(1))
+   deallocate(work)
+   allocate(work(lwork))
+
+   call la_syev('N','U',ndim,H_syev,ndim,w,work,lwork,info)
+   hmax = maxval(w)
+   hmin = minval(w)
+   
+   hmin1=(ndim-nel)/(chempot-hmin)
+   hmax1=nel/(hmax-chempot)
+   alpha=min(hmin1,hmax1)
+   print*,alpha
+
+   !-----------------------------------------------
+   !                    (15) 
+   !                Initial P0
+   !-----------------------------------------------
+   s_inverse=sdum
+   call sytrf(S_inverse, ipiv, info=info, uplo='l')
+   if (info == 0) then
+         call sytri(S_inverse, ipiv, info=info, uplo='l')
+         if (info == 0) then
+            do ic = 1, ndim
+               do jc = ic+1, ndim
+                  S_inverse(ic, jc) = S_inverse(jc, ic)
+               end do
+            end do
+         end if
+   end if
+   do i=1,ndim
+      do j=1,ndim
+         if(i==j) then
+            identity(i,j) = 1
+         else 
+            identity(i,j) = 0
+         endif
+      enddo
+   enddo
+
+   term1 = alpha * chempot * S_inverse
+   term2 =  matmul(S_inverse,H)
+   term2 =  matmul(term2,S_inverse) * alpha
+   term3 = nel * matmul(Identity,S_inverse)
+   term4 = (term1 - term2 + term3) * 0.5_wp
+   P0=term4
+   
+   P0=U
+   print *,"initial"
+   write(*,106) (P0(:,i),i=1,ndim)
+   106 format(10F8.3)
    do num=1,10 
-      SP=matmul(sdum,U)
-      PSP=matmul(U,SP)
+      SP=matmul(sdum,P0)
+      PSP=matmul(P0,SP)
       PSPSP=matmul(PSP,SP)
       matr1=PSP-PSPSP
-      matr2=U-PSP
+      matr2=P0-PSP
       tr1=0.0_wp
       tr2=0.0_wp
       do i=1, ndim
@@ -1854,15 +2027,44 @@ subroutine nonorthogonal_cp(ndim,S,P)
          res=((1.0_wp+cn)*PSP-PSPSP)/cn
          print*,"bigger"
       else
-         res=((1.0_wp-2.0_wp*cn)*U+(1.0_wp+cn)*PSP-PSPSP)/(1-cn)
+         res=((1.0_wp-2.0_wp*cn)*P0+(1.0_wp+cn)*PSP-PSPSP)/(1-cn)
          print*,"smaller"
       endif
       
-      write (*,*) "Purified P"
-      write (*,101) (res(:,i),i=1,ndim)
-      101 FORMAT(10F8.3,X)
-      U=res
+      !write (*,*) "Purified P"
+      !write (*,101) (res(:,i),i=1,ndim)
+      !101 FORMAT(10F8.3,X)
+         !> if converged
+         !if (purificator.ne.1) then
+         !   if (norm2(res)-norm <1.0E-8) then
+         !      conv=.true.
+         !      iter=purificator
+         !      exit pur
+         !   else
+         !      norm=norm2(res)
+         !   endif
+         !endif
+      P0=res
    enddo
-
-   call packsym(ndim,res,P)
-end subroutine nonorthogonal_cp
+    
+   write (*,*) "Purified P"
+   write (*,101) (res(:,i),i=1,ndim)
+   101 FORMAT(10F8.3,X)
+   
+   ! if (error) then
+   !      write(*,104) "chemical potential = ", chempot, ', NaN = ', error
+   !      104 format(a,F8.4,a,l)
+   !   else 
+   !      if (conv) then
+   !         nel=check_electrons(ndim,Ssym,res)
+   !         write(*,102) "chemical potential = ", chempot, ", iterations = ", iter, ", electrons = ", nel
+   !         102 format(a,F10.4,a,I0,a,F6.3)
+   !      else
+   !         write(*,103) "chemical potential = ", chempot, ', converged = ', conv
+   !         103 format(a,F8.4,a,l)
+   !      endif
+   !   endif
+   
+   !stop
+   !call packsym(ndim,res,P)
+end subroutine cp_purification
