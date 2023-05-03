@@ -1,0 +1,246 @@
+ 
+       ==============================================
+       |                 P T B                      |
+       |                S.Grimme                    |
+       |          Universitaet Bonn, MCTC           |
+       ==============================================
+       Version 3.7, Do 28. Apr 14:28:45 CEST 2022
+ 
+       Cite work conducted with this code as
+       S. Grimme, M. Mueller, A. Hansen, unpublished.
+ 
+ ~/.atompara                                                                    
+  
+          =========================
+          reading ... h2.xyz
+          =========================
+ basis read done.
+ ncao           10
+ nsao           10
+ npr            28
+ basis setup done. Ndim          10
+ coreat            0
+ cncao             0
+ cnsao             0
+ cnpr              0
+ 
+ nalpha            1
+ nbeta             1
+ ntotal            2
+ nopen             0
+cpu  time for startup and initial S    0.02 s
+wall time for startup and initial S    0.00 s
+               -----------------------
+               |      PTB  model      |
+               | SG, MM, AH 2020-2022 |
+               -----------------------
+ prop :           1
+ PA setup with Mull-Loew partitioning   0.333333 ...
+ done.
+EEQ done. sum q :   -0.000
+    atom   Zeff  qEEQ  mod   srCN   noHCN   CN(EEQ)
+    1    1  1.0     0.000   0.494   0.000   0.479
+    2    1  1.0    -0.000   0.494   0.000   0.479
+ computing Vecp ...
+ PTB H matrix iteration            1  done. Now diag ...
+ PTB H matrix iteration            2  done. Now diag ...
+chemical potential = -10.0000, NaN =  T
+chemical potential =  -9.9000, NaN =  T
+chemical potential =  -9.8000, NaN =  T
+chemical potential =  -9.7000, NaN =  T
+chemical potential =  -9.6000, NaN =  T
+chemical potential =  -9.5000, NaN =  T
+chemical potential =  -9.4000, NaN =  T
+chemical potential =  -9.3000, NaN =  T
+chemical potential =  -9.2000, NaN =  T
+chemical potential =  -9.1000, NaN =  T
+chemical potential =  -9.0000, NaN =  T
+chemical potential =  -8.9000, NaN =  T
+chemical potential =  -8.8000, NaN =  T
+chemical potential =  -8.7000, NaN =  T
+chemical potential =  -8.6000, NaN =  T
+chemical potential =  -8.5000, NaN =  T
+chemical potential =  -8.4000, NaN =  T
+chemical potential =  -8.3000, NaN =  T
+chemical potential =  -8.2000, NaN =  T
+chemical potential =  -8.1000, NaN =  T
+chemical potential =  -8.0000, NaN =  T
+chemical potential =  -7.9000, NaN =  T
+chemical potential =  -7.8000, NaN =  T
+chemical potential =  -7.7000, NaN =  T
+chemical potential =  -7.6000, NaN =  T
+chemical potential =  -7.5000, NaN =  T
+chemical potential =  -7.4000, NaN =  T
+chemical potential =  -7.3000, NaN =  T
+chemical potential =  -7.2000, NaN =  T
+chemical potential =  -7.1000, NaN =  T
+chemical potential =  -7.0000, NaN =  T
+chemical potential =  -6.9000, NaN =  T
+chemical potential =  -6.8000, NaN =  T
+chemical potential =  -6.7000, NaN =  T
+chemical potential =  -6.6000, NaN =  T
+chemical potential =  -6.5000, NaN =  T
+chemical potential =  -6.4000, NaN =  T
+chemical potential =  -6.3000, NaN =  T
+chemical potential =  -6.2000, NaN =  T
+chemical potential =  -6.1000, NaN =  T
+chemical potential =  -6.0000, NaN =  T
+chemical potential =  -5.9000, NaN =  T
+chemical potential =  -5.8000, NaN =  T
+chemical potential =  -5.7000, NaN =  T
+chemical potential =  -5.6000, NaN =  T
+chemical potential =  -5.5000, NaN =  T
+chemical potential =  -5.4000, NaN =  T
+chemical potential =  -5.3000, NaN =  T
+chemical potential =  -5.2000, NaN =  T
+chemical potential =  -5.1000, NaN =  T
+chemical potential =  -5.0000, NaN =  T
+chemical potential =  -4.9000, NaN =  T
+chemical potential =  -4.8000, NaN =  T
+chemical potential =  -4.7000, NaN =  T
+chemical potential =  -4.6000, NaN =  T
+chemical potential =  -4.5000, NaN =  T
+chemical potential =  -4.4000, NaN =  T
+chemical potential =  -4.3000, NaN =  T
+chemical potential =  -4.2000, NaN =  T
+chemical potential =  -4.1000, NaN =  T
+chemical potential =  -4.0000, NaN =  T
+chemical potential =  -3.9000, NaN =  T
+chemical potential =  -3.8000, NaN =  T
+chemical potential =  -3.7000, NaN =  T
+chemical potential =  -3.6000, NaN =  T
+chemical potential =  -3.5000, NaN =  T
+chemical potential =  -3.4000, NaN =  T
+chemical potential =  -3.3000, NaN =  T
+chemical potential =  -3.2000, NaN =  T
+chemical potential =  -3.1000, NaN =  T
+chemical potential =  -3.0000, NaN =  T
+chemical potential =  -2.9000, NaN =  T
+chemical potential =  -2.8000, NaN =  T
+chemical potential =  -2.7000, NaN =  T
+chemical potential =  -2.6000, NaN =  T
+chemical potential =  -2.5000, NaN =  T
+chemical potential =  -2.4000, NaN =  T
+chemical potential =  -2.3000, NaN =  T
+chemical potential =  -2.2000, NaN =  T
+chemical potential =  -2.1000, NaN =  T
+chemical potential =  -2.0000, NaN =  T
+chemical potential =  -1.9000, NaN =  T
+chemical potential =  -1.8000, NaN =  T
+chemical potential =  -1.7000, NaN =  T
+chemical potential =  -1.6000, NaN =  T
+chemical potential =  -1.5000, NaN =  T
+chemical potential =  -1.4000, NaN =  T
+chemical potential =  -1.3000, NaN =  T
+chemical potential =  -1.2000, NaN =  T
+chemical potential =  -1.1000, NaN =  T
+chemical potential =  -1.0000, NaN =  T
+chemical potential =  -0.9000, NaN =  T
+chemical potential =  -0.8000, NaN =  T
+chemical potential =  -0.7000, NaN =  T
+chemical potential =  -0.6000, NaN =  T
+chemical potential =  -0.5000, NaN =  T
+chemical potential =  -0.4000, NaN =  T
+chemical potential =  -0.3000, NaN =  T
+chemical potential =  -0.2000, NaN =  T
+chemical potential =  -0.1000, NaN =  T
+chemical potential =  -0.0000, NaN =  T
+chemical potential =   0.1000, NaN =  T
+chemical potential =   0.2000, NaN =  T
+chemical potential =   0.3000, NaN =  T
+chemical potential =   0.4000, NaN =  T
+chemical potential =   0.5000, NaN =  T
+chemical potential =   0.6000, NaN =  T
+chemical potential =   0.7000, NaN =  T
+chemical potential =   0.8000, NaN =  T
+chemical potential =   0.9000, NaN =  T
+chemical potential =   1.0000, NaN =  T
+chemical potential =   1.1000, NaN =  T
+chemical potential =   1.2000, NaN =  T
+chemical potential =   1.3000, NaN =  T
+chemical potential =   1.4000, NaN =  T
+chemical potential =   1.5000, NaN =  T
+chemical potential =   1.6000, NaN =  T
+chemical potential =   1.7000, NaN =  T
+chemical potential =   1.8000, NaN =  T
+chemical potential =   1.9000, NaN =  T
+chemical potential =   2.0000, NaN =  T
+chemical potential =   2.1000, NaN =  T
+chemical potential =   2.2000, NaN =  T
+chemical potential =   2.3000, NaN =  T
+chemical potential =   2.4000, NaN =  T
+chemical potential =   2.5000, NaN =  T
+chemical potential =   2.6000, NaN =  T
+chemical potential =   2.7000, NaN =  T
+chemical potential =   2.8000, NaN =  T
+chemical potential =   2.9000, NaN =  T
+chemical potential =   3.0000, NaN =  T
+chemical potential =   3.1000, NaN =  T
+chemical potential =   3.2000, NaN =  T
+chemical potential =   3.3000, NaN =  T
+chemical potential =   3.4000, NaN =  T
+chemical potential =   3.5000, NaN =  T
+chemical potential =   3.6000, NaN =  T
+chemical potential =   3.7000, NaN =  T
+chemical potential =   3.8000, NaN =  T
+chemical potential =   3.9000, NaN =  T
+chemical potential =   4.0000, NaN =  T
+chemical potential =   4.1000, NaN =  T
+chemical potential =   4.2000, NaN =  T
+chemical potential =   4.3000, NaN =  T
+chemical potential =   4.4000, NaN =  T
+chemical potential =   4.5000, NaN =  T
+chemical potential =   4.6000, NaN =  T
+chemical potential =   4.7000, NaN =  T
+chemical potential =   4.8000, NaN =  T
+chemical potential =   4.9000, NaN =  T
+chemical potential =   5.0000, NaN =  T
+chemical potential =   5.1000, NaN =  T
+chemical potential =   5.2000, NaN =  T
+chemical potential =   5.3000, NaN =  T
+chemical potential =   5.4000, NaN =  T
+chemical potential =   5.5000, NaN =  T
+chemical potential =   5.6000, NaN =  T
+chemical potential =   5.7000, NaN =  T
+chemical potential =   5.8000, NaN =  T
+chemical potential =   5.9000, NaN =  T
+chemical potential =   6.0000, NaN =  T
+chemical potential =   6.1000, NaN =  T
+chemical potential =   6.2000, NaN =  T
+chemical potential =   6.3000, NaN =  T
+chemical potential =   6.4000, NaN =  T
+chemical potential =   6.5000, NaN =  T
+chemical potential =   6.6000, NaN =  T
+chemical potential =   6.7000, NaN =  T
+chemical potential =   6.8000, NaN =  T
+chemical potential =   6.9000, NaN =  T
+chemical potential =   7.0000, NaN =  T
+chemical potential =   7.1000, NaN =  T
+chemical potential =   7.2000, NaN =  T
+chemical potential =   7.3000, NaN =  T
+chemical potential =   7.4000, NaN =  T
+chemical potential =   7.5000, NaN =  T
+chemical potential =   7.6000, NaN =  T
+chemical potential =   7.7000, NaN =  T
+chemical potential =   7.8000, NaN =  T
+chemical potential =   7.9000, NaN =  T
+chemical potential =   8.0000, NaN =  T
+chemical potential =   8.1000, NaN =  T
+chemical potential =   8.2000, NaN =  T
+chemical potential =   8.3000, NaN =  T
+chemical potential =   8.4000, NaN =  T
+chemical potential =   8.5000, NaN =  T
+chemical potential =   8.6000, NaN =  T
+chemical potential =   8.7000, NaN =  T
+chemical potential =   8.8000, NaN =  T
+chemical potential =   8.9000, NaN =  T
+chemical potential =   9.0000, NaN =  T
+chemical potential =   9.1000, NaN =  T
+chemical potential =   9.2000, NaN =  T
+chemical potential =   9.3000, NaN =  T
+chemical potential =   9.4000, NaN =  T
+chemical potential =   9.5000, NaN =  T
+chemical potential =   9.6000, NaN =  T
+chemical potential =   9.7000, NaN =  T
+chemical potential =   9.8000, NaN =  T
+chemical potential =   9.9000, NaN =  T

@@ -1,0 +1,102 @@
+ 
+       ==============================================
+       |                 P T B                      |
+       |                S.Grimme                    |
+       |          Universitaet Bonn, MCTC           |
+       ==============================================
+       Version 3.7, Do 28. Apr 14:28:45 CEST 2022
+ 
+       Cite work conducted with this code as
+       S. Grimme, M. Mueller, A. Hansen, unpublished.
+ 
+ ~/.atompara                                                                    
+  
+          =========================
+          reading ... h2.xyz
+          =========================
+ basis read done.
+ ncao           10
+ nsao           10
+ npr            28
+ basis setup done. Ndim          10
+ coreat            0
+ cncao             0
+ cnsao             0
+ cnpr              0
+ 
+ nalpha            1
+ nbeta             1
+ ntotal            2
+ nopen             0
+cpu  time for startup and initial S    0.02 s
+wall time for startup and initial S    0.00 s
+               -----------------------
+               |      PTB  model      |
+               | SG, MM, AH 2020-2022 |
+               -----------------------
+ prop :           1
+ PA setup with Mull-Loew partitioning   0.333333 ...
+ done.
+EEQ done. sum q :   -0.000
+    atom   Zeff  qEEQ  mod   srCN   noHCN   CN(EEQ)
+    1    1  1.0     0.000   0.494   0.000   0.479
+    2    1  1.0    -0.000   0.494   0.000   0.479
+ computing Vecp ...
+ PTB H matrix iteration            1  done. Now diag ...
+ PTB H matrix iteration            2  done. Now diag ...
+ -0.794676225133118     
+  0.971766281508747     
+ initial
+ -21.817  -3.542 -14.888   2.060   0.000  22.417   3.691 -15.263   2.112   0.000
+  -3.542-102.143 -26.581   3.677   0.000   3.691 102.405 -26.059   3.605   0.000
+ -14.888 -26.581 -15.032   2.182   0.000  15.263  26.059 -15.479   2.130   0.000
+   2.060   3.677   2.182   0.436   0.000  -2.112  -3.605   2.130  -0.377   0.000
+   0.000   0.000   0.000   0.000   0.737   0.000   0.000   0.000   0.000  -0.082
+  22.417   3.691  15.263  -2.112   0.000 -21.817  -3.542  14.888  -2.060   0.000
+   3.691 102.405  26.059  -3.605   0.000  -3.542-102.143  26.581  -3.677   0.000
+ -15.263 -26.059 -15.479   2.130   0.000  14.888  26.581 -15.032   2.182   0.000
+   2.112   3.605   2.130  -0.377   0.000  -2.060  -3.677   2.182   0.436   0.000
+   0.000   0.000   0.000   0.000  -0.082   0.000   0.000   0.000   0.000   0.737
+  -8.19625620219635     
+ smaller
+  -14.0250225732246     
+ smaller
+  -7.34603627649606     
+ smaller
+  -885.882059153875     
+ smaller
+   833316.967131890     
+ bigger
+  -816739923664.087     
+ smaller
+  7.844900301275564E+023
+ bigger
+ -7.237602304451968E+047
+ smaller
+  6.160405352253861E+095
+ bigger
+                     NaN
+ smaller
+ Purified P
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN     NaN
+ After PTB
+   0.436   0.094   0.035  -0.005   0.000   0.436   0.094  -0.035   0.005   0.000
+   0.094   0.020   0.008  -0.001   0.000   0.094   0.020  -0.008   0.001   0.000
+   0.035   0.008   0.003  -0.000   0.000   0.035   0.008  -0.003   0.000   0.000
+  -0.005  -0.001  -0.000   0.000   0.000  -0.005  -0.001   0.000  -0.000   0.000
+   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+   0.436   0.094   0.035  -0.005   0.000   0.436   0.094  -0.035   0.005   0.000
+   0.094   0.020   0.008  -0.001   0.000   0.094   0.020  -0.008   0.001   0.000
+  -0.035  -0.008  -0.003   0.000   0.000  -0.035  -0.008   0.003  -0.000   0.000
+   0.005   0.001   0.000  -0.000   0.000   0.005   0.001  -0.000   0.000   0.000
+   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+   1.99999928474426     

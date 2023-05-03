@@ -547,27 +547,32 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
 !  solve 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    mode = iter
-   test_1 = .true.
+   test_1 = .false.
    if(iter.eq.2.and.prop.eq.4) mode = 3     ! stda write
    if(iter.eq.2.and.prop.eq.5) mode = 4     ! TM write
    if(              prop.lt.0) mode = -iter ! IR/Raman  
    if (iter .eq.1) then
-      if (test_1) then
 
-         call purification(Hmat,ndim,S,P, P_purified)
-      
+      !! If the density from the first iteration should be tested
+      if (test_1) then
+         call purification(Hmat,ndim,S,P, P_purified) 
          call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
          call print_matrix(ndim,P,S,hmat,P_purified)
          stop
       else
          call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
       endif
+
    else
-      call purification(Hmat,ndim,S,P, P_purified)
-      
+
+      !call purification(Hmat,ndim,S,P, P_purified) 
       call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+      call check_idempotency(ndim,P,S)
+      print*,focc
+      
+      stop
       call print_matrix(ndim,P,S,hmat,P_purified)
-     stop
+
    end if
    
    
@@ -1050,25 +1055,27 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
       real*8 P(ndim*(ndim+1)/2)
       real*8 e(ndim)
       real*8 U(ndim,ndim)
-      logical fail
+      logical fail, force
 
       integer i,j,info,lwork,liwork,ij,iu
       integer ihomoa,ihomob
       real*8 nfoda,nfodb,ga,gb,efa,efb,gap,w1,w0,t1,t0
       integer,allocatable ::iwork(:),ifail(:)
-      real*8 ,allocatable ::sdum(:,:),work(:)
+      real*8 ,allocatable ::sdum(:,:),work(:),snew(:,:)
       real*8 ,allocatable ::focca(:), foccb(:)
       real*8 ,allocatable ::hdum(:,:)            
 
       fail =.false.
+      force=.true.
       allocate (sdum(ndim,ndim),focca(ndim),foccb(ndim))  
 
       call blowsym(ndim,S,sdum)
 
       iu=min(homo+4,ndim)                 ! normal case 
       if(mode.eq.3) iu = min(ndim,5*homo) ! sTDA write, guess for highest relevant virt
-      if(mode.eq.4) iu = ndim             ! all virts MUST be given to TM (otherwise virts are strange orthogonalized and results
-                                          ! are worse! (i.e. iu = ndim)
+      if(mode.eq.4 .or. force) iu = ndim             ! all virts MUST be given to TM (otherwise virts are strange orthogonalized and results
+       
+      ! are worse! (i.e. iu = ndim)
 ! diag case branch
       if(iu.eq.ndim) then                  
 ! full diag (faster if all eigenvalues are taken)
@@ -1080,6 +1087,7 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
        deallocate(work,iwork)
        allocate (work(lwork),iwork(liwork)) 
        call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,LWORK,IWORK,LIWORK,INFO)
+      print*, "full"
       else
 ! for a large basis, taking only the occ.+few virt eigenvalues is faster than a full diag
        allocate(hdum(ndim,ndim))  
@@ -1099,6 +1107,7 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
          U(1:ndim,i)=0d0
          U(i,i)     =1d0
        enddo
+      print*, "not full"
 ! end of diag case branch      
       endif
 
@@ -1130,10 +1139,11 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
       endif
       focc = focca + foccb
 
-      call dmat(ndim,focc,U,sdum)
+      call blowsym(ndim,S,snew)
+      call dmat(ndim,focc,U,sdum,snew)
       call packsym(ndim,sdum,P)
 
-      end
+end subroutine solve2
 
 !! ------------------------------------------------------------------------
 !  solve eigenvalue problem in case of polarizability calc
@@ -1201,7 +1211,6 @@ subroutine solve3(ndim,nel,nopen,homo,et,focc,H,S,P)
 
       call dmat(ndim,focc,hdum,sdum)
       call packsym(ndim,sdum,P)
-
       end
 
 !! ------------------------------------------------------------------------
@@ -1519,7 +1528,42 @@ real function check_electrons(ndim,S,P) result(check_nel)
    enddo
 
 end function check_electrons
+!--------------------------------------------------------------
+! Orthogonality check
+!--------------------------------------------------------------
+subroutine check_idempotency(ndim,P,S)
+   
+   use iso_fortran_env, only : wp => real64
+   implicit none
+   real(wp), intent(in) :: P(ndim,ndim)
+   real(wp), intent(in) :: S(ndim,ndim)
+   integer, intent(in) :: ndim
+   integer :: i,j
+   real(wp) ::  PSP(ndim,ndim) 
+   real(wp) :: PP(ndim,ndim)
+   real(wp) :: orth(ndim,ndim)
+   
+   
+   PSP=matmul(P,matmul(S,P))
+   PP=matmul(P,P)
+   print*
+   print*, "original P(first row)"
+   print *,P(:,1)
+   print*
+   print*, "original S(first row)"
+   print *,S(:,1)
+   print*
+   print*, "PSP to check idempotency(first row)"
+   print*,PSP(:,1)
+   print*
+   print*, "PP to check idempotency(first row)"
+   print*,PP(:,1)
+   print* 
+   print*, "PP-P to check idempotency(first row)"
+   print*,PP(:,1)-P(:,1)
+   print* 
 
+end subroutine check_idempotency
 !--------------------------------------------------------------
 ! Nonorthogonal purification
 !--------------------------------------------------------------
