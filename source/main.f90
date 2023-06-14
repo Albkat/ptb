@@ -15,7 +15,7 @@ program gTB
 
       real(wp),allocatable :: xyz(:,:),rab(:),z(:), wbo(:,:), cn(:)
       real(wp),allocatable :: psh(:,:),q(:), psh_ref(:,:), q_ref(:), wbo_ref(:,:), qd4(:)
-      real(wp),allocatable :: S(:),T(:),P(:),tmpmat(:),F(:),D3(:,:)
+      real(wp),allocatable :: S(:),T(:),P(:),tmpmat(:),F(:),D3(:,:),snew(:,:)
       real(wp),allocatable :: eps(:),focc(:),xnorm(:)
       real(wp),allocatable :: fragchrg_ref(:),fragchrg(:)
       real(wp),allocatable :: dipgrad(:,:),dipgrad_ref(:,:)
@@ -299,7 +299,7 @@ program gTB
       call setupbas0(n,at,ndim)   
 
       allocate(S(ndim*(ndim+1)/2),P(ndim*(ndim+1)/2),F(ndim*(ndim+1)/2),tmpmat(ndim*(ndim+1)/2), &
-     &         D3(ndim*(ndim+1)/2,3),ML1(ndim,ndim),ML2(ndim,ndim),xnorm(ndim),focc(ndim),eps(ndim)) 
+     &         D3(ndim*(ndim+1)/2,3),ML1(ndim,ndim),ML2(ndim,ndim),xnorm(ndim),focc(ndim),eps(ndim),snew(ndim,ndim)) 
 
       if(n.lt.200) then
          call mrec(molcount,xyz,n,at,molvec)  ! fragments (for CT check), crashes for large systems
@@ -333,8 +333,11 @@ program gTB
        call sint (n,ndim,at,xyz,rab,S,xnorm)
        tmpmat = S
       endif
-                                          call timing(t1,w1)           
-                                          call prtime(6,t1-t00,w1-w00,'startup and initial S')
+   
+      call blowsym(ndim,S,snew)
+
+      call timing(t1,w1)           
+      call prtime(6,t1-t00,w1-w00,'startup and initial S')
 
       if(n.eq.1) call prmat(6,S,ndim,0,'overlap matrix')
 

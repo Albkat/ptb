@@ -378,6 +378,8 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    real(wp),intent(inout)   :: gab(nsh,nsh)          ! 
    real(wp),intent(out)     :: eps (ndim)            ! orbital energies
    real(wp),intent(out)     :: U(ndim,ndim)          ! orbitals
+   
+   real(wp)     :: snew(ndim,ndim),pnew(ndim,ndim) 
 
 !  local
    logical  :: fail,test_1
@@ -386,7 +388,7 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    real(wp),parameter :: au2ev = 27.2113957_wp
    real(wp) :: r,tmp,pol,hi,hj,hij,xk,t8,t9,qa,qb,keav,eh1,tmp2
    real(wp) :: xiter(2),yiter(2),ziter(2),ssh,gap1,gap2
-   real(wp) :: t0,t1,w0,w1, check_electrons,ch
+   real(wp) :: t0,t1,w0,w1, check_electrons,ch, bandStrEnergy
    real(wp), allocatable :: SSS(:)
    real(wp), allocatable :: vs(:),vd(:,:),vq(:,:)
    real(wp), allocatable :: gq(:),xab(:),scal(:,:),ptmp(:,:), stmp(:,:)
@@ -408,7 +410,8 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    call shscalP(iter,n,at,psh,scal)
    call modbasd(n,at,scal)         ! scale exponents shell/atom-wise with psh dep.
    call sint(n,ndim,at,xyz,rab,SS,eps)
-
+   call blowsym(ndim,S,snew)
+      
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! H0 +  third-order (atomic charge exists in 1. AND 2. iter)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -547,7 +550,11 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
 !  solve 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    mode = iter
+   
    test_1 = .false.
+
+      !! To test 1 iteration 
+
    if(iter.eq.2.and.prop.eq.4) mode = 3     ! stda write
    if(iter.eq.2.and.prop.eq.5) mode = 4     ! TM write
    if(              prop.lt.0) mode = -iter ! IR/Raman  
@@ -555,22 +562,23 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
 
       !! If the density from the first iteration should be tested
       if (test_1) then
+         call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
          call purification(Hmat,ndim,S,P, P_purified) 
-         call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
-         call print_matrix(ndim,P,S,hmat,P_purified)
-         stop
+         !print *, 'Band Structure Energy:', bandStrEnergy(Hmat,P)
+         !stop
+         call print_matrix(ndim,P,S,hmat,P_purified) 
       else
+
          call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+         !print *, 'Band Structure Energy:', bandStrEnergy(Hmat,P)
       endif
 
    else
 
-      !call purification(Hmat,ndim,S,P, P_purified) 
       call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
-      call check_idempotency(ndim,P,S)
-      print*,focc
-      
-      stop
+      call blowsym(ndim,S,snew)
+      call blowsym(ndim,P,pnew)
+      call purification(Hmat,ndim,S,P,P_purified) 
       call print_matrix(ndim,P,S,hmat,P_purified)
 
    end if
@@ -596,6 +604,9 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  pop
+      !call purification(Hmat,ndim,S,P, P_purified) 
+      call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+      
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    call mlpop2(n, ndim, P, S1, S2, pa, psh)
    if(iter.eq.1) pa = z - pa  ! output are populations but here q is used for convenience
@@ -857,11 +868,11 @@ subroutine print_matrix(ndim,P,S,H,P2)
 
 
 
-    write(*,*), "After PTB" 
-    write (*,108) (ptmp(:,i), i=1,ndim) 
-    108 FORMAT(56F8.3,X)
-    write(*,109) "electrons = ",check_electrons(ndim,stmp,ptmp), ", Band-str E = ", band, ", RMSD = ", rmsd
-    109 FORMAT(a,F11.7,a,F14.7,a,F14.7)
+   !write(*,*), "After PTB" 
+   !write (*,108) (ptmp(:,i), i=1,ndim) 
+   !108 FORMAT(56F8.3,X)
+   !write(*,109) "electrons = ",check_electrons(ndim,stmp,ptmp), ", Band-str E = ", band, ", RMSD = ", rmsd
+   !109 FORMAT(a,F11.7,a,F14.7,a,F14.7)
 
 
 end subroutine print_matrix
@@ -1067,7 +1078,7 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
 
       fail =.false.
       force=.true.
-      allocate (sdum(ndim,ndim),focca(ndim),foccb(ndim))  
+      allocate (sdum(ndim,ndim),focca(ndim),foccb(ndim),snew(ndim,ndim))  
 
       call blowsym(ndim,S,sdum)
 
@@ -1087,7 +1098,6 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
        deallocate(work,iwork)
        allocate (work(lwork),iwork(liwork)) 
        call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,LWORK,IWORK,LIWORK,INFO)
-      print*, "full"
       else
 ! for a large basis, taking only the occ.+few virt eigenvalues is faster than a full diag
        allocate(hdum(ndim,ndim))  
@@ -1107,7 +1117,6 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
          U(1:ndim,i)=0d0
          U(i,i)     =1d0
        enddo
-      print*, "not full"
 ! end of diag case branch      
       endif
 
@@ -1211,7 +1220,8 @@ subroutine solve3(ndim,nel,nopen,homo,et,focc,H,S,P)
 
       call dmat(ndim,focc,hdum,sdum)
       call packsym(ndim,sdum,P)
-      end
+
+end subroutine solve3
 
 !! ------------------------------------------------------------------------
 !  response analogue of the twoscf routine
@@ -1504,6 +1514,33 @@ subroutine shscalP(iter,n,at,psh,scal)
 
 end
 
+real function bandStrEnergy(H_arr,P_arr) result(band)
+   
+   use iso_fortran_env, only : wp => real64
+   implicit none
+   real(wp), intent(in) :: H_arr(:)
+   real(wp), intent(in) :: P_arr(:)
+   
+   real(wp),allocatable :: PH(:,:), P(:,:), H(:,:)
+   integer :: i,j, dimen
+   
+   band=0.0_wp
+   dimen=size(P_arr)
+
+   call blowsym(dimen,P_arr,P)
+   call blowsym(dimen,H_arr,H)
+   allocate(PH(dimen,dimen))
+   
+
+   PH= matmul(P,H)
+   do i=1, size(P,1)
+      do j=1, size(H,1)
+         if(i==j) band = band+ PH(i,i)
+      enddo
+   enddo
+
+end function bandStrEnergy
+
 real function check_electrons(ndim,S,P) result(check_nel)
    
    use iso_fortran_env, only : wp => real64
@@ -1528,10 +1565,11 @@ real function check_electrons(ndim,S,P) result(check_nel)
    enddo
 
 end function check_electrons
+
 !--------------------------------------------------------------
-! Orthogonality check
+!> orthogonality check
 !--------------------------------------------------------------
-subroutine check_idempotency(ndim,P,S)
+subroutine idempotency(ndim,P,S)
    
    use iso_fortran_env, only : wp => real64
    implicit none
@@ -1543,29 +1581,23 @@ subroutine check_idempotency(ndim,P,S)
    real(wp) :: PP(ndim,ndim)
    real(wp) :: orth(ndim,ndim)
    
-   
    PSP=matmul(P,matmul(S,P))
-   PP=matmul(P,P)
-   print*
-   print*, "original P(first row)"
-   print *,P(:,1)
-   print*
-   print*, "original S(first row)"
-   print *,S(:,1)
-   print*
-   print*, "PSP to check idempotency(first row)"
-   print*,PSP(:,1)
-   print*
-   print*, "PP to check idempotency(first row)"
-   print*,PP(:,1)
-   print* 
-   print*, "PP-P to check idempotency(first row)"
-   print*,PP(:,1)-P(:,1)
-   print* 
+   
+   print *
+   print *, "p initial"  
+   print *, P(:,1)
+   
+   print *
+   print *, "pSp"  
+   print *, PSP(:,1)/(2.0_wp)
+   
+   
+   !PP=matmul(P,P)
 
-end subroutine check_idempotency
+end subroutine idempotency
+
 !--------------------------------------------------------------
-! Nonorthogonal purification
+!> nonorthogonal purification
 !--------------------------------------------------------------
 subroutine purification(H,ndim,S,P,P_purified)
    use iso_fortran_env, only : wp => real64
@@ -1624,12 +1656,11 @@ subroutine purification(H,ndim,S,P,P_purified)
 
    
    !> Intial values for purification
-   chempot=-1000_wp
-   upper_limit=500
-   step=10_wp
-   is_defined=.true.
+   chempot=-800_wp
+   upper_limit=10000
+   step=0.1_wp
+   is_defined=.false.
 
-   print *,"p0",P 
    if (is_cp)then
       call cp_purification(ndim, S_inverse, Ssym, Psym, Hsym, hmax, hmin, chempot, upper_limit, step, P_purified, is_defined)
    else
@@ -1702,28 +1733,30 @@ subroutine gcp_purification(ndim, S_inverse, S, P_ptb, H, hmax, hmin, chempot, u
       !! to ovepass convergence criterium
    
    
-   !> Initial values
+   !> Initial configuration
    error = .false.
-   is_ptb = .true. 
+   is_ptb = .false.
    not_conv = .true. 
    
    !> Find optimal chemical potential
    chemp: do num=1,upl
    
-      !> get alpha value
-      alpha_max=1.0_wp/(hmax-chempot)
-      alpha_min=1.0_wp/(chempot-hmin)
-      if (alpha_max>alpha_min) then
-         alpha=alpha_min
-      else
-         alpha=alpha_max
-      endif
-      
+     
       if (is_ptb) then
          !! if intial guess taken from ptb
          
          P0=P_ptb
-      else
+      
+      else 
+         !> get alpha value
+         alpha_max=1.0_wp/(hmax-chempot)
+         alpha_min=1.0_wp/(chempot-hmin)
+         if (alpha_max>alpha_min) then
+            alpha=alpha_min
+         else
+            alpha=alpha_max
+         endif
+      
          do i=1,ndim
             do j=1,ndim
                if(i==j) then
@@ -1755,9 +1788,14 @@ subroutine gcp_purification(ndim, S_inverse, S, P_ptb, H, hmax, hmin, chempot, u
          term6 = 0.5_wp * term5
          P0 = term6
          111 FORMAT(10F13.6)
+         
+         
       endif 
-
+      
+     ! call idempotency(ndim,P0,S)
+      
       if (defined) write(*,*) "Purification loop"
+      
 
       pur: do purificator=1,20
          
@@ -1766,8 +1804,8 @@ subroutine gcp_purification(ndim, S_inverse, S, P_ptb, H, hmax, hmin, chempot, u
          !              McWeeny purification
          !-------------------------------------------------
          SP=matmul(S,P0)
-         PSP=matmul(P0,SP) 
-         PSPSP=matmul(PSP,SP)
+         PSP=matmul(P0,SP)/2.0_wp 
+         PSPSP=matmul(PSP,SP)/2.0_wp
          res=3*PSP-2*PSPSP
          !res=3*matmul(P0,P0)-2*matmul(P0,matmul(P0,P0))
 
@@ -1811,7 +1849,9 @@ subroutine gcp_purification(ndim, S_inverse, S, P_ptb, H, hmax, hmin, chempot, u
          
          else
             nel=check_electrons(ndim,S,res)
+            !call idempotency(ndim,res,S)
             write(*,108) "chemical potential = ", chempot, ", iterations = ", purificator, ", electrons = ", nel ,", Band-str E = ", band,", norm2=", norm2(res)
+            !write(*,*)
             108 format(a,F16.9,a,I0,a,F14.9,a,F14.9,a,F14.9)
          endif
 
@@ -1845,10 +1885,10 @@ subroutine gcp_purification(ndim, S_inverse, S, P_ptb, H, hmax, hmin, chempot, u
 
    enddo chemp
    
-   if (defined) then
-      write(*,*) "Purified matrix"
-      write (*,101) (P0(:,i),i=1,ndim)
-   endif
+   !if (defined) then
+   !   write(*,*) "Purified matrix"
+   !   write (*,101) (P0(:,i),i=1,ndim)
+   !endif
    
    !> Format for matrix dimensionality
    101 FORMAT(56F8.3,X)
@@ -1998,7 +2038,6 @@ subroutine cp_purification(ndim, S_inverse, S, P_ptb, H, hmax, hmin, chempot, up
       enddo
    
       cn=tr1/tr2
-      print*,cn
       if(cn>=0.5_wp) then
          res=((1.0_wp+cn)*PSP-PSPSP)/cn
       else

@@ -270,31 +270,21 @@ c     convert restricted occ first to alpha/beta
       real*8 iden(ndim,ndim)
       real*8 P(ndim,ndim)
       real*8,optional :: snew(ndim,ndim)
-      integer i,m
+      integer i,m,var
       real*8,allocatable ::Ptmp(:,:)
-              
+      var=0
       allocate(Ptmp(ndim,ndim))                  
       do m=1,ndim  
+         if (focc(m)==0.0) var=var+1
          do i=1,ndim
             Ptmp(i,m)=C(i,m)*focc(m)
-            iden=c(m,i)
          enddo
       enddo
-      ctmp=c
+      ctmp = C
       !>p = C*C^(T)
       call la_gemm('N','T',ndim,ndim,ndim,1.0d0,C,
      .               ndim,Ptmp,ndim,0.0d0,P,ndim)
       deallocate(Ptmp)
-      if(present(snew)) then
-         !print*,"iden(:,1)"
-         !print*,iden(:,1)
-         !print*,"iden(:,1)"
-         !print*,ctmp(:,1)
-         print*,"s(:,1)"
-         print*,snew(1,:)
-         iden=matmul(iden,matmul(snew,ctmp))
-         print*,iden(1,:)
-      endif
 
       end
 
