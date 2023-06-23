@@ -147,12 +147,15 @@ c     convert restricted occ first to alpha/beta
 !ccccccccccccccccccccccccccccccccccccccccccccc
 
       subroutine blowsym(n,matin,matout)
+      use ISO_FORTRAN_ENV, only : wp => real64
       implicit none
       integer n
       real*8 matin (n*(n+1)/2)
       real*8 matout(n,n)      
       integer i,j,ij
+      
 
+      matout=0.0_wp
       ij = 0
       do i=1,n
          do j=1,i
@@ -183,12 +186,13 @@ c     convert restricted occ first to alpha/beta
       end
 
       subroutine packsym(n,matin,matout)
+      use ISO_FORTRAN_ENV, only : wp => real64
       implicit none
       integer n
       real*8 matin (n,n)      
       real*8 matout(n*(n+1)/2)
       integer i,j,ij
-
+      matout = 0.0_wp
       ij = 0
       do i=1,n
          do j=1,i

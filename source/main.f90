@@ -62,7 +62,7 @@ program gTB
       logical calc_ptb_grad,d4only
       integer TID, OMP_GET_NUM_THREADS, OMP_GET_THREAD_NUM, nproc
 
-      call timing(t00,w00)           
+      call timing(t00,w00)      
 
       rdref   =.false.
       wrapo   =.false.
