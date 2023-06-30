@@ -1643,7 +1643,7 @@ end subroutine idempotency
 !--------------------------------------------------------------
 !> nonorthogonal purification
 !--------------------------------------------------------------
-subroutine purification(H,ndim,S,P,P_purified)!,Sguess)
+subroutine purification(H,ndim,S,P,P_purified)
    use iso_fortran_env, only : wp => real64
    
    implicit none
@@ -1657,8 +1657,6 @@ subroutine purification(H,ndim,S,P,P_purified)!,Sguess)
       !! array form of Hamiltonian matrix
    real(wp), intent(out)    :: P_purified(ndim,ndim)
       !! purified density matrix
-   !real(wp), intent(in), optional    :: Sguess
-      !! purified density matrix
    
    !> All temporary matrices
    real(wp) :: Psym(ndim,ndim)
@@ -1669,6 +1667,8 @@ subroutine purification(H,ndim,S,P,P_purified)!,Sguess)
       !! Hamiltonian matrix 
    real(wp) :: S_inverse (ndim,ndim)
       !! S^(-1)
+   real(wp) :: root(ndim,ndim)
+      !! S^(1/2)
    
    real(wp) :: hmax, hmin, pmax, pmin 
       !! upper and lower bounds of H spectrum
@@ -1688,27 +1688,21 @@ subroutine purification(H,ndim,S,P,P_purified)!,Sguess)
 
    !> Transform from array form to matrix form
    call blowsym(ndim,P,Psym)
-   call blowsym(ndim,H,Hsym)
-   
-   !if (present(Sguess)) print*,"TRUE"
-   !call print_packed_matrix(ndim,Sguess,'SGUESS')
-
-   !if (present(Sguess)) then
-   !     call blowsym(ndim,Sguess,Ssym)
-   !else
-      call blowsym(ndim,S,Ssym)
-   !end if
+   call blowsym(ndim,H,Hsym)  
+   call blowsym(ndim,S,Ssym)
    
    call inverse_(ndim,Ssym,S_inverse)
-      !! get inverse of overlap
+      !! get inverse of overlap, if .true. get the square root
    call eigs(ndim,Hsym,hmax,hmin)
       !! obtain the max and min eigenvalues
    
-   
+   call sq_root(ndim,Ssym,root)
+      !! obtain the S^(1/2)
+
    !> Intial values for purification
    chempot=-500_wp
-   upper_limit=4000
-   step=0.2_wp
+   upper_limit=3000
+   step=0.5_wp
 
    if (is_cp)then
       call cp_purification(ndim, S_inverse, Ssym, Psym, Hsym, hmax, hmin, chempot, upper_limit, step, P_purified)
@@ -1834,8 +1828,8 @@ subroutine gcp_purification(ndim, S_inverse, S, P_ptb, H, hmax, hmin, chempot, u
          term1 = chempot*S_inverse
          term2 = matmul(H,S_inverse)
          term3 = matmul(S_inverse,term2)
-         term4 = alpha * 2.0_wp * (term1-term3)
-         term5 = term4 + 2.0_wp * S_inverse 
+         term4 = alpha * 0.9_wp * (term1-term3)
+         term5 = term4 + 0_wp * S_inverse 
          P0 = term5
          111 FORMAT(10F13.6)
          
@@ -1846,7 +1840,7 @@ subroutine gcp_purification(ndim, S_inverse, S, P_ptb, H, hmax, hmin, chempot, u
       if (defined) write(*,*) "Purification loop"
       
       P0=P0/2.0_wp
-      pur: do purificator=1,20
+      pur: do purificator=1,30
          
          !-------------------------------------------------
          !                       (10)
@@ -2169,6 +2163,7 @@ subroutine eigs(ndim,matrix,maxim,minim)
       !-------------------------------------------------
       !                       (13a/b)
       !-------------------------------------------------
+
       !> Gershgorin formulas to obtain lower and upper bounds of the spectrum of H 
       do i=1,ndim      
          do j=1,ndim
@@ -2197,15 +2192,55 @@ subroutine eigs(ndim,matrix,maxim,minim)
 
 end subroutine eigs
 
+!> matrix^(1/2)
+subroutine sq_root(ndim,matrix,root)
+   
+   use gtb_la, only : la_syev
+   use iso_fortran_env, only : wp => real64
+   implicit none 
+   integer, intent(in) :: ndim
+   real(wp), intent(in) :: matrix(ndim,ndim)
+   real(wp), intent(inout) :: root(ndim,ndim)
+   
+   real(wp), allocatable :: work(:)
+      !! workspace
+   integer  :: lwork
+      !! dimension of workspace
+   real(wp) :: w(ndim), sqrtW(ndim)
+      !! eigenvalues
+
+   real(wp), dimension(ndim,ndim) :: matrix_syev
+   real(wp),dimension(ndim) :: left,right
+   integer  :: ipiv(ndim), info
+   integer :: i,j
+   
+   
+   matrix_syev=matrix
+   allocate(work(1))
+   w = 0.0_wp
+   lwork = -1
+   call la_syev('V','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+   lwork=idint(work(1))
+   deallocate(work)
+   allocate(work(lwork))
+
+   call la_syev('V','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+   sqrtW=sqrt(w)
+   print*,W(1:3) 
+   print*,sqrtW(1:3) 
+   stop
+end subroutine sq_root
+
+!> get inverse of the matrix 
 subroutine inverse_(ndim,matrix,inverse) 
    
    use iso_fortran_env, only : wp => real64
    use multicharge_lapack, only : sytri,sytrf
 
    implicit none
-   real(wp), intent(in)     :: matrix (ndim,ndim)             
-   integer,  intent(in)     :: ndim                           ! number of AOs       
-   real(wp), intent(out) :: inverse (ndim,ndim)             
+   real(wp), intent(in)    :: matrix (ndim,ndim)             
+   integer,  intent(in)    :: ndim                           ! number of AOs       
+   real(wp), intent(out)   :: inverse (ndim,ndim)             
    
    real(wp)    :: check (ndim,ndim)             
    real(wp)    :: identity (ndim,ndim)             
@@ -2216,8 +2251,6 @@ subroutine inverse_(ndim,matrix,inverse)
 
    logical :: lapack
       !! if lapack should be used   
-   logical :: root
-      !! if s^(1/2) should be used 
    
    real(wp) :: a_1(ndim)
       !! max absolute column sum of matrix
@@ -2225,7 +2258,6 @@ subroutine inverse_(ndim,matrix,inverse)
       !! max absolute row sum of matrix
 
    lapack       = .true.
-   root  = .false.
    
    if (lapack) then
       !! get inverse of matrix from the LAPACK
@@ -2277,8 +2309,6 @@ subroutine inverse_(ndim,matrix,inverse)
       
       inverse = (1.0_wp/(maxval(a_1) * maxval(a_inf))) * matrix
 
-      write (*,*) "S^(-1) initial guess"
-      write (*,1001) (inverse(:,i),i=1,ndim)
       
       !> check 
       print*,"Is the largest spectral norm of intial guess bigger < 1? ", 1 > maxval(identity - matmul(inverse,matrix))
@@ -2293,84 +2323,10 @@ subroutine inverse_(ndim,matrix,inverse)
          inverse=(2*inverse - matmul(inverse,inverse) * matrix) 
       enddo
 
-      write (*,*) "S^(-1)"
-      write (*,1001) (inverse(:,i),i=1,ndim)
       check=matmul(matrix,inverse)
-      write (*,*) "S*S**(^2)"
-      write (*,1001) (check(:,i),i=1,ndim)
    
    endif 
    
-   !> create s^1/2
-   if (root) then 
-     block  
-         use gtb_la, only : la_syev
-   
-         real(wp), allocatable :: work(:)
-            !! workspace
-         integer  :: lwork
-            !! dimension of workspace
-         real(wp) :: w(ndim)
-            !! eigenvalues
-         real(wp)    :: inverse_square_root (ndim,ndim)             
-            !! S^(-1/2)
-         real(wp)    :: square_root (ndim,ndim)             
-            !! S^(1/2)
-
-         real(wp) :: matrix_syev(ndim,ndim)
-         real(wp) :: inverse_matrix_syev(ndim,ndim)
-         real(wp), dimension(ndim,ndim) :: sqrtw 
-   
-         matrix_syev=matrix
-            
-         allocate(work(1))
-         lwork=-1
-         call la_syev('N','U',ndim,matrix_syev,ndim,w,work,lwork,info)
-         lwork=idint(work(1))
-         deallocate(work)
-         allocate(work(lwork))
-
-         call la_syev('N','U',ndim,matrix_syev,ndim,w,work,lwork,info)
-         sqrtw=0.0_wp
-         do i=1,ndim
-            sqrtw(i,i) = w(i)
-         enddo
-         sqrtw= sqrt(sqrtw)
-         call print_blowed_matrix(ndim,matrix_syev,"I")
-         stop
-         
-         inverse_matrix_syev = matrix_syev
-         call sytrf(inverse_matrix_syev, ipiv, info=info, uplo='l')
-         if (info == 0) then
-               call sytri(inverse_matrix_syev, ipiv, info=info, uplo='l')
-               if (info == 0) then
-                  do ic = 1, ndim
-                     do jc = ic+1, ndim
-                        inverse_matrix_syev(ic, jc) = inverse_matrix_syev(jc, ic)
-                     end do
-                  end do
-               end if
-         end if 
-         
-         check=matmul(matrix_syev,inverse_matrix_syev)
-
-         call print_blowed_matrix(ndim,check,"I")
-         stop
-
-         square_root=matmul(matrix_syev,matmul(sqrtw,matrix_syev))
-         check = matmul(square_root,square_root)
-         call print_blowed_matrix(ndim,square_root,"s^1/2")
-         call print_blowed_matrix(ndim,check,"s^1/2*s^1/2")
-         call print_blowed_matrix(ndim,matrix,"s")
-
-     end block 
-   endif
-  
-   !call print_blowed_matrix(ndim,inverse,"S square root")
-   
-
-   !> Format for matrix dimensionality
-   1001 FORMAT(56F8.3,X)
    
 end subroutine inverse_
 
