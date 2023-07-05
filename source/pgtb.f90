@@ -2209,12 +2209,12 @@ subroutine sq_root(ndim,matrix,root)
    real(wp) :: w(ndim), sqrtW(ndim)
       !! eigenvalues
 
-   real(wp), dimension(ndim,ndim) :: matrix_syev
+   real(wp), dimension(ndim,ndim) :: matrix_syev, matrix_syev_T,root2, matrix_syev_inv, D
    real(wp),dimension(ndim) :: left,right
    integer  :: ipiv(ndim), info
    integer :: i,j
    
-   
+
    matrix_syev=matrix
    allocate(work(1))
    w = 0.0_wp
@@ -2224,10 +2224,32 @@ subroutine sq_root(ndim,matrix,root)
    deallocate(work)
    allocate(work(lwork))
 
+   ! V, D !
    call la_syev('V','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+   
+   ! D^(1/2) !
    sqrtW=sqrt(w)
-   print*,W(1:3) 
-   print*,sqrtW(1:3) 
+   D = 0.0_wp
+   do i=1,ndim
+      D(i,i) = sqrtW(i) 
+   enddo
+
+   ! V^(T) !
+   do i=1,ndim
+      do j=1,ndim
+         matrix_syev_T(j,i)=matrix_syev(i,j)
+      enddo
+   enddo
+
+   ! V^(-1) !
+   matrix_syev_inv = 0.0_wp
+   call inverse_(ndim,matrix_syev,matrix_syev_inv)
+   
+   ! r = V * D^(1/2) * V^(-1)
+   root = matmul(matrix_syev, matmul(D,matrix_syev_inv))
+   call print_blowed_matrix(ndim,root,'root')
+   root2 = matmul(root,root)
+   call print_blowed_matrix(ndim,root2,'root*root')
    stop
 end subroutine sq_root
 
@@ -2235,52 +2257,75 @@ end subroutine sq_root
 subroutine inverse_(ndim,matrix,inverse) 
    
    use iso_fortran_env, only : wp => real64
-   use multicharge_lapack, only : sytri,sytrf
+   use multicharge_lapack, only : sytri, sytrf, getrf, getri
 
    implicit none
-   real(wp), intent(in)    :: matrix (ndim,ndim)             
    integer,  intent(in)    :: ndim                           ! number of AOs       
+   real(wp), intent(in)    :: matrix (ndim,ndim)             
    real(wp), intent(out)   :: inverse (ndim,ndim)             
    
+   !> A*A^(-1) check
    real(wp)    :: check (ndim,ndim)             
-   real(wp)    :: identity (ndim,ndim)             
-      !! identity matrix
+   !> identity matrix
+   real(wp)    :: identity (ndim,ndim)
+   !> lower or upper triangular part
    character(len=1) :: uplo
-   integer :: info, ipiv(ndim)
+   !> exit status of routine
+   integer :: info
+   
+   integer :: ipiv(ndim)
    integer :: i, j, ic, jc
 
+   !> use lapack to calculate square root
    logical :: lapack
-      !! if lapack should be used   
+   
+   !> symmetric or general matrix
+   logical :: sy
    
    real(wp) :: a_1(ndim)
       !! max absolute column sum of matrix
    real(wp) :: a_inf(ndim)
       !! max absolute row sum of matrix
 
-   lapack       = .true.
-   
+   lapack   = .true.
+   check    = 0.0_wp 
+
+   ! check if matrix sym !
+   sy = matrix(1,2) == matrix(2,1)
+
+
+   ! get inverse of matrix using LAPACK !
    if (lapack) then
-      !! get inverse of matrix from the LAPACK
-      
       inverse=matrix
 
-      call sytrf(inverse, ipiv, info=info, uplo='l')
-      if (info == 0) then
-            call sytri(inverse, ipiv, info=info, uplo='l')
-            if (info == 0) then
-               do ic = 1, ndim
-                  do jc = ic+1, ndim
-                     inverse(ic, jc) = inverse(jc, ic)
+      if (sy) then
+         call sytrf(inverse, ipiv, info=info, uplo='l')
+         if (info == 0) then
+               call sytri(inverse, ipiv, info=info, uplo='l')
+               if (info == 0) then
+                  do ic = 1, ndim
+                     do jc = ic+1, ndim
+                        inverse(ic, jc) = inverse(jc, ic)
+                     end do
                   end do
-               end do
-            end if
-      end if
-
+               end if
+         end if
+      else
+         call getrf(ndim,ndim,inverse,ndim,ipiv,info)
+         if (info == 0) then
+            call getri(inverse, ipiv, info)  
+            if (info /= 0) then
+               print *, "The inverse matrix cannot be computed"
+               stop
+            endif
+         endif
+      endif
       check=matmul(inverse,matrix)
       if (any(abs(check)>1.5_wp)) then 
          print *,"Not identity"
          stop   
       endif
+
 
    else
        
@@ -2324,7 +2369,7 @@ subroutine inverse_(ndim,matrix,inverse)
       enddo
 
       check=matmul(matrix,inverse)
-   
+
    endif 
    
    

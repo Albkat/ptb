@@ -3883,12 +3883,13 @@ module multicharge_lapack
    implicit none
    private
 
-   public :: sytrf, sytrs, sytri, lapack_sytri, lapack_sytrf
+   public :: sytrf, sytrs, sytri, lapack_sytri, lapack_sytrf, getrf, getri
 
    interface sytrf
       module procedure :: mchrg_ssytrf
       module procedure :: mchrg_dsytrf
    end interface sytrf
+
 
    interface sytrs
       module procedure :: mchrg_ssytrs
@@ -3904,7 +3905,35 @@ module multicharge_lapack
       module procedure :: mchrg_dsytri
    end interface sytri
 
-
+   interface getri
+      module procedure :: get_dgetri
+      module procedure :: get_sgetri
+   end interface getri
+      
+   !> computation of inverse matrix
+   interface lapack_getri
+      pure subroutine sgetri(N, a, lda, ipiv, work, lwork, info)
+         import :: sp 
+         integer, intent(in) :: N
+         real(sp), intent(inout) :: a(lda,*)
+         integer, intent(in) :: lda
+         integer, intent(in) :: ipiv(*)
+         real(sp), intent(out) :: work(*)
+         integer, intent(in) :: lwork
+         integer, intent(out) :: info
+      end subroutine sgetri
+      pure subroutine dgetri(N, a, lda, ipiv, work, lwork, info)
+         import :: dp 
+         integer, intent(in) :: N
+         real(dp), intent(inout) :: a(lda,*)
+         integer, intent(in) :: lda
+         integer, intent(in) :: ipiv(*)
+         real(dp), intent(out) :: work(*)
+         integer, intent(in) :: lwork
+         integer, intent(out) :: info
+      end subroutine dgetri
+   end interface lapack_getri
+   
    interface lapack_sytrf
       pure subroutine ssytrf(uplo, n, a, lda, ipiv, work, lwork, info)
          import :: sp
@@ -3929,7 +3958,32 @@ module multicharge_lapack
          integer, intent(in) :: lwork
       end subroutine dsytrf
    end interface lapack_sytrf
-
+   
+   !> general matrix LU factorization
+   interface getrf
+      !> single-precision
+      pure subroutine sgetrf(M, N, a, lda, ipiv, info)
+         import :: sp
+         integer, intent(in) :: M
+         integer, intent(in) :: N
+         real(sp), intent(inout) :: a(lda,*)
+         integer, intent(in) :: lda
+         integer, intent(out) :: ipiv(*)
+         integer, intent(out) :: info  
+      end subroutine sgetrf
+      
+      !> double-precion
+      pure subroutine dgetrf(M, N, a, lda, ipiv, info)
+         import :: dp 
+         integer, intent(in) :: M
+         integer, intent(in) :: N
+         real(dp), intent(inout) :: a(lda,*)
+         integer, intent(in) :: lda
+         integer, intent(out) :: ipiv(*)
+         integer, intent(out) :: info  
+      end subroutine dgetrf
+   end interface getrf
+   
    interface lapack_sytrs
       pure subroutine ssytrs(uplo, n, nrhs, a, lda, ipiv, b, ldb, info)
          import :: sp
@@ -3979,7 +4033,7 @@ module multicharge_lapack
          real(dp), intent(in) :: work(*)
       end subroutine dsytri
    end interface lapack_sytri
-
+   
 
 contains
 
@@ -4192,6 +4246,55 @@ subroutine mchrg_ssytri(amat, ipiv, uplo, info)
    end if
 end subroutine mchrg_ssytri
 
+subroutine get_sgetri(amat,ipiv,info)
+   
+   real(sp), intent(inout) :: amat(:, :)
+   integer, intent(in) :: ipiv(:)
+   integer, intent(out) :: info
+   
+   integer ::  n, lda, lwork
+   real(sp), allocatable :: work(:)
+   
+   lda = max(1, size(amat, 1))
+   n = size(amat, 2)
+   allocate(work(n))
+   
+   ! calculate optimal size of a workspace !
+   print*, amat(1:10,1)
+   lwork=-1
+   call lapack_getri(n, amat, lda, ipiv, work, lwork, info)
+   
+   print*, amat(1:10,1)
+   stop
+   deallocate(work)
+end subroutine get_sgetri
+
+subroutine get_dgetri(amat,ipiv,info)
+   
+   real(dp), intent(inout) :: amat(:, :)
+   integer, intent(in) :: ipiv(:)
+   integer, intent(out) :: info
+   
+   integer :: n, lda, lwork
+   real(dp), allocatable :: work(:)
+   
+   lda = max(1, size(amat, 1))
+   n = size(amat, 2)
+   allocate(work(n))
+   
+   ! calculate optimal size of a workspace !
+   lwork=-1
+   call lapack_getri(n, amat, lda, ipiv, work, lwork, info)
+
+   ! calculate inverse !
+   if (info==0) then
+      lwork = work(1) 
+      deallocate(work)
+      allocate(work(lwork))
+      call lapack_getri(n, amat, lda, ipiv, work, lwork, info)
+   endif
+
+end subroutine get_dgetri
 
 subroutine mchrg_dsytri(amat, ipiv, uplo, info)
    real(dp), intent(inout) :: amat(:, :)
