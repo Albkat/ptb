@@ -3,7 +3,7 @@ module gtb_lapack_eig
   implicit none
   private
 
-  public :: la_syev, la_syevx, la_sygvx, la_sygvd
+  public :: la_syev, la_syevd, la_syevx, la_sygvx, la_sygvd
 
   !> Computes all eigenvalues and, optionally, eigenvectors of a
   !> real symmetric matrix A.
@@ -35,6 +35,41 @@ module gtb_lapack_eig
       integer(ik), intent(in) :: lwork
     end subroutine dsyev
   end interface la_syev
+  
+  !> Computes all eigenvalues and, optionally, eigenvectors of a
+  !> real symmetric matrix A with divide and conquer algorithm
+  interface la_syevd
+    pure subroutine ssyevd(jobz, uplo, n, a, lda, w, work, lwork, iwork, liwork, info)
+      import :: ik, sp
+      integer, parameter :: wp = sp
+      real(wp), intent(inout) :: a(lda, *)
+      real(wp), intent(out) :: w(*)
+      character(len=1), intent(in) :: jobz
+      character(len=1), intent(in) :: uplo
+      integer(ik), intent(out) :: info
+      integer(ik), intent(in) :: n
+      integer(ik), intent(in) :: lda
+      real(wp), intent(inout) :: work(*)
+      integer(ik), intent(in) :: lwork
+      integer(ik), intent(inout) :: iwork(*)
+      integer(ik), intent(in) :: liwork
+    end subroutine ssyevd
+    pure subroutine dsyevd(jobz, uplo, n, a, lda, w, work, lwork, iwork, liwork, info)
+      import :: ik, dp
+      integer, parameter :: wp = dp
+      real(wp), intent(inout) :: a(lda, *)
+      real(wp), intent(out) :: w(*)
+      character(len=1), intent(in) :: jobz
+      character(len=1), intent(in) :: uplo
+      integer(ik), intent(out) :: info
+      integer(ik), intent(in) :: n
+      integer(ik), intent(in) :: lda
+      real(wp), intent(inout) :: work(*)
+      integer(ik), intent(in) :: lwork
+      integer(ik), intent(inout) :: iwork(*)
+      integer(ik), intent(in) :: liwork
+    end subroutine dsyevd
+  end interface la_syevd
 
   !> Computes selected eigenvalues and, optionally, eigenvectors
   !> of a real symmetric matrix A.  Eigenvalues and eigenvectors can be

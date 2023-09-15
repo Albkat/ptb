@@ -1139,14 +1139,14 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
 ! diag case branch
       if(iu.eq.ndim) then                  
 ! full diag (faster if all eigenvalues are taken)
-       call blowsym(ndim,H,U)    
-       allocate (work(1),iwork(1))
-       call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,-1,IWORK,LIWORK,INFO)
-       lwork=int(work(1))
-       liwork=iwork(1)
-       deallocate(work,iwork)
-       allocate (work(lwork),iwork(liwork)) 
-       call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,LWORK,IWORK,LIWORK,INFO)
+         call blowsym(ndim,H,U)    
+         allocate (work(1),iwork(1))
+         call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,-1,IWORK,LIWORK,INFO)
+         lwork=int(work(1))
+         liwork=iwork(1)
+         deallocate(work,iwork)
+         allocate (work(lwork),iwork(liwork)) 
+         call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,LWORK,IWORK,LIWORK,INFO)
       else
 ! for a large basis, taking only the occ.+few virt eigenvalues is faster than a full diag
        allocate(hdum(ndim,ndim))  
@@ -1197,7 +1197,7 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
       endif
       
       focc = focca + foccb
-      !print*,"focca",focca
+      !print*,"focca",foccfa
       !print*,"foccb",foccb
       !print*,"focc",focc
 
@@ -1766,6 +1766,10 @@ subroutine purification(H, ndim, S, P, P_purified)
    !> McWeeny or Pade
    logical :: mcweeny
    
+   !-------!
+   ! SETUP !
+   !-------!
+   
    is_cp   = .true. 
    mcweeny = .true.
 
@@ -1806,11 +1810,17 @@ subroutine purification(H, ndim, S, P, P_purified)
    
    endif
    
-   ! intial values for purification !
-   chempot=-30_wp
-   upper_limit=30_wp
-   step=0.1_wp
-
+   ! intial values chempot scan  !
+   if (.not.is_cp) then
+      chempot=-30_wp
+      upper_limit=30_wp
+      step=0.1_wp
+   endif
+   
+   !--------------!
+   ! PURIFICATION !
+   !--------------!
+   
    if (is_cp)then
       call cp_purification(ndim, metric, Ssym, Psym, Hsym, hmax, hmin, tmp)
    else
@@ -2231,15 +2241,6 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
       ! construct initial guess !   
       else 
 
-         ! get alpha !
-         ! alpha_max=1.0_wp/(hmax-chempot)
-         ! alpha_min=1.0_wp/(chempot-hmin)
-         ! if (alpha_max>alpha_min) then
-         !   alpha=alpha_min
-         ! else
-         !   alpha=alpha_max
-         ! endif
-         
          ! (11a) !
          term1 = chempot*metric
          term2 = matmul(H,metric)
@@ -2298,8 +2299,8 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
          
          if (.not.defined) then
             
-            if (purificator>1) then
-            
+            if (purificator>1) then 
+
                if (abs(norm2(res)-norm)<1.0E-5_wp) then
                   conv=.true.
                   iter=purificator
@@ -2307,9 +2308,8 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
                else
                   norm=norm2(res)
                endif
-            
-            else
 
+            else
                norm=norm2(res)
                
             endif
@@ -2381,6 +2381,9 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    
    !> metric
    real(wp), intent(in) :: metric(ndim,ndim)
+
+   !> overlap matrix 
+   real(wp), intent(in) :: S(ndim,ndim)
    
    !> PTB density matrix 
    real(wp), intent(in) :: P_ptb(ndim,ndim)
@@ -2388,9 +2391,6 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    !> hamiltonian 
    real(wp), intent(in) :: H(ndim,ndim)
    
-   !> overlap matrix 
-   real(wp), intent(in) :: S(ndim,ndim)
-
    !> spectral bounds  of H
    real(wp), intent(in) :: hmax, hmin 
    
@@ -2403,6 +2403,9 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    
    !> scaling parameter
    real(wp) :: alpha_max, alpha_min, alpha
+   
+   !> Gershgorin's circle theorem 
+   real(wp) :: h_max, h_min, buff_min, buff_max
    
    !> l2 norm 
    real(wp) :: norm 
@@ -2425,7 +2428,7 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    !> band structure energy
    real(wp) :: bandStrEnergy
    
-   !> number of electrons
+   !> desired number of electrons
    real(wp) :: nel, check_electrons, N_e, N
    
    !> equation terms
@@ -2438,7 +2441,10 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    real(wp) :: matr1(ndim,ndim),matr2(ndim,ndim)
    
    !> initial guess
-   real(wp) :: P0(ndim,ndim)
+   real(wp) :: p0(ndim,ndim)
+   
+   !> density in iteration 
+   real(wp) :: pn(ndim,ndim)
    
    !> identity matrix
    real(wp) :: identity(ndim,ndim)
@@ -2462,26 +2468,49 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    ! INITIAL CONFIGURATION !
    !-----------------------!
    
-   frob_norm = .false.
-   error    = .false.
-   is_ptb   = .false. 
-   verbose  = .true.
+   frob_norm   = .true.
+   error       = .false.
+   is_ptb      = .false. 
+   verbose     = .true.
    
-   ! desired number of electrons !
    N_e = 14.0_wp
-   N = 28._wp
+   N   = ndim
 
-   N = 28._wp! chemical potential ! 
-   tr=0.0_wp
+   ! chempot !
+   tr  = 0.0_wp
+   h_min  = 0.0_wp
    do i=1,ndim
       tr = tr + H(i,i)
+      buff_min = H(i,i)
+      buff_max = H(i,i)
+      do j=1,ndim
+         if (i.ne.j) then
+            buff_min = buff_min - H(i,j)
+            buff_max = buff_max + H(i,j)
+         endif
+      enddo
+      if (i.eq.1) then
+         h_min = buff_min
+         h_max = buff_max
+      else 
+         if (buff_max > h_max) h_max = buff_max
+         if (buff_min < h_max) h_min = buff_min
+      endif
+
    enddo
-   chempot = tr / ndim
+
+
+   chempot = tr / N
 
    if (verbose) write(*,"(a, 2x, F14.6)") "The chemical potential", chempot
-
    
-   ! initial guess !
+   if (verbose) write(*,"(a, 2x, F14.6)") "h_max ", hmax
+   if (verbose) write(*,"(a, 2x, F14.6)") "h_min ", hmin
+   if (verbose) write(*,"(a, 2x, F14.6)") "h_max ", h_max
+   if (verbose) write(*,"(a, 2x, F14.6)") "h_min ", h_min
+
+   stop
+
    identity = 0.0_wp
    do i=1, ndim
       identity(i,i) = 1.0_wp
@@ -2491,30 +2520,11 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    ! CALCULATION !
    !-------------!
    
-   if (is_ptb) then
+   ! initial guess !   
+   if (.not.is_ptb) then
 
-      P0=P_ptb
-
-   else
-      
             
-      if (.not. frob_norm) then
-      
-         hmin1 = 1.0_wp / (chempot - hmin)
-         hmax1 = 1.0_wp / (hmax - chempot)
-         
-         alpha = 1.0_wp/min(hmin1,hmax1)
-         
-         print*,alpha
-         stop
-         term1 = alpha * chempot * metric
-         term2 = matmul(metric,H)
-         term2 = matmul(term2,metric) * alpha
-         term3 = matmul(identity,metric)
-         term4 = (term1 - term2 + term3) / ndim ! 1/N 
-         p0    = term4
-      
-      else
+      if (frob_norm) then
          
          term1 = chempot * metric
          
@@ -2538,28 +2548,50 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
             print *, "Frobenius Norm", frob
          endif
          
-         alpha=1.0_wp/min(gersh,frob)
+         alpha=N_e/min(gersh,frob)
 
-         term4 =  metric * nel
+         term4 =  metric * N_e
          !p0 = term4 / ndim
-         p0 = ( (0.5_wp* term3 * alpha)  + term4 ) / ndim
+         p0 = ( (term3 * alpha)  + term4 ) / N 
 
+      else
+
+     
+         hmin1 = ( N - N_e) / (chempot - hmin)
+         hmax1 =  N_e / (hmax - chempot)
+         
+         alpha = min(hmin1,hmax1)
+         
+         term1 = alpha * chempot * metric
+         term2 = matmul(metric,H)
+         term2 = matmul(term2,metric) * alpha
+         term3 = matmul(identity,metric) * N_e
+         term4 = (term1 - term2 + term3) / N ! 1/N 
+         p0    = term4
+      
+         
       endif
+   
+   ! ptb density = initial guess !
+   else
 
+      p0 = p_ptb
+      
    endif
 
+   print * , "number of electrons: ", check_electrons(ndim,S,p0)
    if (verbose) call print_blowed_matrix(ndim,p0, "Initial guess")
+   pn = p0 / 2
 
-   p0 = p0/2.0_wp
    ! purification loop !
-   do num=1,20 
+   do num=1,100 
 
-      SP=matmul(S,p0)
-      PSP=matmul(p0,SP)
+      SP=matmul(S,pn)
+      PSP=matmul(pn,SP)
       PSPSP=matmul(PSP,SP)
 
       matr1=PSP-PSPSP
-      matr2=p0-PSP
+      matr2=pn-PSP
 
       tr1=0.0_wp
       tr2=0.0_wp
@@ -2578,7 +2610,7 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
 
       else
 
-         res=( (1.0_wp - 2.0_wp * cn ) * p0 + (1.0_wp + cn) * PSP - PSPSP ) / (1.0_wp-cn)
+         res=( (1.0_wp - 2.0_wp * cn ) * pn + (1.0_wp + cn) * PSP - PSPSP ) / (1.0_wp-cn)
       
       endif
       
@@ -2592,14 +2624,14 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
          write(*,'(a,2x,F14.6)') "The cn factor", cn
       endif
       
-      p0=res
+      pn=res
    
    enddo
     
    
    stop
    
-   P_purified=P0
+   P_purified = pn
 
 end subroutine cp_purification
 
@@ -2741,16 +2773,26 @@ subroutine inverse_(ndim,matrix,inverse)
    use multicharge_lapack, only : sytri, sytrf, getrf, getri
 
    implicit none
-   integer,  intent(in)    :: ndim                           ! number of AOs       
+   
+   !> number of AOs
+   integer,  intent(in)    :: ndim                                  
+   
+   !> A matrix
    real(wp), intent(in)    :: matrix (ndim,ndim)             
+   
+   !> inverse
    real(wp), intent(out)   :: inverse (ndim,ndim)             
    
+   
    !> A*A^(-1) check
-   real(wp)    :: check (ndim,ndim)             
+   real(wp)    :: check (ndim,ndim)     
+
    !> identity matrix
    real(wp)    :: identity (ndim,ndim)
+   
    !> lower or upper triangular part
    character(len=1) :: uplo
+   
    !> exit status of routine
    integer :: info
    
@@ -2763,10 +2805,11 @@ subroutine inverse_(ndim,matrix,inverse)
    !> symmetric or general matrix
    logical :: sy
    
+   !> max absolute column sum of matrix
    real(wp) :: a_1(ndim)
-      !! max absolute column sum of matrix
+   
+   !> max absolute row sum of matrix
    real(wp) :: a_inf(ndim)
-      !! max absolute row sum of matrix
 
    lapack   = .true.
    check    = 0.0_wp 
@@ -2777,6 +2820,7 @@ subroutine inverse_(ndim,matrix,inverse)
 
    ! get inverse of matrix using LAPACK !
    if (lapack) then
+
       inverse=matrix
 
       if (sy) then
@@ -2801,12 +2845,13 @@ subroutine inverse_(ndim,matrix,inverse)
             endif
          endif
       endif
+      
       check=matmul(matrix,inverse)
+      
       if (any(abs(check)>1.5_wp)) then 
          print *,"Not identity"
          stop   
       endif
-
 
    else
        
@@ -2842,11 +2887,9 @@ subroutine inverse_(ndim,matrix,inverse)
       enddo
 
       check=matmul(matrix,inverse)
+      call print_blowed_matrix(ndim,check,'CHECK')     
 
-      call print_blowed_matrix(ndim,check,'CHECK')      
    endif 
-
-   
    
 end subroutine inverse_
 
