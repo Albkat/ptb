@@ -1,4 +1,4 @@
-!! ------------------------------------------------------------------------
+! ------------------------------------------------------------------------
 ! model Hamiltonian to provide atomic shell populations and density matrix
 ! as well as dipole response
 ! fitted to shell populations/q/BO/dipole/IR/alpha/Raman/Ekin/matched orbital energies
@@ -56,6 +56,7 @@ subroutine pgtb(pr,prop,n,ndim,nel,nopen,homo,at,chrg,xyz,z,rab, &
    real(wp),intent(in)    :: S(ndim*(ndim+1)/2) ! exact overlap maxtrix in SAO
    real(wp),intent(in)    :: D(ndim*(ndim+1)/2,3)!dipole integrals
    real(wp),intent(in)    :: efield(3)          ! electric field
+
 !! ------------------------------------------------------------------------
 !  Output
 !! ------------------------------------------------------------------------
@@ -105,11 +106,11 @@ subroutine pgtb(pr,prop,n,ndim,nel,nopen,homo,at,chrg,xyz,z,rab, &
 !  initizialization
 !! ------------------------------------------------------------------------
    if(pr)then
-   write(*,*) '              -----------------------'
-   write(*,*) '              |      PTB  model      |'
-   write(*,*) '              | SG, MM, AH 2020-2022 |'
-   write(*,*) '              -----------------------'
-   write(*,*) 'prop :',prop
+      write(*,*) '              -----------------------'
+      write(*,*) '              |      PTB  model      |'
+      write(*,*) '              | SG, MM, AH 2020-2022 |'
+      write(*,*) '              -----------------------'
+      write(*,*) 'prop :',prop
    endif
 
 !  call prmat(6,S,ndim,0,'S')
@@ -384,12 +385,63 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
 !  local
    logical :: fail
    
-   !> test iteration 1/2
-   logical :: test1, test2
+   type :: pur_set
+         
+      !> S metric
+      character(len=:), allocatable :: metric
+
+      !> purification type
+      character(len=:), allocatable :: type
+      
+      !> for sign: iterative or diagonalisation
+      logical :: iter = .false.
+
+      !> chemical potetial
+      real(wp) :: chempot = 0.0_wp
+
+      !> upper limit for chempot search
+      real(wp) :: limit = 30.0_wp
+
+      !> step
+      real(wp) :: step = 0.1_wp
+
+      !> printout level
+      logical :: verbose = .false.
+
+      !> if chemical potential fixed
+      logical :: fixed = .false.
+      
+      !> if sparsity should be forced
+      logical :: sparse = .false.
+
+      !> purification iteration number
+      integer :: cycle = 20
+
+   ! type-bound procedures !
+   contains
+      
+   end type pur_set
+      
+   type(pur_set) :: pur
    
-   !> printout level
-   logical :: verbose
-   
+   !> number of CLI arguments
+   integer :: numArgs
+
+   !> raw value of flag
+   character*80 :: arg
+
+   !> raw value of flag argument
+   character(len=:), allocatable :: line 
+
+   !> length of flag argument
+   integer :: leng
+
+   !> variables for readline
+   real(wp) :: floats(10)
+   character(len=80) :: str(10)
+   integer :: ns, nf
+
+
    integer  :: i,j,k,l,ish,ati,atj,ia,ib,jsh,ii,jj,lin,ij,li,lj,iter,iish,jjsh,mode
    real(wp) :: P_purified (ndim*(ndim+1)/2)            
    real(wp),parameter :: au2ev = 27.2113957_wp
@@ -403,6 +455,7 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    real(wp) :: nel2,nel3
    real(wp) :: identity(ndim,ndim)
    real(wp) :: eigval(ndim)
+
 
    identity(:,:)=0
    do i=1,ndim
@@ -568,73 +621,138 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    mode = iter
    
-   test1 = .true.
-   test2 = .true.
-   verbose = .true.
 
    if(iter.eq.2.and.prop.eq.4) mode = 3     ! stda write
    if(iter.eq.2.and.prop.eq.5) mode = 4     ! TM write
+   
    if(              prop.lt.0) mode = -iter ! IR/Raman  
-   if (iter .eq.1) then
+       
+   pur%metric = "-0.5"
+   pur%verbose = .false.
+   pur%chempot = 0.0_wp
+   
+   ! Parser !
+   numArgs = command_argument_count()
 
-      ! if the density from the first iteration should be tested !
-      if (test1) then
+   do i=2, numArgs
+      call get_command_argument(i,arg)
+      
+      ! verbose printout !
+      if(index(arg,'-V').ne.0) pur%verbose = .true. 
          
-         ! print initial config !
-         if (verbose) then
+      ! chempot !
+      if(index(arg,'--chempot').ne.0) then
 
-            write(*,'(/,a,1x,a,1x,a)') repeat('*',24), "INITIAL CONFIGURATION", repeat('*',25)
-            call check_density(ndim, P, S, Hmat, 'initial density')
+         ! initial guess !
+         call get_command_argument(i+1,length=leng) 
+         allocate( character(len=leng) :: line)
+         call get_command_argument(i+1,value=line)
+         call readline(line,floats,str,ns,nf)
+         deallocate(line)
+
+         if (nf.ne.0) then
+            
+            pur%chempot=floats(1)
+            if (pur%chempot>=pur%limit) pur%limit = pur%chempot + 30.0_wp 
+            
+            ! limit !
+            call get_command_argument(i+2,length=leng) 
+            allocate( character(len=leng) :: line)
+            call get_command_argument(i+2,value=line)
+            call readline(line,floats,str,ns,nf) 
+            deallocate(line)
+
+            if (nf.ne.0) then
+               
+               if(floats(1)>pur%chempot) pur%limit = floats(1)
+               
+               ! step !
+               call get_command_argument(i+3,length=leng) 
+               allocate( character(len=leng) :: line)
+               call get_command_argument(i+3,value=line)
+               call readline(line,floats,str,ns,nf)
+               deallocate(line)
+
+               if(nf.ne.0 .and. floats(1)<(pur%limit-pur%chempot).and.floats(1)>0.0_wp) then
+                  pur%step=floats(1)
+               endif
+
+            endif 
+         endif
+      endif
+      
+      ! mode sign(default) | mcweeny | cp !
+      if(index(arg,'--pur').ne.0) then
+         call get_command_argument(i+1,length=leng) 
+         allocate( character(len=leng) :: line)
+         call get_command_argument(i+1,value=line)
+         if (line.eq."sign" .or. line.eq."mcweeny" .or. line.eq."cp") then
+            pur%type = line
+
+            if (line.eq."sign") then
+               deallocate(line)
+               call get_command_argument(i+2,length=leng) 
+               allocate( character(len=leng) :: line)
+               call get_command_argument(i+2,value=line)
+               if (line.eq."iter") then
+                  pur%iter = .true.
+               endif
+            endif
          
          endif
 
-         call solve2(mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+         deallocate(line)
+      endif
+      
+      if(index(arg,"--metric").ne.0) then 
+         call get_command_argument(i+1,length=leng) 
+         allocate( character(len=leng) :: line)
+         call get_command_argument(i+1,value=line)
+         if (line.eq."-1" .or. line.eq."-0.5" .or. line .eq. "+1") then
+            pur%metric = line
+         endif
+         deallocate(line)
+      endif
+
+      if(index(arg,"--fix").ne.0) pur%fixed = .true.
+
+      if(index(arg,"--cycle").ne.0) then
+         call get_command_argument(i+1,length=leng)
+         allocate( character(len=leng) :: line)
+         call get_command_argument(i+1,value=line)
+         call readline(line,floats,str,ns,nf)
+         if (nf.ne.0 .and. floats(1)>0) then
+            pur%cycle = int(floats(1))
+         endif
+         deallocate(line)
+      endif
+       
+      if(index(arg,"--sparse").ne.0) pur%sparse = .true.
+   enddo
   
-         write(*,'(/,a,1x,a,1x,a)') repeat('*',29), "AFTER SOLVE2", repeat('*',29) 
-         call check_density(ndim, P, S, Hmat, 'ptb density')
-        
-         call purification(Hmat,ndim,S,P,P_purified)  
+   ! if purification !
+   if (allocated(pur%type)) then
 
-         write(*,'(/,a,1x,a,1x,a)') repeat('*',26), "AFTER PURIFICATION", repeat('*',26)
-         call check_density(ndim, P_purified, S, Hmat, 'purified density')
-         
-         !stop
-      
-      else
-         
-         call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
-      
-      endif
+      if (pur%verbose) &
+         & call check_density(ndim, P, S, Hmat, 'Initial density')
 
+      call solve2(mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+
+      call check_density(ndim, P, S, Hmat, 'PTB normal density')
+      
+      call purification(Hmat,ndim,S,P,P_purified, pur%type,pur%verbose, &
+            & pur%chempot,pur%metric,pur%fixed,pur%limit,&
+            & pur%step,pur%iter,pur%cycle,pur%sparse)  
+
+      if (pur%type=="cp" .or. pur%fixed) &
+            call check_density(ndim, P_purified, S, Hmat, 'Purified density')
+         
    else
-      
-      if (test2) then
-
-         ! print initial config !
-         if (verbose) then
-
-            write(*,'(/,a,1x,a,1x,a)') repeat('*',24), "FIRST CONFIGURATION", repeat('*',25)
-            call check_density(ndim, P, S, Hmat, 'after 1 iter')
          
-         endif
-
-         call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+      call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
       
-         write(*,'(/,a,1x,a,1x,a)') repeat('*',29), "AFTER SOLVE2", repeat('*',29)
-         call check_density(ndim, P, S, Hmat, 'ptb density')
-      
-         call purification(Hmat,ndim,S,P,P_purified)  
-         
-         write(*,'(/,a,1x,a,1x,a)') repeat('*',26), "AFTER PURIFICATION", repeat('*',26)
-         call check_density(ndim, P_purified, S, Hmat, 'purified density')
-
-         stop
-
-      endif
-   
-   end if
-   
-   
+   endif
+   stop
    if(fail) stop 'diag error'
 
    if(iter.eq.1) gap1 = (eps(homo+1)-eps(homo))*au2ev
@@ -902,7 +1020,7 @@ subroutine print_packed_matrix(ndim,matrix,msg)
    call blowsym(ndim,matrix,tmp)
    
    
-   write(output,'(a)') repeat("-",72)
+   write(output,'(a)') repeat("-",70)
    !if (present(msg)) write(output,'(  1x, a, ":" )') msg
    write(output,'(  1x, a, ":" )') msg
    write(output,*) tmp(:12,1)
@@ -916,16 +1034,25 @@ subroutine print_blowed_matrix(ndim,matrix,msg)
     
    use iso_fortran_env, only : wp => real64, output => output_unit 
    implicit none
-   real*8 matrix(ndim,ndim)
+   real(wp) matrix(ndim,ndim)
    integer, intent(in) :: ndim
-   character(len=*), intent(in) :: msg
-    
+   character(len=*), intent(in),optional :: msg
+   integer :: i
+   character(len=72) :: outfmt
+
+   write(outfmt, '(a,i0,a)')  '(', ndim, 'F11.8)'
    write(output,'(a)') repeat("-",72)
-   !if (present(msg)) write(output,'(  1x, a, ":" )') msg
+
    write(output,'(  1x, a, ":" )') msg
-   write(output,*) matrix(:12,1)
+   
+   do i = 1, ndim
+      write(output,outfmt) matrix(:,i)
+   enddo
+
+   write(output,'(a)') repeat("-",72)
 
 end subroutine print_blowed_matrix
+
 !! ------------------------------------------------------------------------
 !  set the average (common) CN of elements
 !  use code avcn.f
@@ -1281,7 +1408,6 @@ end subroutine solve3
 !! ------------------------------------------------------------------------
 !  response analogue of the twoscf routine
 !! ------------------------------------------------------------------------
-
 subroutine onescf(n,ndim,nel,nopen,homo,at,rab,cn,S,SS,Hmat,Hdiag,focc,&
                   eT,scfpar,ves0,psh,pa,P)                      
    use iso_fortran_env, only : wp => real64
@@ -1413,7 +1539,6 @@ end
 !! ------------------------------------------------------------------------
 !  MO match score for occupied space and scaled LUMO contribution
 !! ------------------------------------------------------------------------
-
 subroutine momatch(pr,ex,ndim,nocc,nvirt,S,e,C)
       use mocom  
       use gtb_la, only : la_symm, la_gemm
@@ -1593,7 +1718,7 @@ subroutine check_density(ndim, P, S, H, str)
    real(wp), dimension(ndim,ndim) :: Psym, Ssym, Hsym
    
    !> format for I/O
-   character(len=*), parameter :: form = '(/, a, /, a, 3x, f12.6, /, a, 1x, f12.6, /)'
+   character(len=*), parameter :: form = '( /, a, 3x, f12.6, /, a, 1x, f12.6)'
    
    !> number of electrons
    real(wp) :: check_electrons
@@ -1602,19 +1727,15 @@ subroutine check_density(ndim, P, S, H, str)
    real(wp) :: bandStrEnergy
 
    ! print all input matrices !
-   call print_packed_matrix(ndim,S,"Overlap")       
-   call print_packed_matrix(ndim,H,'Hamiltonian')
-   call print_packed_matrix(ndim,P,'Density matrix')
+   call print_packed_matrix(ndim,P,str)
    
    ! transform to matrices !
    call blowsym(ndim,P,Psym)
    call blowsym(ndim,S,Ssym)
    call blowsym(ndim,H,Hsym)
 
-   ! check if idempotent !
-   call idempotency(ndim,Psym,Ssym,"P*S*P")
-  
-   write(6,form), str, "Number of electrons:", check_electrons(ndim,Ssym,Psym), "Band structure energy:", bandStrEnergy(ndim,Hsym,Psym) 
+   write(6,form) "Number of electrons:", check_electrons(ndim,Ssym,Psym), "Band structure energy:", bandStrEnergy(ndim,Hsym,Psym) 
+   write(6, "(a)") repeat('-',72)
 
 end subroutine check_density
 
@@ -1703,7 +1824,8 @@ subroutine idempotency(ndim, mat, S, msg)
 end subroutine idempotency
 
 !> non-orthogonal purification
-subroutine purification(H, ndim, S, P, P_purified)
+subroutine purification(H, ndim, S, P, P_purified,method,&
+      & verbose,chempot,metr,fix,upper_limit,step,iter,cycle,sparse_cli)
 
    use iso_fortran_env, only : wp => real64
    implicit none
@@ -1722,8 +1844,39 @@ subroutine purification(H, ndim, S, P, P_purified)
    
    !> purified density matrix
    real(wp), intent(out)    :: P_purified(ndim*(ndim+1)/2)
+
+   !> settigns
+   character(len=*), intent(in) :: method
    
+   !> intial guess
+   real(wp), intent(inout) :: chempot
+
+   !> if verbose
+   logical, intent(in) :: verbose
+
+   !> metric
+   character(len=*), intent(in) :: metr   
+
+   !> fixed chemical potential
+   logical, intent(in) :: fix
+
+   !> step size
+   real(wp),intent(in) :: step
+
+   !> upper limit for chempot scan
+   real(wp),intent(in) :: upper_limit
+
+   !> fixed chemical potential
+   logical, intent(in) :: iter
+
+   !> number of purification cycles
+   integer, intent(in) :: cycle
+
+   !> sparse 
+   logical, intent(in) :: sparse_cli
+
    ! local vars !
+
    !> density matrix 
    real(wp) :: Psym(ndim,ndim)
    
@@ -1748,61 +1901,38 @@ subroutine purification(H, ndim, S, P, P_purified)
    !> upper and lower spectrum bounds of H 
    real(wp) :: hmax, hmin 
    
-   !> chemical potential
-   real(wp) :: chempot 
-      
-   !> step size
-   real(wp) :: step
-
-   !> upper limit for chempot scan
-   real(wp) :: upper_limit
-
-   !> which S should be used 
-   integer :: Sver
-
-   !> cp or gcp
-   logical :: is_cp
-   
-   !> McWeeny or Pade
-   logical :: mcweeny
    
    !-------!
    ! SETUP !
    !-------!
-   
-   is_cp   = .true. 
-   mcweeny = .true.
-
-   ! 0 = S^(-1), 1 = S^(1/2), 2 = S^(-1/2) !
-   Sver = 0
-
    hmax  = 0.0_wp
    hmin  = 0.0_wp
    Hsym(:,:)=0.0_wp
    Ssym(:,:)=0.0_wp
    Psym(:,:)=0.0_wp
 
+   
    ! transform array to matrix ! 
    call blowsym(ndim,P,Psym)
    call blowsym(ndim,H,Hsym)  
    call blowsym(ndim,S,Ssym)
    
    ! max and min eigenvalues !
-   if (mcweeny) call eigs(ndim, Hsym, hmax, hmin)
+   if (method .eq. "mcweeny".or. method .eq. "cp") call eigs(ndim, Hsym, hmax, hmin)
    
    ! obtain S^(-1) !
-   if (Sver == 0) then
+   if (metr .eq. "-1") then
       
       call inverse_(ndim,Ssym,metric)
    
    ! obtain the S^(1/2) !
-   else if (Sver == 1) then
+   else if (metr == "0.5") then
 
       call sq_root(ndim,Ssym,root)
       metric = root
 
    ! obtain the S^(-1/2) !
-   else if (Sver == 2) then
+   else if (metr == "-0.5") then
       
       call sq_root(ndim,Ssym,root)
       call inverse_(ndim,root,root_inv)
@@ -1810,37 +1940,61 @@ subroutine purification(H, ndim, S, P, P_purified)
    
    endif
    
-   ! intial values chempot scan  !
-   if (.not.is_cp) then
-      chempot=-30_wp
-      upper_limit=30_wp
-      step=0.1_wp
-   endif
-   
-   !--------------!
-   ! PURIFICATION !
-   !--------------!
-   
-   if (is_cp)then
-      call cp_purification(ndim, metric, Ssym, Psym, Hsym, hmax, hmin, tmp)
-   else
-      if (mcweeny) then
-         call gcp_purification(ndim, metric, Ssym, Psym, Hsym, hmax, hmin, chempot, upper_limit, step, tmp)
+   ! print the purification settings !
+   write(6,'(/,a,1x,a,1x,a,/)') repeat('*',24), "PURIFICATION", repeat('*',25)
+   write(6,'(2x,a)') "__SETTINGS__" 
+   write(6,'(2x,a,5x,a)') "Purification type:            ", method
+   if (method.eq."sign") then
+      if (iter) then
+         write(6,'(2x,a,5x,a)') "Sign mode:                    ", "iterative"
       else
-         call gcp2_purification(ndim, metric, Ssym, Hsym, chempot, upper_limit, step, tmp)
+         write(6,'(2x,a,5x,a)') "Sign mode:                    ", "diagonalisation"
+      endif
+   endif
+   write(6,'(2x,a,5x,a)') "Overlap metric (S^metric):    ", metr 
+   write(6,'(2x,a,5x,I0)') "Purification cycle number:    ", cycle
+
+   if (method .ne. 'cp') &
+      &  write(6,'(2x,a,2x,f14.8)') "Initial chemical potential:   ", chempot
+   if (.not.fix .and. method.ne."cp") then
+      write(6,'(2x,a,2x,f14.8)') "Upper limit               :   ", upper_limit
+      write(6,'(2x,a,2x,f14.8)') "Step (initial -> limit)   :   ", step
+   else if(method.ne."cp") then
+      write(6,'(2x,a,6x,L1)') "Fixed mode:                   ",fix
+   endif
+   if (verbose) & 
+      & write(6,'(2x,a,6x,L1)') "Verbose:                     ",verbose
+   write(6,*)
+
+!--------------!
+! PURIFICATION !
+!--------------! 
+   
+   if (method .eq. "cp")then
+      call cp_purification(ndim, metric, Ssym, Psym, Hsym, hmax, hmin, tmp, cycle, verbose)
+   
+   else
+      if (method .eq. "mcweeny") then
+         call gcp_purification(ndim,metric,Ssym,Hsym,hmax,hmin,chempot, &
+            & upper_limit,step,tmp,cycle,fix,verbose)
+      else
+         call sign_purification(ndim,metric,Ssym,Hsym,chempot, &
+            & upper_limit,step,tmp,verbose,fix,iter,cycle,sparse_cli)
       endif
    endif
 
-   call packsym(ndim,tmp, P_purified)
+   call packsym(ndim,tmp,P_purified)
 
 end subroutine purification
 
-!> grand-canonical purification, v2
-subroutine gcp2_purification(ndim, metric, S, H, chempot, upl, step, P_purified)
+!> Sign Method 
+subroutine sign_purification(ndim, metric, S, H, chempot, upl, &
+      & step, P_purified, verbose, fix, iterative, cycle_,sparse_cli)
    
    use ieee_arithmetic, only : ieee_is_NaN
    use iso_fortran_env, only : wp => real64, out => OUTPUT_UNIT
    use gtb_lapack_eig, only : la_sygvd
+
 
    !> number of basis functions
    integer, intent(in) :: ndim
@@ -1866,28 +2020,30 @@ subroutine gcp2_purification(ndim, metric, S, H, chempot, upl, step, P_purified)
    !> purified density matrix 
    real(wp), intent(out) :: P_purified(ndim,ndim)
    
+   !> verbosity
+   logical, intent(in) :: verbose
 
+   !> if print the iterations inside purification cycle
+   logical, intent(in) :: fix
 
+   !> iterative or diagonalization
+   logical,intent(in) :: iterative 
+   
+   !> cycles
+   integer,intent(in) :: cycle_
+
+   !> farced sparse mode
+   logical, intent(in) :: sparse_cli
+
+!------------------------------------------------------------------------   
    !> iterators
-   integer :: num, purificator, i, j, ic, jc, iter
-   
-   !> l2 norm
-   real(wp) :: norm 
-   
-   !> band structure energy
-   real(wp) :: band 
-   
-   !> number of electrons
-   real(wp) :: nel, number_of_electrons, check_el2, check_electrons
+   integer :: i
    
    !> normalization
    real(wp) :: frob, gersh, Ascale
    
    !> terms for initial guess 
-   real(wp), dimension(ndim,ndim) :: term1, term2, term3, term4
-   
-   !> terms for Pade approximation (19)
-   real(wp), dimension(ndim,ndim) :: x2k, x4k, res
+   real(wp), dimension(ndim,ndim) :: term1, term2, term3, term4, tmp
    
    !> initial guess
    real(wp) :: sign_A(ndim,ndim)
@@ -1895,60 +2051,39 @@ subroutine gcp2_purification(ndim, metric, S, H, chempot, upl, step, P_purified)
    !> final guess
    real(wp) :: final_(ndim,ndim)
 
-   !> eigenvectors
-   real(wp) :: eigvec(ndim,ndim)
-   
-   !> eigenvalues
-   real(wp) :: eigval(ndim), eigval2(ndim,ndim)
    
    !> I
    real(wp) :: identity(ndim,ndim)
    
-   !> P*H
-   real(wp) :: PH(ndim,ndim)
-   
-   !> if NaN 
-   logical :: error
-
    !> if converged
    logical :: conv
-   
-   !> if print non-convergent matrices
-   logical :: not_conv
-   
-   !> if print the iterations inside purification cycle
-   logical :: defined
-   
-   !> iterative or diagonalization
-   logical :: iterative 
-   
-   !> printout level
-   logical :: verbose
-   
-   
-   !-----------------------!
-   ! initial configuration !
-   !-----------------------!
-   
-   error       = .false.
-   not_conv    = .true. 
-   defined     = .false.
-   iterative   = .true.
-   verbose     = .false.
 
+   !> if sparse
+   logical :: sparse
+
+   !> if NaN
+   logical :: NaN_
+
+   !> if debug mode
+   logical :: debug
+
+!---------------------------------------------------!
+!-------------- initial configuration --------------!
+!---------------------------------------------------! 
+
+   debug = verbose .and. ndim < 20
    ! identity matrix !
    identity=0.0_wp
    do i=1,ndim
       identity(i,i) = 1.0_wp
    enddo
 
-   !--------------!
-   ! chempot scan !
-   !--------------!
+!---------------------------------------------------!
+!------------------ chempot scan -------------------!
+!---------------------------------------------------!
 
    ! find optimal chemical potential !
-   chemp: do while (chempot <= upl)
-     
+   chemp: do while (chempot <= upl) 
          
       ! sign(A) ! 
       term1 = chempot * identity
@@ -1967,163 +2102,239 @@ subroutine gcp2_purification(ndim, metric, S, H, chempot, upl, step, P_purified)
       enddo
 
       ! print the normalization !
-      if (verbose) then
+      if (debug) then
          write(out,'(a, 1x, F12.6)') "Gershgorin norm", gersh
          write(out,'(a, 1x, F12.6)') "Frobenuis norm",  frob
       endif
 
       Ascale=min(frob,gersh)
       sign_A=sign_A/Ascale
+
+      ! for debugging !
+      if (debug) &
+         & call print_blowed_matrix(ndim,sign_A,'sign_A')
+
+      ! check sparisty!
+      if (.not. sparse_cli) then
+         call chk_sparsity(ndim,sign_A,verbose,sparse) 
+      else 
+         sparse = .true.
+      endif
       
-      if (iterative) then
+      ! Submatrix method !
+      if(sparse .and. .not.iterative) then
          
-         ! sign iteration (Pade approximation) !
-         pur: do purificator=1,30
-            
-            x2k = matmul(sign_A,sign_A)
-            x4k = matmul(x2k,x2k) 
-            
-            ! (19) !
-            res = 0.125_wp * matmul(sign_A,((15*identity) - (10*x2k) + (3*x4k)))
+         tmp = sign_A
+         call apply_submatrix_method(ndim,tmp,sign_A,verbose,thr)
 
-            ! (16) density matrix!
-            final_ = 0.5 * matmul(metric,matmul((identity-res),metric))
-            
-            PH=matmul(final_,H)
-            
-            band=0.0_wp
-
-            do ic=1,ndim
-               do jc=1, ndim
-                  
-                  ! band-structure energy !
-                  if (ic == jc) then
-                     band=band+PH(ic,jc)
-                  endif
-
-                  ! NaN present !
-                  if (ieee_is_NaN(res(ic,jc))) then
-                     error=.true.
-                     exit pur
-                  endif
-
-               enddo
-            enddo
-            
-            if (.not.defined) then
-               
-               if (purificator>1) then
-                  if (abs(norm2(res)-norm) <1.0E-5) then
-                     conv=.true.
-                     iter=purificator
-                     exit pur
-                  else
-                     norm=norm2(res)
-                  endif
-               else
-                  norm=norm2(res)
-               endif
-            
-            else 
-
-               if (purificator==1) write(6,'(a)') "Purification loop"
-               
-               ! get number of electrons !  
-               nel=2.0*check_el2(ndim, res, identity)
-                
-               write(*,108) "chemical potential = ", chempot, ", iterations = ", purificator, ", electrons = ", nel ,", Band-str E = ", band,", norm2=", norm2(res)
-               108 format(a,F16.9,a,I0,a,F14.9,a,F14.9,a,F14.9)
-               110 format(a,I0,a,F14.9,a,F14.9,a,F14.9)
-            endif
-            
-            sign_A=res
-         
-            if (verbose .and. defined) then
-               call print_blowed_matrix(ndim,final_,'pur')
-            endif
-
-         enddo pur 
-         
-         ! printout !
-         if (.not.defined) then
-            if (error) then
-               write(*,104) "chemical potential = ", chempot, ', NaN = ', error
-               104 format(a,F14.5,a,l)
-            else 
-               if (conv) then
-                  nel=2.0*check_el2(ndim, res, identity)
-                  write(*,102) "chemical potential = ", chempot, ", iterations = ", iter, ", electrons = ", nel ,", Band-str E = ", band*2
-                  102 format(a,F14.9,3x,a,I0,3x,a,F14.9,3x, a,F14.9 )
-               else
-                  write(*,103) "chemical potential = ", chempot, ', converged = ', conv
-                  103 format(a,F14.5,a,l)
-               endif
-            endif
-         endif
-
- 
-      ! (17) diagonalization !
+         ! for debugging !
+         if (debug) &
+            & call print_blowed_matrix(ndim,sign_A,'after sub')
+      
+      ! Dense matrix case !
       else
 
-         call eigendecompostion(ndim, sign_A, eigvec, eigval)
-         
-         eigval2 = 0.0_wp
-         
-         ! signum() !
-         do i = 1, ndim
-            if (abs(eigval(i)) < 0.1E-10_wp) then
-               eigval2(i,i) = 0.0_wp
-            else 
-               if (eigval(i) > 0.0) then 
-                  eigval2(i,i) = 1.0_wp 
-               else 
-                  eigval2(i,i) = -1.0_wp 
-               endif
-            endif
-         enddo
-         
-         sign_A = matmul(eigvec,matmul(eigval2,transpose(eigvec)))
-         nel=check_el2(ndim, sign_A, identity)
-         
-         ! (16) density matrix!
-         final_ = 0.5 * matmul(metric,matmul((identity-sign_A),metric))
-         
-         ! band-structure energy !
-         PH=matmul(final_,H)   
-         band=0.0_wp
-         do ic=1,ndim
-            band=band+PH(ic,ic)
-         enddo
- 
-         write(*,112) "chemical potential = ", chempot, " electrons = ", nel*2, " band str E = ", band*2
-         112  format(a, f14.9, 3x, a, f9.6, 3x, a, f14.6)
-
-         if (verbose) then
-            call print_blowed_matrix(ndim,final_,'pur')
+         if (iterative) then
+            call sign_iterative(ndim,chempot,sign_A,H,metric,identity,cycle_,fix,final_,conv)                     
+         else
+            call sign_diagonalization(ndim,sign_A,H,identity,verbose,.false.)
          endif
-         
+      
       endif
-
+         
+      ! construct density matrix !
+      call sign_density(ndim,final_, sign_A, identity, metric, NaN_)
+      
+      ! print iterarion summary !
+      call print_summary(ndim,chempot,sign_A,final_,H,identity,iterative,&
+                              &  NaN_, conv)
+      
+      ! exit if chempot is user-fix !
+      if (fix) exit chemp
+      
       ! next iteration parameters !
       chempot=chempot+step
-      error=.false.
-      conv=.false.
-      
-      ! exit if chempot is user-defined !
-      if (defined) exit chemp
    
+      stop   
    enddo chemp
+   P_purified = final_
+
+end subroutine sign_purification
+
+!> iterative purification of sign matrix
+subroutine sign_iterative(ndim, chempot, sign_A, H, metric, identity, cycle_, fix, final_, conv)
+
+   use iso_fortran_env, only : wp => real64, out => output_unit
+   implicit none
+
+   !> number of basis functions
+   integer, intent(in) :: ndim
    
-   P_purified = 2.0*final_
+   !> chemical potential
+   real(wp), intent(in) :: chempot
 
-
-end subroutine gcp2_purification
-
-!> grand-canonical purification, v1
-subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl, step, P_purified)
+   !> sign matrix
+   real(wp), intent(inout) :: sign_A(ndim,ndim)
    
+   !> hamiltonian
+   real(wp), intent(in) :: H(ndim,ndim)
+
+   !> metric
+   real(wp), intent(in) :: metric(ndim,ndim)
+
+   !> identity matrix
+   real(wp), intent(in) :: identity(ndim,ndim)
+
+   !> number of cycles
+   integer, intent(in) :: cycle_
+
+   !> if fixed mode
+   logical, intent(in) :: fix
+   
+   !> density matrix
+   real(wp), intent(out) :: final_(ndim,ndim)
+   
+   !> convergence
+   logical, intent(out) :: conv
+
+!---------------------------------------------------!
+   !> iterator
+   integer :: purificator
+   
+   !> temporary matrices
+   real(wp), dimension(ndim,ndim) :: x2k, x4k
+   real(wp) :: norm
+
+   !> if NaN
+   logical :: NaN_
+
+   conv=.false.
+
+   ! Pade approximation !
+   pur: do purificator=1, cycle_
+                  
+      x2k = matmul(sign_A,sign_A)
+      x4k = matmul(x2k,x2k) 
+      
+      sign_A = 0.125_wp * matmul(sign_A,((15*identity) - (10*x2k) + (3*x4k)))
+
+      call sign_density(ndim,final_, sign_A, identity, metric, NaN_) ! create density matrix from sign matrix
+      if (NaN_) exit pur ! exit the current loop if NaN is found
+
+      ! convergence check ! 
+      if (purificator>1) then
+         if (abs(norm2(sign_A)-norm) < 1.0e-5) then
+            conv=.true.
+            write(out,'(2x,a,I0)') "cycle number: ", purificator
+            exit pur
+         else
+            norm=norm2(sign_A)
+         endif
+      else
+         norm=norm2(sign_A)
+      endif
+
+      ! printout for fix modus !
+      if (fix) then
+
+         if (purificator==1) &
+            write(out,'(2x,a)') "_ITERATIVE PURIFICATION_" 
+         
+         call print_summary(ndim,chempot,sign_A,final_,H,identity,.true.,NaN_,.true.)
+         
+         if(purificator==cycle_) &
+            write(out,'(2x,a,I0)') "cycle number: ", purificator
+      endif
+
+   enddo pur 
+
+end subroutine sign_iterative
+
+!> construct density matrix from sign matrix
+subroutine sign_density(ndim, P, sign_A, identity, metric, NaN_)
+
    use ieee_arithmetic, only : ieee_is_NaN
    use iso_fortran_env, only : wp => real64
+   implicit none
+
+   !> number of basis functions
+   integer, intent(in) :: ndim
+
+   !> density matrix
+   real(wp), intent(out) :: P(ndim,ndim)
+
+   !> sign matrix
+   real(wp), intent(in) :: sign_A(ndim,ndim)
+
+   !> identity matrix
+   real(wp), intent(in) :: identity(ndim,ndim)
+
+   !> metric
+   real(wp), intent(in) :: metric(ndim,ndim)
+
+   !> NaN
+   logical, intent(out) :: NaN_
+   
+
+   ! (16) density matrix !
+   P = 0.5_wp * matmul(metric,matmul((identity-sign_A),metric))
+   NaN_ = any((ieee_is_NaN(P)))
+      
+end subroutine sign_density
+
+!> purification of the sign matrix via diagonalization
+subroutine sign_diagonalization(ndim, sign_A, verbose)
+
+   use iso_fortran_env, only : wp => real64, out => output_unit
+   implicit none
+
+   !> number of basis functions
+   integer, intent(in) :: ndim
+
+   !> sign matrix
+   real(wp), intent(inout) :: sign_A(ndim,ndim)
+
+   !> verbosity
+   logical, intent(in) :: verbose   
+
+   !> eigenvectors
+   real(wp) :: eigvec(ndim,ndim)
+
+   !> eigenvalues
+   real(wp) :: eigval(ndim), eigval2(ndim,ndim)
+
+   !> temporary vars
+   integer :: i
+
+
+   call eigendecompostion(ndim, sign_A, eigvec, eigval)
+            
+   eigval2 = 0.0_wp
+   
+   ! signum() !
+   do i = 1, ndim
+      if (abs(eigval(i)) < 0.1E-10_wp) then
+         eigval2(i,i) = 0.0_wp
+      else 
+         if (eigval(i) > 0.0) then 
+            eigval2(i,i) = 1.0_wp 
+         else 
+            eigval2(i,i) = -1.0_wp 
+         endif
+      endif
+   enddo
+   
+   ! TODO: change to dgemm !
+   sign_A = matmul(eigvec,matmul(eigval2,transpose(eigvec)))
+
+end subroutine sign_diagonalization
+
+!> grand-canonical purification
+subroutine gcp_purification(ndim, metric, S, H, hmax, hmin, chempot, &
+      & upl, step, P_purified, cycle_, fix, verbose)
+   
+   use ieee_arithmetic, only : ieee_is_NaN
+   use iso_fortran_env, only : wp => real64, out => output_unit 
 
    !> number of basis functions
    integer, intent(in) :: ndim
@@ -2133,9 +2344,6 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
 
    !> metric (S version)
    real(wp), intent(in) :: metric(ndim,ndim)
-   
-   !> ptb density matrix
-   real(wp), intent(in) :: P_ptb(ndim,ndim)
    
    !> hamiltonian matrix
    real(wp), intent(in) :: H(ndim,ndim)
@@ -2149,12 +2357,22 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
    !> chemical potential
    real(wp), intent(inout) :: chempot
    
-   !> stepsize b/n iterations
+   !> step size
    real(wp), intent(in) :: step   
 
-   !> purified density matrix 
+   !> purified density 
    real(wp), intent(out) :: P_purified(ndim,ndim)
 
+   !> max purification number
+   integer, intent(in) :: cycle_
+
+   !> if chempot user-defined
+   logical, intent(in) :: fix
+
+   !> printlevel
+   logical, intent(in) :: verbose
+
+!----------------------------------------------------------
    
    !> iterators
    integer :: num, purificator, i, j, ic, jc, iter
@@ -2189,36 +2407,19 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
    !> P*H
    real(wp) :: PH(ndim,ndim)
    
-   !> initial guess = PTB density
-   logical :: is_ptb
-   
-   !> if NaN
+   !> NaN catch
    logical :: error
    
    !> if converged
    logical :: conv
    
-   !> to ovepass convergence criterium
-   logical :: not_conv
    
-   !> if certain density should be tested inidividually
-   logical :: defined
+!-----------------------! 
+! initial configuration !
+!-----------------------! 
    
-   !> printout level
-   logical :: verbose
-
-   
-   !-----------------------! 
-   ! initial configuration !
-   !-----------------------! 
-   
-   error    = .false.
-   not_conv = .true. 
-   is_ptb   = .false.
-   defined  = .false.
-   verbose  = .false. 
-
-   if (.not.defined) is_ptb = .false.
+   error = .false.
+   conv  = .false. 
 
    ! construct identity !
    identity =0.0_wp
@@ -2226,50 +2427,40 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
       identity(i,i) = 1.0_wp
    enddo
 
-   !--------------!
-   ! chempot scan !
-   !--------------!
-   
+!--------------!
+! chempot scan !
+!--------------!
+
    chemp: do while (chempot <= upl)
    
-     
-      ! PTB intial guess !
-      if (is_ptb) then
-         
-         P0=P_ptb
-      
       ! construct initial guess !   
-      else 
-
-         ! (11a) !
-         term1 = chempot*metric
-         term2 = matmul(H,metric)
-         term3 = matmul(metric,term2)
-         term4 = term1 - term3            
-         
-         ! frobenius norm !
-         frob=sqrt(sum(term4**2))
+      ! (11a) !
+      term1 = chempot*metric
+      term2 = matmul(H,metric)
+      term3 = matmul(metric,term2)
+      term4 = term1 - term3            
       
-         ! gershgorin norm !
-         gersh=0.0_wp
-         do i=1,ndim
-            gersh=max(gersh,sum(abs(term4(:,i))))
-         enddo
-       
-         ! print norms if verbose !
-         if (verbose) then
-            print *, "Gershgorin Norm", gersh
-            print *, "Frobenius Norm", frob
-         endif
-
-         alpha=1.0_wp/min(gersh,frob)
-
-         term5 = alpha * 0.5 * term4   ! scaling !
-         P0 = term5 + 0.5 * metric     ! shift !
+      ! frobenius norm !
+      frob=sqrt(sum(term4**2))
    
-      endif 
+      ! gershgorin norm !
+      gersh=0.0_wp
+      do i=1,ndim
+         gersh=max(gersh,sum(abs(term4(:,i))))
+      enddo
       
-      pur: do purificator=1,100
+      ! print norms !
+      if (verbose) then
+         write(out,'(2x,a,f14.9)'), "Gershgorin Norm  = ", gersh
+         write(out,'(2x,a,f14.9,\)'), "Frobenius Norm   = ", frob
+      endif
+
+      alpha=1.0_wp/min(gersh,frob)
+
+      term5 = alpha * 0.5 * term4   ! scaling !
+      P0 = term5 + 0.5 * metric     ! shift !
+      
+      pur: do purificator=1,cycle_
          
          ! McWeeny purification !
          SP=matmul(S,P0)
@@ -2277,31 +2468,33 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
          PSPSP=matmul(PSP,SP)
          res=3*PSP-2*PSPSP
 
-         ! band str energy !
+         ! band-str energy !
          PH=matmul(2.0_wp*res,H)         
          band=0.0_wp
+         
+         ! NaN catch !
          do ic=1,ndim
             do jc=1, ndim
+               
+               ! if NaN !
+               if (ieee_is_NaN(res(ic,jc))) then
+                  error=.true.
+                  exit pur
+               endif
                
                ! band-structure energy !
                if (ic == jc) then
                   band=band+PH(ic,jc)
                endif
 
-               ! if NaN !
-               if (ieee_is_NaN(res(ic,jc))) then
-                  error=.true.
-                  exit pur
-               endif
-
             enddo
          enddo
          
-         if (.not.defined) then
+         if (.not.fix) then
             
             if (purificator>1) then 
 
-               if (abs(norm2(res)-norm)<1.0E-5_wp) then
+               if (abs(norm2(res)-norm)<1.0E-6_wp) then
                   conv=.true.
                   iter=purificator
                   exit pur
@@ -2310,27 +2503,16 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
                endif
 
             else
-               norm=norm2(res)
-               
+               norm=norm2(res)               
             endif
          
          else
             
             nel=check_electrons(ndim,S,2.0_wp*res)
-            
-            if (is_ptb) then
-            
-               write(*,110) "iterations = ", purificator, ", electrons = ", nel ,", Band-str E = ", band,", norm2=", norm2(res)
-            
-            else 
-               
-               if (purificator==1) write(*,'(a)') "Purification for defined density"
-               write(*,108) "chemical potential = ", chempot, ", iterations = ", purificator, ", electrons = ", nel ,", Band-str E = ", band,", norm2=", norm2(res)
-            
-            endif 
-            
-            108 format(a,F16.9,a,I0,a,F14.9,a,F14.9,a,F14.9)
-            110 format(a,I0,a,F14.9,a,F14.9,a,F14.9)
+
+            if (purificator==1) write(*,'(a)') "Fixed chempot purification"
+            write(out,111) "chempot = ", chempot, ", iterations = ", purificator, ", electrons = ", nel ,", Band-str E = ", band,", norm2=", norm2(res)
+            111 format(a,F14.9,a,I0,a,F14.9,a,F14.9,a,F14.9)
          
          endif
          
@@ -2339,18 +2521,18 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
       enddo pur 
 
 
-      if (.not.defined) then
+      if (.not.fix) then
          if (error) then
-            write(*,104) "chemical potential = ", chempot, ', NaN = ', error
-            104 format(a,F14.5,a,l)
+            write(out,104) "chempot = ", chempot, ', NaN '
+            104 format(a,F14.9,a)
          else 
             if (conv) then
                nel=check_electrons(ndim,S,res)
-               write(*,102) "chemical potential = ", chempot, ", iterations = ", iter, ", electrons = ", nel*2.0_wp ,", Band-str E = ", band
-               102 format(a,F14.9,a,I0,a,F14.9,a,F14.9 )
+               write(out,112) "chempot = ", chempot, ", iterations = ", iter, ", electrons = ", nel*2.0_wp ,", Band-str E = ", band
+               112 format(a,F14.9,a,I0,a,F14.9,a,F14.9)
             else
-               write(*,103) "chemical potential = ", chempot, ', converged = ', conv
-               103 format(a,F14.5,a,l)
+               write(out,113) "chempot = ", chempot, ', not converged '
+               113 format(a,F14.5,a)
             endif
          endif
       endif
@@ -2361,7 +2543,7 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
       conv=.false.
       
       ! exit after 1 iter if density is given !
-      if (defined) exit chemp
+      if (fix) exit chemp
    
    enddo chemp
 
@@ -2370,10 +2552,10 @@ subroutine gcp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, chempot, upl,
 end subroutine gcp_purification
 
 
-subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
+subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified, cycle_, ver)
    
    use ieee_arithmetic, only : ieee_is_NaN
-   use iso_fortran_env, only : wp => real64 
+   use iso_fortran_env, only : wp => real64, out => output_unit
    implicit none 
    
    !> dimensionality (nbf)
@@ -2396,7 +2578,14 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    
    !> purified density
    real(wp), intent(out) :: P_purified(ndim,ndim)
+
+   !> number of cycles
+   integer, intent(in) :: cycle_
    
+   !> verbosity
+   logical, intent(in) :: ver
+
+!---------------------------------------------------------
    
    !> iterators
    integer :: num, purificator, i, j, iter
@@ -2449,9 +2638,6 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    !> identity matrix
    real(wp) :: identity(ndim,ndim)
    
-   !> if PTB density used
-   logical :: is_ptb
-   
    !> if NAN present
    logical :: error
    
@@ -2461,8 +2647,6 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    !> if frobenius/gershgorin norm should be used
    logical :: frob_norm
    
-   !> if printout density every iteration
-   logical :: verbose
    
    !-----------------------!
    ! INITIAL CONFIGURATION !
@@ -2470,8 +2654,6 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    
    frob_norm   = .true.
    error       = .false.
-   is_ptb      = .false. 
-   verbose     = .true.
    
    N_e = 14.0_wp
    N   = ndim
@@ -2479,14 +2661,15 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    ! chempot !
    tr  = 0.0_wp
    h_min  = 0.0_wp
+   h_max  = 0.0_wp
    do i=1,ndim
       tr = tr + H(i,i)
       buff_min = H(i,i)
       buff_max = H(i,i)
       do j=1,ndim
          if (i.ne.j) then
-            buff_min = buff_min - H(i,j)
-            buff_max = buff_max + H(i,j)
+            buff_min = buff_min - abs(H(i,j))
+            buff_max = buff_max + abs(H(i,j))
          endif
       enddo
       if (i.eq.1) then
@@ -2494,7 +2677,7 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
          h_max = buff_max
       else 
          if (buff_max > h_max) h_max = buff_max
-         if (buff_min < h_max) h_min = buff_min
+         if (buff_min < h_min) h_min = buff_min
       endif
 
    enddo
@@ -2502,14 +2685,13 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
 
    chempot = tr / N
 
-   if (verbose) write(*,"(a, 2x, F14.6)") "The chemical potential", chempot
-   
-   if (verbose) write(*,"(a, 2x, F14.6)") "h_max ", hmax
-   if (verbose) write(*,"(a, 2x, F14.6)") "h_min ", hmin
-   if (verbose) write(*,"(a, 2x, F14.6)") "h_max ", h_max
-   if (verbose) write(*,"(a, 2x, F14.6)") "h_min ", h_min
-
-   stop
+   if (ver) then 
+      write(out,"(a, 2x, F14.6)") "Chemical potential", chempot   
+      write(out,"(a, 2x, F14.6)") "hmax ", hmax
+      write(out,"(a, 2x, F14.6)") "hmin ", hmin
+      write(out,"(a, 2x, F14.6)") "h_max ", h_max
+      write(out,"(a, 2x, F14.6)") "h_min ", h_min
+   endif
 
    identity = 0.0_wp
    do i=1, ndim
@@ -2520,71 +2702,59 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
    ! CALCULATION !
    !-------------!
    
-   ! initial guess !   
-   if (.not.is_ptb) then
-
-            
-      if (frob_norm) then
-         
-         term1 = chempot * metric
-         
-         term2 = matmul(metric,H)
-         term2 = matmul(term2,metric)
-         
-         term3 = term1 - term2
-         
-         ! frobenius norm !
-         frob=sqrt(sum(term3**2))
-
-         ! gershgorin norm !
-         gersh=0.0_wp
-         do i=1,ndim
-            gersh=max(gersh,sum(abs(term3(:,i))))
-         enddo
-         
-         ! print norms if verbose !
-         if (verbose) then
-            print *, "Gershgorin Norm", gersh
-            print *, "Frobenius Norm", frob
-         endif
-         
-         alpha=N_e/min(gersh,frob)
-
-         term4 =  metric * N_e
-         !p0 = term4 / ndim
-         p0 = ( (term3 * alpha)  + term4 ) / N 
-
-      else
-
-     
-         hmin1 = ( N - N_e) / (chempot - hmin)
-         hmax1 =  N_e / (hmax - chempot)
-         
-         alpha = min(hmin1,hmax1)
-         
-         term1 = alpha * chempot * metric
-         term2 = matmul(metric,H)
-         term2 = matmul(term2,metric) * alpha
-         term3 = matmul(identity,metric) * N_e
-         term4 = (term1 - term2 + term3) / N ! 1/N 
-         p0    = term4
+   ! initial guess !            
+   if (frob_norm) then
       
-         
-      endif
-   
-   ! ptb density = initial guess !
-   else
+      term1 = chempot * metric
+      
+      term2 = matmul(metric,H)
+      term2 = matmul(term2,metric)
+      
+      term3 = term1 - term2
+      
+      ! frobenius norm !
+      frob=sqrt(sum(term3**2))
 
-      p0 = p_ptb
+      ! gershgorin norm !
+      gersh=0.0_wp
+      do i=1,ndim
+         gersh=max(gersh,sum(abs(term3(:,i))))
+      enddo
+      
+      ! print norms !
+      if (ver) then
+         write(out, '(2x,a,f14.9)'), "Gershgorin Norm: ", gersh
+         write(out, '(2x,a,f14.9)'), "Frobenius Norm:  ", frob
+      endif
+      
+      alpha=N_e/min(gersh,frob)
+
+      term4 =  metric * N_e    
+      p0 = ( (term3 * alpha)  + term4 ) / N_e
+
+   else
+   
+      hmin1 = ( N - N_e) / (chempot - hmin)
+      hmax1 =  N_e / (hmax - chempot)
+      
+      alpha = min(hmin1,hmax1)
+      
+      term1 = alpha * chempot * metric
+      term2 = matmul(metric,H)
+      term2 = matmul(term2,metric) * alpha
+      term3 = matmul(identity,metric) * N_e
+      term4 = (term1 - term2 + term3) / N_e ! 1/N 
+      p0    = term4 
       
    endif
+   
 
-   print * , "number of electrons: ", check_electrons(ndim,S,p0)
-   if (verbose) call print_blowed_matrix(ndim,p0, "Initial guess")
-   pn = p0 / 2
+   write(out,'(2x,a,f14.9)') , "number of electrons: ", check_electrons(ndim,S,p0)
+   if (ver) call print_blowed_matrix(ndim,p0, "initial guess")
+   pn = p0*2 
 
    ! purification loop !
-   do num=1,100 
+   do num=1, cycle_ 
 
       SP=matmul(S,pn)
       PSP=matmul(pn,SP)
@@ -2616,21 +2786,18 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified)
       
       nel = check_electrons(ndim, S, res)
       if (num==1) write(*,'(a)') "Purification loop"
-      write(*,108) "iterations = ", num, "number of electrons = ", nel, "band-str E = ", bandStrEnergy(ndim,H,res),"norm2=", norm2(res)
-      108 format(a, I0, 3x, a, F14.6, 3x, a, F14.6, 3x, a, F14.6)
+      write(out,114) "iterations = ", num, ", electrons = ", nel, ", band-str E = ", bandStrEnergy(ndim,H,res),", norm2=", norm2(res)
+      114 format(a, I0, a, F14.6, a, F14.6, a, F14.6)
       
-      if (verbose) then   
+      if (ver) then   
          call print_blowed_matrix(ndim,res,"P")
-         write(*,'(a,2x,F14.6)') "The cn factor", cn
+         write(out,'(a,2x,f14.6)') "The cn factor", cn
       endif
       
       pn=res
    
    enddo
     
-   
-   stop
-   
    P_purified = pn
 
 end subroutine cp_purification
@@ -2967,6 +3134,218 @@ subroutine eigendecompostion(ndim,matrix,eigvec,eigval)
    endif
 
 end subroutine eigendecompostion
+
+!> submatrix method
+subroutine apply_submatrix_method(ndim, input_matrix, result, verbose, thr)
+   
+   use iso_fortran_env, only : wp => real64, int => int64, out => output_unit
+   implicit none
+   integer, intent(in) :: ndim
+   real(wp), dimension(ndim,ndim), intent(in) :: input_matrix
+   real(wp), dimension(ndim,ndim), intent(out) :: result
+   logical, intent(in) :: verbose
+   real(wp), intent(in) :: thr
+
+   integer(int) :: N(2), dim, i, j, k, nonzero, result_col
+   real(wp), dimension(:,:), allocatable :: submatrix, submatrix_result
+   integer(int), dimension(:), allocatable :: indices
+   character(len=20), allocatable :: msg
+   logical :: debug
+   
+   debug = ndim < 20 .and. verbose
+   N = shape(input_matrix)
+   result=0.0_wp
+
+   write(out,'(a,2x,i0)') "Applying submatrix method to matrix of dimension", ndim   
+
+   ! We generate and process a submatrix for each column i of the input matrix
+   do i = 1, ndim
+
+      ! The size of the submatrix is determined by the number of nonzero elements
+      !  in the inducing column i.
+      nonzero = count(abs(input_matrix(:,i)) > thr) ! Criteruim ???
+      allocate(submatrix(nonzero, nonzero), submatrix_result(nonzero, nonzero), &
+               &indices(nonzero))!, eigvec(nonzero,nonzero), eigval(nonzero))
+
+
+      ! We need to determine which elements in that column are nonzero because
+      ! they determine the elements copied into the submatrix.
+      k = 1
+      do j = 1, ndim
+         if (abs(input_matrix(j,i)) > thr) then
+
+            indices(k) = j
+
+            ! We should take note which column in the submatrix contains elements from the i'th column
+            ! of the original matrix because that will be our result column.
+            ! Note: Elements on the diagonal of the input matrix always have to be nonzero!
+            if (j == i) then
+               result_col = k
+            end if
+            
+            k = k+1
+
+         end if
+
+      end do
+      
+      ! Building the submatrix now just means selecting the right rows and columns of the original matrix.
+      submatrix = input_matrix(indices,indices)
+      
+      ! print submatrices if it is small enough !
+      if (debug) then
+         write(out,'(a,x,i0)') "Submatrix", i
+         call print_blowed_matrix(nonzero,submatrix)
+         write(out, *)
+      end if
+
+
+      ! Apply the function of interest to the submatrix.
+      call sign_diagonalization(nonzero,submatrix,verbose)
+      
+      ! print submatrices if it is small enough !
+      if (debug) then
+         write(out,'(a,x,i0)') "diagonalized submatrix", i
+         call print_blowed_matrix(nonzero,submatrix)
+         write(out, *)
+      end if
+
+      ! Now we copy the matching result column into the approximate result matrix.
+      result(indices,i) = submatrix(:,result_col)
+
+      deallocate(submatrix, submatrix_result, indices)
+   end do
+
+end subroutine apply_submatrix_method
+
+!> check if matrix should be decomposed 
+subroutine chk_sparsity(ndim,A,verbose,sparse)
+
+   use ISO_FORTRAN_ENV, only : wp => real64, out => output_unit
+   implicit none
+  
+   !> thresholds 
+   real(wp), parameter :: thr = 1.0e-5_wp
+   real(wp), parameter :: spars = 50.0_wp
+   
+   !> dimension
+   integer, intent(in) :: ndim
+
+   !> matrix
+   real(wp), dimension(ndim,ndim), intent(in) :: A
+
+   !> print level
+   logical, intent(in) :: verbose
+
+   !> if sparse
+   logical, intent(out) :: sparse
+
+   !> sparsity ratio
+   real(wp) :: ratio
+   
+   !> temp
+   integer :: i, nonzero
+
+   !> max number of nonzero elements in a column
+   real(wp) :: max
+
+   ! check overall sparsity !
+   ratio = count(abs(A(:,:)) < thr) 
+   ratio = ratio / (ndim**2) * 100.0_wp
+   if (verbose) &
+      write(out,'(a, 1x, F12.1, a)') "Sparsity ratio:", ratio , "%"
+
+   ! check sparsity of columns !
+   max = 0
+   do i=1,ndim
+      nonzero = count(abs(A(:,i)) > thr)
+      ! swap if nonzero is larger
+      if (nonzero > max) max = nonzero
+   enddo
+   max = max / ndim * 100.0_wp
+   if(verbose) &
+      write(out,'(a, 1x, F12.1, a)') "(max nonzero column / dimension) ratio ", max, "%"
+   
+   if (ratio > spars .and. spars > max ) then
+      sparse = .true.
+   else 
+      sparse = .false.
+   endif
+
+end subroutine chk_sparsity
+
+subroutine print_summary(ndim, chempot, sign_A, P, H, identity, iterative, NaN_, conv)
+   
+   use iso_fortran_env, only : wp => real64, out => output_unit
+   implicit none
+
+   !> dimension
+   integer, intent(in) :: ndim
+
+   !> chemical potential
+   real(wp), intent(in) :: chempot
+   
+   !> sign function
+   real(wp), intent(in) :: sign_A(ndim,ndim)
+
+   !> density matrix
+   real(wp), intent(in) :: P(ndim,ndim)
+
+   !> hamiltonian
+   real(wp), intent(in) :: H(ndim,ndim)
+
+   !> identity matrix
+   real(wp), intent(in) :: identity(ndim,ndim)
+
+   !> band-structure energy
+   logical, intent(in) :: NaN_
+
+   !> if converged
+   logical, intent(in) :: conv
+
+   !> if iterative
+   logical, intent(in) :: iterative
+
+   !> band-structure energy
+   real(wp) :: PH(ndim,ndim), band   
+   
+   !> number of electrons
+   real(wp) :: check_el2,nel
+
+   !> temp
+   integer :: i
+
+   !> format holder
+   character(len=*), parameter :: fmt_conv = '(2x,a,f14.9,a,f14.9,a,f14.9)'
+   character(len=*), parameter :: fmt_not_conv = '(2x,a,F14.9,a)'
+
+   if (NaN_) then
+      write(out,'(a,f9.4,a)') "NaN in the density matrix (", chempot, ")"
+      return
+   endif
+
+   PH=matmul(P,H)  ! TODO: dgemm  
+   band=0.0_wp
+   do i=1,ndim
+      band=band+PH(i,i)
+   enddo
+
+   nel = 2.0_wp * check_el2(ndim,sign_A,identity)
+   
+   if(.not.iterative) then
+      write(out,'(a,f9.4,a,f9.4,a,f9.4)') &
+         "chempot = ", chempot, ", electrons = ",nel, ", band-str E = ", band*2
+   else
+      if (conv) then
+         write(out,fmt_conv) "chempot = ", chempot, ", electrons = ", nel ,", Band-str E = ", band*2
+      else
+         write(out,fmt_not_conv) "chempot = ", chempot, ', not converged'
+      endif
+   endif
+
+   write(out, *)
+
+end subroutine print_summary
 
 !> the chempot prediction algorithm
 subroutine chempot_scan(ndim,eigvec,eigval2,nel,chempot)

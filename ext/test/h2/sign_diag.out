@@ -1,0 +1,79 @@
+ 
+       ==============================================
+       |                 P T B                      |
+       |                S.Grimme                    |
+       |          Universitaet Bonn, MCTC           |
+       ==============================================
+       Version 3.7, Do 28. Apr 14:28:45 CEST 2022
+ 
+       Cite work conducted with this code as
+       S. Grimme, M. Mueller, A. Hansen, unpublished.
+ 
+ ~/.atompara                                                                    
+  
+          =========================
+          reading ... h2.xyz
+          =========================
+ basis read done.
+ ncao           10
+ nsao           10
+ npr            28
+ basis setup done. Ndim          10
+ coreat            0
+ cncao             0
+ cnsao             0
+ cnpr              0
+ 
+ nalpha            1
+ nbeta             1
+ ntotal            2
+ nopen             0
+cpu  time for startup and initial S    0.02 s
+wall time for startup and initial S    0.00 s
+               -----------------------
+               |      PTB  model      |
+               | SG, MM, AH 2020-2022 |
+               -----------------------
+ prop :           1
+ PA setup with Mull-Loew partitioning   0.333333 ...
+ done.
+EEQ done. sum q :    0.000
+    atom   Zeff  qEEQ  mod   srCN   noHCN   CN(EEQ)
+    1    1  1.0    -0.000   0.000   0.000   0.000
+    2    1  1.0     0.000   0.000   0.000   0.000
+ computing Vecp ...
+ PTB H matrix iteration            1  done. Now diag ...
+----------------------------------------------------------------------
+ PTB normal density:
+  0.527596474787267       0.254922628096307       0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.254922628096307       0.123172821315251     
+
+Number of electrons:       2.000000
+Band structure energy:    -3.386675
+------------------------------------------------------------------------
+
+************************ PURIFICATION *************************
+
+  __SETTINGS__
+  Purification type:                 sign
+  Sign mode:                         diagonalisation
+  Overlap metric (S^metric):         -0.5
+  Purification cycle number:         20
+  Initial chemical potential:        -1.60000000
+  Fixed mode:                         T
+ 
+Applying submatrix method to matrix of dimension  10
+chempot =   -1.6000, electrons =    4.0000, band-str E =   -6.7733
+ 
+----------------------------------------------------------------------
+ Purified density:
+  0.527596474787267       0.254922628096307       0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.254922628096307       0.123172821315251     
+
+Number of electrons:       2.000000
+Band structure energy:    -3.386675
+------------------------------------------------------------------------

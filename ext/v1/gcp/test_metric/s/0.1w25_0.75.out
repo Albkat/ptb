@@ -1,0 +1,568 @@
+ 
+       ==============================================
+       |                 P T B                      |
+       |                S.Grimme                    |
+       |          Universitaet Bonn, MCTC           |
+       ==============================================
+       Version 3.7, Do 28. Apr 14:28:45 CEST 2022
+ 
+       Cite work conducted with this code as
+       S. Grimme, M. Mueller, A. Hansen, unpublished.
+ 
+ ~/.atompara                                                                    
+  
+          =========================
+          reading ... ethan.xyz
+          =========================
+ basis read done.
+ ncao           58
+ nsao           56
+ npr           156
+ basis setup done. Ndim          56
+ coreat            2
+ cncao             2
+ cnsao             2
+ cnpr             12
+ 
+ nalpha            7
+ nbeta             7
+ ntotal           14
+ nopen             0
+cpu  time for startup and initial S    0.03 s
+wall time for startup and initial S    0.00 s
+               -----------------------
+               |      PTB  model      |
+               | SG, MM, AH 2020-2022 |
+               -----------------------
+ prop :           1
+ PA setup with Mull-Loew partitioning   0.333333 ...
+ done.
+EEQ done. sum q :    0.000
+    atom   Zeff  qEEQ  mod   srCN   noHCN   CN(EEQ)
+    1    6  4.0    -0.081   3.974   0.405   4.014
+    2    6  4.0    -0.081   3.974   0.405   4.014
+    3    1  1.0     0.027   1.026   0.004   1.005
+    4    1  1.0     0.027   1.026   0.004   1.005
+    5    1  1.0     0.027   1.026   0.004   1.005
+    6    1  1.0     0.027   1.026   0.004   1.005
+    7    1  1.0     0.027   1.026   0.004   1.005
+    8    1  1.0     0.027   1.026   0.004   1.005
+ computing Vecp ...
+ PTB H matrix iteration            1  done. Now diag ...
+------------------------------------------------------------------------
+ Overlap:
+   1.00000000000000       0.896725798633308       0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+------------------------------------------------------------------------
+ Hamiltonian:
+  -2.98256946945887       -3.61449383071289      -0.140240164649803     
+  2.762640747278056E-007  3.610034298162645E-007 -0.134480269622523     
+ -1.247450995833788E-007  2.024263494604384E-007  2.421408025064087E-002
+ -1.397976105077280E-002 -8.506384574502590E-007  2.009227451083007E-008
+------------------------------------------------------------------------
+ Density matrix:
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+------------------------------------------------------------------------
+ PSP:
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+ 
+***************************** AFTER SOLVE2 *****************************
+------------------------------------------------------------------------
+ Overlap:
+   1.00000000000000       0.896725798633308       0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+------------------------------------------------------------------------
+ Hamiltonian:
+  -2.98256946945887       -3.61449383071289      -0.140240164649803     
+  2.762640747278056E-007  3.610034298162645E-007 -0.134480269622523     
+ -1.247450995833788E-007  2.024263494604384E-007  2.421408025064087E-002
+ -1.397976105077280E-002 -8.506384574502590E-007  2.009227451083007E-008
+------------------------------------------------------------------------
+ Density matrix:
+  0.852798586490095       0.155626532079162       1.053010600971827E-002
+ -2.116567128307931E-009  4.383332384591223E-007  8.151640034540756E-003
+  5.087997836098764E-007  6.189927291793698E-007 -1.492580467102770E-002
+  8.617861723803841E-003 -5.127013317760393E-007 -3.159234388076951E-007
+------------------------------------------------------------------------
+ PSP:
+  0.852798586490094       0.155626532079162       1.053010600971828E-002
+ -2.116567128539800E-009  4.383332383719671E-007  8.151640034540759E-003
+  5.087997836015042E-007  6.189927291647823E-007 -1.492580467102770E-002
+  8.617861723803841E-003 -5.127013317506068E-007 -3.159234388171762E-007
+ 
+chemical potential = -500.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811964
+chemical potential = -499.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811943
+chemical potential = -499.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811922
+chemical potential = -498.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811902
+chemical potential = -498.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811882
+chemical potential = -497.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811863
+chemical potential = -497.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811844
+chemical potential = -496.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811826
+chemical potential = -496.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811808
+chemical potential = -495.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811791
+chemical potential = -495.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811774
+chemical potential = -494.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811758
+chemical potential = -494.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811742
+chemical potential = -493.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811727
+chemical potential = -493.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811712
+chemical potential = -492.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811697
+chemical potential = -492.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811683
+chemical potential = -491.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811669
+chemical potential = -491.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811656
+chemical potential = -490.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811643
+chemical potential = -490.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811630
+chemical potential = -489.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811617
+chemical potential = -489.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811606
+chemical potential = -488.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811594
+chemical potential = -488.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811583
+chemical potential = -487.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811572
+chemical potential = -487.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811561
+chemical potential = -486.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811550
+chemical potential = -486.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811540
+chemical potential = -485.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811530
+chemical potential = -485.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811521
+chemical potential = -484.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811512
+chemical potential = -484.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811503
+chemical potential = -483.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811494
+chemical potential = -483.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811485
+chemical potential = -482.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811477
+chemical potential = -482.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811469
+chemical potential = -481.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811461
+chemical potential = -481.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811454
+chemical potential = -480.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811447
+chemical potential = -480.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811440
+chemical potential = -479.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811433
+chemical potential = -479.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811426
+chemical potential = -478.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811419
+chemical potential = -478.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811413
+chemical potential = -477.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811407
+chemical potential = -477.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811401
+chemical potential = -476.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811395
+chemical potential = -476.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811390
+chemical potential = -475.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811384
+chemical potential = -475.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811379
+chemical potential = -474.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811374
+chemical potential = -474.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811369
+chemical potential = -473.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811364
+chemical potential = -473.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811360
+chemical potential = -472.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811355
+chemical potential = -472.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811351
+chemical potential = -471.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811347
+chemical potential = -471.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811343
+chemical potential = -470.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811339
+chemical potential = -470.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811335
+chemical potential = -469.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811331
+chemical potential = -469.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811327
+chemical potential = -468.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811324
+chemical potential = -468.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811321
+chemical potential = -467.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811317
+chemical potential = -467.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811314
+chemical potential = -466.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811311
+chemical potential = -466.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811308
+chemical potential = -465.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811305
+chemical potential = -465.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811303
+chemical potential = -464.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811300
+chemical potential = -464.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811297
+chemical potential = -463.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811295
+chemical potential = -463.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811292
+chemical potential = -462.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811290
+chemical potential = -462.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811288
+chemical potential = -461.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811286
+chemical potential = -461.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811283
+chemical potential = -460.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811281
+chemical potential = -460.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811279
+chemical potential = -459.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811277
+chemical potential = -459.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811276
+chemical potential = -458.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811274
+chemical potential = -458.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811272
+chemical potential = -457.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811270
+chemical potential = -457.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811269
+chemical potential = -456.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811267
+chemical potential = -456.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811266
+chemical potential = -455.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811264
+chemical potential = -455.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811263
+chemical potential = -454.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811261
+chemical potential = -454.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811260
+chemical potential = -453.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811259
+chemical potential = -453.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811258
+chemical potential = -452.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811256
+chemical potential = -452.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811255
+chemical potential = -451.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811254
+chemical potential = -451.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811253
+chemical potential = -450.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811252
+chemical potential = -450.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811251
+chemical potential = -449.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811250
+chemical potential = -449.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811249
+chemical potential = -448.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811248
+chemical potential = -448.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811248
+chemical potential = -447.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811247
+chemical potential = -447.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811246
+chemical potential = -446.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811245
+chemical potential = -446.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811244
+chemical potential = -445.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811244
+chemical potential = -445.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811243
+chemical potential = -444.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811242
+chemical potential = -444.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811242
+chemical potential = -443.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811241
+chemical potential = -443.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811241
+chemical potential = -442.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811240
+chemical potential = -442.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811239
+chemical potential = -441.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811239
+chemical potential = -441.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811238
+chemical potential = -440.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811238
+chemical potential = -440.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811237
+chemical potential = -439.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811237
+chemical potential = -439.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811237
+chemical potential = -438.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811236
+chemical potential = -438.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811236
+chemical potential = -437.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811235
+chemical potential = -437.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811235
+chemical potential = -436.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811235
+chemical potential = -436.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811234
+chemical potential = -435.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811234
+chemical potential = -435.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811234
+chemical potential = -434.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811233
+chemical potential = -434.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811233
+chemical potential = -433.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811233
+chemical potential = -433.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811232
+chemical potential = -432.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811232
+chemical potential = -432.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811232
+chemical potential = -431.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811232
+chemical potential = -431.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811231
+chemical potential = -430.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811231
+chemical potential = -430.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811231
+chemical potential = -429.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811231
+chemical potential = -429.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811231
+chemical potential = -428.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -428.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -427.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -427.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -426.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -426.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -425.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -425.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -424.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -424.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -423.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -423.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -422.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -422.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -421.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -421.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -420.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -420.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -419.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -419.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -418.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -418.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -417.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -417.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -416.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -416.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -415.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -415.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -414.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -414.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -413.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -413.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -412.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -412.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -411.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -411.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -410.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -410.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -409.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -409.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -408.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -408.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -407.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -407.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -406.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -406.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -405.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -405.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -404.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -404.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -403.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -403.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -402.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -402.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -401.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -401.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -400.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -400.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -399.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -399.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -398.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -398.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -397.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -397.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -396.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -396.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -395.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -395.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -394.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -394.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -393.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -393.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -392.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -392.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -391.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -391.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -390.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -390.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -389.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -389.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -388.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -388.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -387.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -387.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -386.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -386.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -385.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -385.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -384.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -384.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -383.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -383.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -382.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -382.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -381.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -381.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -380.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -380.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -379.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -379.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -378.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -378.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -377.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -377.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -376.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -376.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -375.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -375.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -374.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -374.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -373.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -373.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -372.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -372.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -371.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -371.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -370.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -370.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -369.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -369.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -368.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -368.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -367.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -367.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -366.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -366.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -365.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -365.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -364.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -364.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -363.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -363.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -362.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -362.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -361.500000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -361.000000000, iterations = 15, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -360.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599814792
+chemical potential = -360.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599814660
+chemical potential = -359.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599814532
+chemical potential = -359.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599814408
+chemical potential = -358.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599814289
+chemical potential = -358.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599814173
+chemical potential = -357.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599814062
+chemical potential = -357.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813954
+chemical potential = -356.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813850
+chemical potential = -356.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813749
+chemical potential = -355.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813652
+chemical potential = -355.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813559
+chemical potential = -354.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813469
+chemical potential = -354.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813381
+chemical potential = -353.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813297
+chemical potential = -353.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813216
+chemical potential = -352.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813138
+chemical potential = -352.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599813062
+chemical potential = -351.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812990
+chemical potential = -351.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812919
+chemical potential = -350.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812852
+chemical potential = -350.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812787
+chemical potential = -349.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812724
+chemical potential = -349.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812663
+chemical potential = -348.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812605
+chemical potential = -348.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812549
+chemical potential = -347.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812495
+chemical potential = -347.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812443
+chemical potential = -346.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812392
+chemical potential = -346.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812344
+chemical potential = -345.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812298
+chemical potential = -345.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812253
+chemical potential = -344.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812210
+chemical potential = -344.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812169
+chemical potential = -343.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812129
+chemical potential = -343.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812091
+chemical potential = -342.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812054
+chemical potential = -342.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599812019
+chemical potential = -341.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811985
+chemical potential = -341.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811952
+chemical potential = -340.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811921
+chemical potential = -340.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811890
+chemical potential = -339.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811862
+chemical potential = -339.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811834
+chemical potential = -338.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811807
+chemical potential = -338.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811781
+chemical potential = -337.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811757
+chemical potential = -337.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811733
+chemical potential = -336.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811711
+chemical potential = -336.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811689
+chemical potential = -335.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811668
+chemical potential = -335.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811648
+chemical potential = -334.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811629
+chemical potential = -334.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811611
+chemical potential = -333.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811593
+chemical potential = -333.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811576
+chemical potential = -332.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811560
+chemical potential = -332.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811545
+chemical potential = -331.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811530
+chemical potential = -331.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811516
+chemical potential = -330.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811502
+chemical potential = -330.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811489
+chemical potential = -329.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811477
+chemical potential = -329.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811465
+chemical potential = -328.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811453
+chemical potential = -328.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811443
+chemical potential = -327.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811432
+chemical potential = -327.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811422
+chemical potential = -326.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811413
+chemical potential = -326.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811404
+chemical potential = -325.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811395
+chemical potential = -325.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811387
+chemical potential = -324.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811379
+chemical potential = -324.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811371
+chemical potential = -323.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811364
+chemical potential = -323.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811357
+chemical potential = -322.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811351
+chemical potential = -322.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811344
+chemical potential = -321.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811338
+chemical potential = -321.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811333
+chemical potential = -320.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811327
+chemical potential = -320.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811322
+chemical potential = -319.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811317
+chemical potential = -319.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811312
+chemical potential = -318.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811308
+chemical potential = -318.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811304
+chemical potential = -317.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811300
+chemical potential = -317.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811296
+chemical potential = -316.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811292
+chemical potential = -316.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811289
+chemical potential = -315.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811285
+chemical potential = -315.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811282
+chemical potential = -314.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811279
+chemical potential = -314.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811276
+chemical potential = -313.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811274
+chemical potential = -313.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811271
+chemical potential = -312.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811269
+chemical potential = -312.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811266
+chemical potential = -311.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811264
+chemical potential = -311.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811262
+chemical potential = -310.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811260
+chemical potential = -310.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811258
+chemical potential = -309.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811256
+chemical potential = -309.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811255
+chemical potential = -308.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811253
+chemical potential = -308.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811252
+chemical potential = -307.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811250
+chemical potential = -307.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811249
+chemical potential = -306.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811248
+chemical potential = -306.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811246
+chemical potential = -305.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811245
+chemical potential = -305.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811244
+chemical potential = -304.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811243
+chemical potential = -304.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811242
+chemical potential = -303.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811241
+chemical potential = -303.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811240
+chemical potential = -302.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811239
+chemical potential = -302.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811239
+chemical potential = -301.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811238
+chemical potential = -301.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811237
+chemical potential = -300.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811237
+chemical potential = -300.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811236
+chemical potential = -299.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811235
+chemical potential = -299.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811235
+chemical potential = -298.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811234
+chemical potential = -298.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811234
+chemical potential = -297.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811233
+chemical potential = -297.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811233
+chemical potential = -296.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811232
+chemical potential = -296.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811232
+chemical potential = -295.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811232
+chemical potential = -295.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811231
+chemical potential = -294.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811231
+chemical potential = -294.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811231
+chemical potential = -293.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -293.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -292.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -292.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811230
+chemical potential = -291.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -291.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -290.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -290.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -289.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -289.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811229
+chemical potential = -288.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -288.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -287.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -287.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -286.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -286.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -285.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -285.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -284.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811228
+chemical potential = -284.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -283.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -283.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -282.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -282.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -281.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -281.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -280.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -280.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -279.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -279.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -278.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -278.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -277.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -277.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -276.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -276.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -275.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -275.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -274.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -274.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -273.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -273.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -272.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -272.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -271.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -271.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -270.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -270.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811227
+chemical potential = -269.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -269.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -268.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -268.000000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811226
+chemical potential = -267.500000000, iterations = 14, electrons =   56.000000000, Band-str E = 2087.599811226

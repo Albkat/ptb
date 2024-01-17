@@ -264,7 +264,7 @@ c     convert restricted occ first to alpha/beta
 ! P  dmat
 !ccccccccccccccccccccccccccccccccccccccccccccc
 
-      subroutine dmat(ndim,focc,C,P,snew)
+      subroutine dmat(ndim,focc,C,P)
       use gtb_la, only : la_gemm
       implicit none
       integer ndim
@@ -273,7 +273,6 @@ c     convert restricted occ first to alpha/beta
       real*8 Ctmp(ndim,ndim)
       real*8 iden(ndim,ndim)
       real*8 P(ndim,ndim)
-      real*8,optional :: snew(ndim,ndim)
       integer i,m,var
       real*8,allocatable ::Ptmp(:,:)
       var=0

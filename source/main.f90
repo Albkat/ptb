@@ -8,11 +8,11 @@ program gTB
       use parcom   ! TB method parameters
       use com      ! general stuff         
       use mocom    ! ref MOs for fit and momatch value
-      use dftd4     
+      use dftd4    
 
       use iso_fortran_env, only : wp => real64
       implicit none
-
+      
       real(wp),allocatable :: xyz(:,:),rab(:),z(:), wbo(:,:), cn(:)
       real(wp),allocatable :: psh(:,:),q(:), psh_ref(:,:), q_ref(:), wbo_ref(:,:), qd4(:)
       real(wp),allocatable :: S(:),T(:),P(:),tmpmat(:),F(:),D3(:,:),snew(:,:)
@@ -28,7 +28,7 @@ program gTB
       integer ,allocatable :: dgen(:)
       integer ,allocatable :: ict(:,:)
 
-      integer n
+      integer :: n, leng
       integer ndim
       integer nopen
       integer na,nb,nel,ihomo
@@ -40,7 +40,6 @@ program gTB
       integer i,j,k,l,m,ns,nf,nn,lin,llao(4)
       data llao/1,3,5,7 /
       real(wp) chrg ! could be fractional for model systems
-
       real(wp) t0,t1,w0,w1,t00,w00,ddot
       real(wp) etot,eref,enuc,ekinref,ekin,eve,everef,egtb
       real(wp) norm,ff,f2,f1,x,y,qi,ge,r,etew,edisp,step
@@ -54,6 +53,7 @@ program gTB
       real(wp) floats(10),edum(86)
       real(wp) trans(9,120)
       real(wp),parameter :: zero = 0_wp
+      character(len=:), allocatable :: line
       character*2 asym
       character*80 str(10)
       character*80 atmp,arg1,fname,pname,bname
@@ -124,41 +124,40 @@ program gTB
       call head
       call getarg(1,fname)
       do i=2,8
-      call getarg(i,arg1)
-      if(index(arg1,'-clean' ).ne.0)calc_ptb_grad=.true.  ! 
-      if(index(arg1,'-avcn' ) .ne.0)  acn=.true.  ! 
-      if(index(arg1,'-apo' )  .ne.0)wrapo=.true.  ! just printout shell pop for coding
-      if(index(arg1,'-polar') .ne.0)prop =2       ! polar      
-      if(index(arg1,'-alpha') .ne.0)prop =2       ! polar      
-      if(index(arg1,'-beta') .ne.0) prop =3       ! hyperpolar      
-      if(index(arg1,'-hyperpolar') .ne.0) prop =3 ! hyperpolar      
-      if(index(arg1,'-energy') .ne.0)energ=.true. ! energy          
-      if(index(arg1,'-e'     ) .ne.0)energ=.true. ! energy          
-      if(index(arg1,'-stda')   .ne.0)stda=.true.  ! stda write      
-      if(index(arg1,'-tmwr')   .ne.0)tmwr=.true.  ! TM write      
-      if(index(arg1,'-test').ne.0) test =.true.   ! more data output
-      if(index(arg1,'-nogtb').ne.0) nogtb =.true. ! 
-      if(index(arg1,'-d4only').ne.0) d4only =.true. ! 
-!     if(index(arg1,'-fitshellq').ne.0) then
-!             fitshellq =.true.                   ! output file for test   
-!             nogtb =.true. 
-!     endif
-      if(index(arg1,'-par').ne.0)then          
-      call getarg(i+1,pname)
-      endif
-      if(index(arg1,'-bas').ne.0)then
-      call getarg(i+1,bname)
-      endif
-      if(index(arg1,'-chrg').ne.0)then          
-      call getarg(i+1,atmp)
-      call readline(atmp,floats,str,ns,nf)
-      chrg=floats(1)
-      endif
-      if(index(arg1,'-uhf').ne.0)then          
-      call getarg(i+1,atmp)
-      call readline(atmp,floats,str,ns,nf)
-      nopen=floats(1)
-      endif
+         call getarg(i,arg1)
+   
+
+         if(index(arg1,'-clean' ).ne.0)calc_ptb_grad=.true.  ! 
+         if(index(arg1,'-avcn' ) .ne.0)  acn=.true.  ! 
+         if(index(arg1,'-apo' )  .ne.0)wrapo=.true.  ! just printout shell pop for coding
+         if(index(arg1,'-polar') .ne.0)prop =2       ! polar      
+         if(index(arg1,'-alpha') .ne.0)prop =2       ! polar      
+         if(index(arg1,'-beta') .ne.0) prop =3       ! hyperpolar      
+         if(index(arg1,'-hyperpolar') .ne.0) prop =3 ! hyperpolar      
+         if(index(arg1,'-energy') .ne.0)energ=.true. ! energy          
+         if(index(arg1,'-e'     ) .ne.0)energ=.true. ! energy          
+         if(index(arg1,'-stda')   .ne.0)stda=.true.  ! stda write      
+         if(index(arg1,'-tmwr')   .ne.0)tmwr=.true.  ! TM write      
+         if(index(arg1,'-test').ne.0) test =.true.   ! more data output
+         if(index(arg1,'-nogtb').ne.0) nogtb =.true. ! 
+         if(index(arg1,'-d4only').ne.0) d4only =.true. ! 
+   !     if(index(arg1,'-fitshellq').ne.0) then
+   !             fitshellq =.true.                   ! output file for test   
+   !             nogtb =.true. 
+   !     endif
+         if(index(arg1,'-par').ne.0) call getarg(i+1,pname)
+         if(index(arg1,'-bas').ne.0) call getarg(i+1,bname)
+         if(index(arg1,'-chrg').ne.0) then          
+            call getarg(i+1,atmp)
+            call readline(atmp,floats,str,ns,nf)
+            chrg=floats(1)
+         endif
+         
+         if(index(arg1,'-uhf').ne.0) then          
+            call getarg(i+1,atmp)
+            call readline(atmp,floats,str,ns,nf)
+            nopen=floats(1)
+         endif
       enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -394,12 +393,12 @@ include 'polgrad.f90'
       endif
 
 ! SINGLE POINT PTB
-      if(ldum) then ! run it in normal case or in energy mode if dump does not exist
-       if(prop.gt.0) call dipint(n,ndim,at,xyz,rab,xnorm,pnt,D3)! dipole integrals 
-       call pgtb(.true.,prop,n,ndim,nel,nopen,ihomo,at,chrg,xyz,z,rab,pnt,xnorm,S,D3,&
-     &          efield,ML1,ML2,psh,q,P,F,eps,wbo,dip,alp) 
-       call system('mv ptb_dump ptb_dump_0')
-      endif
+if(ldum) then ! run it in normal case or in energy mode if dump does not exist
+   if(prop.gt.0) call dipint(n,ndim,at,xyz,rab,xnorm,pnt,D3) ! dipole integrals    
+   call pgtb(.true.,prop,n,ndim,nel,nopen,ihomo,at,chrg,xyz,z,rab,pnt,xnorm,S,D3,&
+   &          efield,ML1,ML2,psh,q,P,F,eps,wbo,dip)       
+   call system('mv ptb_dump ptb_dump_0')
+endif
 
 ! fit case
       if(rpbe)then
@@ -695,4 +694,5 @@ subroutine head
       write(*,*)
 
 end
+
 
