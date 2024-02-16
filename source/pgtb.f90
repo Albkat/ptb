@@ -339,6 +339,7 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    use parcom
    use aescom
    use com
+   use timing_utilities
    implicit none 
 !! ------------------------------------------------------------------------
 !  Input
@@ -455,7 +456,6 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    real(wp) :: nel2,nel3
    real(wp) :: identity(ndim,ndim)
    real(wp) :: eigval(ndim)
-
 
    identity(:,:)=0
    do i=1,ndim
@@ -736,9 +736,12 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
       if (pur%verbose) &
          & call check_density(ndim, P, S, Hmat, 'Initial density')
 
+      call start_timer()
       call solve2(mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
+      call stop_timer('solve2')
 
       call check_density(ndim, P, S, Hmat, 'PTB normal density')
+      
       
       call purification(Hmat,ndim,S,P,P_purified, pur%type,pur%verbose, &
             & pur%chempot,pur%metric,pur%fixed,pur%limit,&
@@ -752,7 +755,9 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
       call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
       
    endif
+   
    stop
+   
    if(fail) stop 'diag error'
 
    if(iter.eq.1) gap1 = (eps(homo+1)-eps(homo))*au2ev
@@ -1694,6 +1699,7 @@ subroutine shscalP(iter,n,at,psh,scal)
 
 end
 
+!> check density for number of electrons and band structure energy
 subroutine check_density(ndim, P, S, H, str)
 
    use ISO_FORTRAN_ENV, only : wp => real64
@@ -1741,6 +1747,7 @@ end subroutine check_density
 
 real(wp) function bandStrEnergy(ndim,H,P) result(band)
    
+   use gtb_la, only : la_symm 
    use iso_fortran_env, only : wp => real64
    implicit none
    
@@ -1753,9 +1760,10 @@ real(wp) function bandStrEnergy(ndim,H,P) result(band)
    
    band=0.0_wp
 
-   PH = matmul(P,H)
+   call la_symm(P,H,PH)
+
    do i=1, ndim
-      band = band+ PH(i,i)
+      band = band + PH(i,i)
    enddo
 
 end function bandStrEnergy
@@ -1783,6 +1791,7 @@ end function check_el2
 
 real(wp) function check_electrons(ndim,S,P) result(check_nel)
    
+   use gtb_la, only : la_symm 
    use iso_fortran_env, only : wp => real64
    implicit none
    integer, intent(in) :: ndim
@@ -1793,7 +1802,7 @@ real(wp) function check_electrons(ndim,S,P) result(check_nel)
    integer :: i 
    
    check_nel=0.0_wp
-   PS=matmul(P,S)
+   call la_symm(P,S,PS) 
    
    do i=1, ndim
       check_nel=check_nel+PS(i,i)
@@ -1804,6 +1813,7 @@ end function check_electrons
 !> idempotency check
 subroutine idempotency(ndim, mat, S, msg)
    
+   use gtb_la, only : la_symm
    use iso_fortran_env, only : wp => real64
    implicit none
    
@@ -1817,7 +1827,8 @@ subroutine idempotency(ndim, mat, S, msg)
    matSmat=0.0_wp 
    
    ! P*S*P !
-   matSmat=matmul(mat,matmul(S,mat))/2.0_wp
+   call la_symm(mat,S,matSmat)
+   call la_symm(matSmat,S,matSmat,alpha=0.5_wp)
    
    call print_blowed_matrix(ndim,matSmat,msg)
 
@@ -1826,7 +1837,8 @@ end subroutine idempotency
 !> non-orthogonal purification
 subroutine purification(H, ndim, S, P, P_purified,method,&
       & verbose,chempot,metr,fix,upper_limit,step,iter,cycle,sparse_cli)
-
+   
+   use timing_utilities
    use iso_fortran_env, only : wp => real64
    implicit none
    
@@ -1900,6 +1912,9 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
    
    !> upper and lower spectrum bounds of H 
    real(wp) :: hmax, hmin 
+
+   !> debug mode
+   logical, parameter :: time(2) = [.false.,.true.]
    
    
    !-------!
@@ -1911,6 +1926,7 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
    Ssym(:,:)=0.0_wp
    Psym(:,:)=0.0_wp
 
+   if(time(1)) call start_timer()
    
    ! transform array to matrix ! 
    call blowsym(ndim,P,Psym)
@@ -1918,7 +1934,8 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
    call blowsym(ndim,S,Ssym)
    
    ! max and min eigenvalues !
-   if (method .eq. "mcweeny".or. method .eq. "cp") call eigs(ndim, Hsym, hmax, hmin)
+   if (method .eq. "mcweeny".or. method .eq. "cp") &
+      call eigs(ndim, Hsym, hmax, hmin)
    
    ! obtain S^(-1) !
    if (metr .eq. "-1") then
@@ -1939,6 +1956,8 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
       metric = root_inv
    
    endif
+   
+   if(time(1)) call stop_timer('metric setup')
    
    ! print the purification settings !
    write(6,'(/,a,1x,a,1x,a,/)') repeat('*',24), "PURIFICATION", repeat('*',25)
@@ -1966,9 +1985,11 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
       & write(6,'(2x,a,6x,L1)') "Verbose:                     ",verbose
    write(6,*)
 
-!--------------!
-! PURIFICATION !
-!--------------! 
+!------------------------------------------!
+!-------------- Purification --------------!
+!------------------------------------------! 
+      
+   if(time(2)) call start_timer()
    
    if (method .eq. "cp")then
       call cp_purification(ndim, metric, Ssym, Psym, Hsym, hmax, hmin, tmp, cycle, verbose)
@@ -1985,6 +2006,8 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
 
    call packsym(ndim,tmp,P_purified)
 
+   if(time(2)) call stop_timer('purification')
+
 end subroutine purification
 
 !> Sign Method 
@@ -1994,7 +2017,7 @@ subroutine sign_purification(ndim, metric, S, H, chempot, upl, &
    use ieee_arithmetic, only : ieee_is_NaN
    use iso_fortran_env, only : wp => real64, out => OUTPUT_UNIT
    use gtb_lapack_eig, only : la_sygvd
-
+   use gtb_la, only : la_gemm, la_symm
 
    !> number of basis functions
    integer, intent(in) :: ndim
@@ -2050,7 +2073,6 @@ subroutine sign_purification(ndim, metric, S, H, chempot, upl, &
    
    !> final guess
    real(wp) :: final_(ndim,ndim)
-
    
    !> I
    real(wp) :: identity(ndim,ndim)
@@ -2072,6 +2094,7 @@ subroutine sign_purification(ndim, metric, S, H, chempot, upl, &
 !---------------------------------------------------! 
 
    debug = verbose .and. ndim < 20
+
    ! identity matrix !
    identity=0.0_wp
    do i=1,ndim
@@ -2087,8 +2110,8 @@ subroutine sign_purification(ndim, metric, S, H, chempot, upl, &
          
       ! sign(A) ! 
       term1 = chempot * identity
-      term2 = matmul(H,metric)
-      term3 = matmul(metric,term2)
+      call la_symm('L','U',ndim,ndim,1.0_wp,H,ndim,metric,ndim,0.0_wp,term2,ndim) ! H * metric
+      call la_gemm('N','N',ndim,ndim,ndim,1.0_wp,metric,ndim,term2,ndim,0.0_wp,term3,ndim) ! metric * H * metric 
       term4 = term3 - term1
       sign_A = term4 ! symmetric !
          
@@ -2120,7 +2143,7 @@ subroutine sign_purification(ndim, metric, S, H, chempot, upl, &
       else 
          sparse = .true.
       endif
-      
+
       ! Submatrix method !
       if(sparse .and. .not.iterative) then
          
@@ -2137,7 +2160,7 @@ subroutine sign_purification(ndim, metric, S, H, chempot, upl, &
          if (iterative) then
             call sign_iterative(ndim,chempot,sign_A,H,metric,identity,cycle_,fix,final_,conv)                     
          else
-            call sign_diagonalization(ndim,sign_A,H,identity,verbose,.false.)
+            call sign_diagonalization(ndim,sign_A)
          endif
       
       endif
@@ -2155,15 +2178,16 @@ subroutine sign_purification(ndim, metric, S, H, chempot, upl, &
       ! next iteration parameters !
       chempot=chempot+step
    
-      stop   
    enddo chemp
-   P_purified = final_
+
+   P_purified = final_ * 2.0
 
 end subroutine sign_purification
 
 !> iterative purification of sign matrix
 subroutine sign_iterative(ndim, chempot, sign_A, H, metric, identity, cycle_, fix, final_, conv)
 
+   use gtb_la, only : la_gemm
    use iso_fortran_env, only : wp => real64, out => output_unit
    implicit none
 
@@ -2202,7 +2226,7 @@ subroutine sign_iterative(ndim, chempot, sign_A, H, metric, identity, cycle_, fi
    integer :: purificator
    
    !> temporary matrices
-   real(wp), dimension(ndim,ndim) :: x2k, x4k
+   real(wp), dimension(ndim,ndim) :: x2k, x4k, tmp, tmp2
    real(wp) :: norm
 
    !> if NaN
@@ -2212,12 +2236,14 @@ subroutine sign_iterative(ndim, chempot, sign_A, H, metric, identity, cycle_, fi
 
    ! Pade approximation !
    pur: do purificator=1, cycle_
-                  
-      x2k = matmul(sign_A,sign_A)
-      x4k = matmul(x2k,x2k) 
       
-      sign_A = 0.125_wp * matmul(sign_A,((15*identity) - (10*x2k) + (3*x4k)))
-
+      call la_gemm(sign_A,sign_A,x2k) 
+      call la_gemm(x2k,x2k,x4k)
+       
+      tmp = (15.0_wp * identity) - (10.0_wp * x2k) + (3.0_wp * x4k)
+      call la_gemm(sign_A,tmp,tmp2, alpha=0.125_wp)
+      sign_A = tmp2
+      
       call sign_density(ndim,final_, sign_A, identity, metric, NaN_) ! create density matrix from sign matrix
       if (NaN_) exit pur ! exit the current loop if NaN is found
 
@@ -2242,7 +2268,7 @@ subroutine sign_iterative(ndim, chempot, sign_A, H, metric, identity, cycle_, fi
          
          call print_summary(ndim,chempot,sign_A,final_,H,identity,.true.,NaN_,.true.)
          
-         if(purificator==cycle_) &
+         if (purificator==cycle_) &
             write(out,'(2x,a,I0)') "cycle number: ", purificator
       endif
 
@@ -2253,6 +2279,7 @@ end subroutine sign_iterative
 !> construct density matrix from sign matrix
 subroutine sign_density(ndim, P, sign_A, identity, metric, NaN_)
 
+   use gtb_la, only : la_gemm
    use ieee_arithmetic, only : ieee_is_NaN
    use iso_fortran_env, only : wp => real64
    implicit none
@@ -2274,17 +2301,23 @@ subroutine sign_density(ndim, P, sign_A, identity, metric, NaN_)
 
    !> NaN
    logical, intent(out) :: NaN_
+
+   !> temporary matrices
+   real(wp) :: tmp(ndim,ndim)
    
 
    ! (16) density matrix !
-   P = 0.5_wp * matmul(metric,matmul((identity-sign_A),metric))
-   NaN_ = any((ieee_is_NaN(P)))
+   call la_gemm(identity-sign_A,metric,tmp)
+   call la_gemm(metric,tmp,P,alpha=0.5_wp)
+   
+   NaN_ = any((ieee_is_NaN(P))) ! check for NaN
       
 end subroutine sign_density
 
 !> purification of the sign matrix via diagonalization
-subroutine sign_diagonalization(ndim, sign_A, verbose)
+subroutine sign_diagonalization(ndim, sign_A)
 
+   use gtb_la, only : la_gemm
    use iso_fortran_env, only : wp => real64, out => output_unit
    implicit none
 
@@ -2294,9 +2327,6 @@ subroutine sign_diagonalization(ndim, sign_A, verbose)
    !> sign matrix
    real(wp), intent(inout) :: sign_A(ndim,ndim)
 
-   !> verbosity
-   logical, intent(in) :: verbose   
-
    !> eigenvectors
    real(wp) :: eigvec(ndim,ndim)
 
@@ -2305,11 +2335,12 @@ subroutine sign_diagonalization(ndim, sign_A, verbose)
 
    !> temporary vars
    integer :: i
-
+   real(wp) :: tmp(ndim,ndim)
 
    call eigendecompostion(ndim, sign_A, eigvec, eigval)
             
    eigval2 = 0.0_wp
+   tmp = 0.0_wp
    
    ! signum() !
    do i = 1, ndim
@@ -2324,15 +2355,17 @@ subroutine sign_diagonalization(ndim, sign_A, verbose)
       endif
    enddo
    
-   ! TODO: change to dgemm !
-   sign_A = matmul(eigvec,matmul(eigval2,transpose(eigvec)))
 
+   call la_gemm(eigval2,eigvec,tmp,transb='T')
+   call la_gemm(eigvec,tmp,sign_A)
+   
 end subroutine sign_diagonalization
 
 !> grand-canonical purification
 subroutine gcp_purification(ndim, metric, S, H, hmax, hmin, chempot, &
       & upl, step, P_purified, cycle_, fix, verbose)
    
+   use gtb_la, only : la_gemm
    use ieee_arithmetic, only : ieee_is_NaN
    use iso_fortran_env, only : wp => real64, out => output_unit 
 
@@ -2436,8 +2469,10 @@ subroutine gcp_purification(ndim, metric, S, H, hmax, hmin, chempot, &
       ! construct initial guess !   
       ! (11a) !
       term1 = chempot*metric
-      term2 = matmul(H,metric)
-      term3 = matmul(metric,term2)
+
+      call la_gemm(H,metric,term2)
+      call la_gemm(metric,term2,term3)
+
       term4 = term1 - term3            
       
       ! frobenius norm !
@@ -2452,24 +2487,24 @@ subroutine gcp_purification(ndim, metric, S, H, hmax, hmin, chempot, &
       ! print norms !
       if (verbose) then
          write(out,'(2x,a,f14.9)'), "Gershgorin Norm  = ", gersh
-         write(out,'(2x,a,f14.9,\)'), "Frobenius Norm   = ", frob
+         write(out,'(2x,a,f14.9)'), "Frobenius Norm   = ", frob
       endif
 
       alpha=1.0_wp/min(gersh,frob)
 
-      term5 = alpha * 0.5 * term4   ! scaling !
-      P0 = term5 + 0.5 * metric     ! shift !
+      term5 = alpha * 0.5_wp * term4   ! scaling !
+      P0 = term5 + 0.5_wp * metric     ! shift !
       
       pur: do purificator=1,cycle_
          
          ! McWeeny purification !
-         SP=matmul(S,P0)
-         PSP=matmul(P0,SP) 
-         PSPSP=matmul(PSP,SP)
+         call la_gemm(S,P0,SP)
+         call la_gemm(P0,SP,PSP)
+         call la_gemm(PSP,SP,PSPSP)
          res=3*PSP-2*PSPSP
 
          ! band-str energy !
-         PH=matmul(2.0_wp*res,H)         
+         call la_gemm(res,H,PH)
          band=0.0_wp
          
          ! NaN catch !
@@ -2508,10 +2543,10 @@ subroutine gcp_purification(ndim, metric, S, H, hmax, hmin, chempot, &
          
          else
             
-            nel=check_electrons(ndim,S,2.0_wp*res)
+            nel=check_electrons(ndim,S,res)
 
             if (purificator==1) write(*,'(a)') "Fixed chempot purification"
-            write(out,111) "chempot = ", chempot, ", iterations = ", purificator, ", electrons = ", nel ,", Band-str E = ", band,", norm2=", norm2(res)
+            write(out,111) "chempot = ", chempot, ", iterations = ", purificator, ", electrons = ", nel*2 ,", Band-str E = ", band*2,", norm2=", norm2(res)
             111 format(a,F14.9,a,I0,a,F14.9,a,F14.9,a,F14.9)
          
          endif
@@ -2547,13 +2582,14 @@ subroutine gcp_purification(ndim, metric, S, H, hmax, hmin, chempot, &
    
    enddo chemp
 
-   P_purified = 2.0_wp*P0
+   P_purified = res * 2.0_wp
    
 end subroutine gcp_purification
 
 
 subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified, cycle_, ver)
    
+   use gtb_la, only : la_gemm
    use ieee_arithmetic, only : ieee_is_NaN
    use iso_fortran_env, only : wp => real64, out => output_unit
    implicit none 
@@ -2701,15 +2737,13 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified, cy
    !-------------!  
    ! CALCULATION !
    !-------------!
-   
    ! initial guess !            
    if (frob_norm) then
       
       term1 = chempot * metric
       
-      term2 = matmul(metric,H)
-      term2 = matmul(term2,metric)
-      
+      call la_gemm(metric,H,term2)
+      call la_gemm(term2,metric,term2)
       term3 = term1 - term2
       
       ! frobenius norm !
@@ -2740,25 +2774,26 @@ subroutine cp_purification(ndim, metric, S, P_ptb, H, hmax, hmin, P_purified, cy
       alpha = min(hmin1,hmax1)
       
       term1 = alpha * chempot * metric
-      term2 = matmul(metric,H)
-      term2 = matmul(term2,metric) * alpha
-      term3 = matmul(identity,metric) * N_e
+      call la_gemm(metric,H,term2)
+      call la_gemm(term2,metric,term2,alpha=alpha)
+      call la_gemm(identity,metric,term3,alpha=N_e)
       term4 = (term1 - term2 + term3) / N_e ! 1/N 
       p0    = term4 
       
    endif
    
-
-   write(out,'(2x,a,f14.9)') , "number of electrons: ", check_electrons(ndim,S,p0)
-   if (ver) call print_blowed_matrix(ndim,p0, "initial guess")
+   if (ver) then
+      write(out,'(2x,a,f14.9)') , "number of electrons: ", check_electrons(ndim,S,p0)
+      call print_blowed_matrix(ndim,p0, "initial guess")
+   endif
    pn = p0*2 
 
    ! purification loop !
    do num=1, cycle_ 
 
-      SP=matmul(S,pn)
-      PSP=matmul(pn,SP)
-      PSPSP=matmul(PSP,SP)
+      call la_gemm(S,pn,SP)
+      call la_gemm(pn,SP,PSP)
+      call la_gemm(PSP,SP,PSPSP)
 
       matr1=PSP-PSPSP
       matr2=pn-PSP
@@ -2876,7 +2911,7 @@ end subroutine eigs
 !> matrix^(1/2)
 subroutine sq_root(ndim,matrix,root)
    
-   use gtb_la, only : la_syev
+   use gtb_la, only : la_syev, la_gemm
    use iso_fortran_env, only : wp => real64
    implicit none 
    integer, intent(in) :: ndim
@@ -2890,7 +2925,8 @@ subroutine sq_root(ndim,matrix,root)
    real(wp) :: w(ndim), sqrtW(ndim)
       !! eigenvalues
 
-   real(wp), dimension(ndim,ndim) :: matrix_syev, matrix_syev_T,root2, matrix_syev_inv, D
+   real(wp), dimension(ndim,ndim) :: matrix_syev, matrix_syev_T, root2
+   real(wp), dimension(ndim,ndim) :: matrix_syev_inv, D, tmp
    real(wp),dimension(ndim) :: left,right
    integer  :: ipiv(ndim), info
    integer :: i,j
@@ -2927,17 +2963,18 @@ subroutine sq_root(ndim,matrix,root)
    call inverse_(ndim,matrix_syev,matrix_syev_inv)
    
    ! r = V * D^(1/2) * V^(-1)
-   root = matmul(matrix_syev, matmul(D,matrix_syev_inv))
-   root2 = matmul(root,root)
-
+   call la_gemm(D,matrix_syev_inv,tmp)
+   call la_gemm(matrix_syev,tmp,root)
+   call la_gemm(root,root,root2)
 
 end subroutine sq_root
 
 !> get inverse of the matrix 
 subroutine inverse_(ndim,matrix,inverse) 
    
-   use iso_fortran_env, only : wp => real64
+   use iso_fortran_env, only : wp => real64, out => output_unit
    use multicharge_lapack, only : sytri, sytrf, getrf, getri
+   use gtb_la, only : la_gemm
 
    implicit none
    
@@ -2952,10 +2989,10 @@ subroutine inverse_(ndim,matrix,inverse)
    
    
    !> A*A^(-1) check
-   real(wp)    :: check (ndim,ndim)     
+   real(wp) :: check (ndim,ndim), tmp (ndim,ndim) 
 
    !> identity matrix
-   real(wp)    :: identity (ndim,ndim)
+   real(wp) :: identity (ndim,ndim)
    
    !> lower or upper triangular part
    character(len=1) :: uplo
@@ -2971,6 +3008,9 @@ subroutine inverse_(ndim,matrix,inverse)
    
    !> symmetric or general matrix
    logical :: sy
+
+   !> spectral norm vs eigenvalue
+   logical :: spect_norm
    
    !> max absolute column sum of matrix
    real(wp) :: a_1(ndim)
@@ -2991,6 +3031,7 @@ subroutine inverse_(ndim,matrix,inverse)
       inverse=matrix
 
       if (sy) then
+
          call sytrf(inverse, ipiv, info=info, uplo='l')
          if (info == 0) then
                call sytri(inverse, ipiv, info=info, uplo='l')
@@ -3002,7 +3043,9 @@ subroutine inverse_(ndim,matrix,inverse)
                   end do
                end if
          end if
+
       else
+
          call getrf(ndim,ndim,inverse,ndim,ipiv,info)
          if (info == 0) then
             call getri(inverse, ipiv, info)  
@@ -3011,12 +3054,13 @@ subroutine inverse_(ndim,matrix,inverse)
                stop
             endif
          endif
+      
       endif
       
-      check=matmul(matrix,inverse)
-      
+      call la_gemm(matrix,inverse,check)
+
       if (any(abs(check)>1.5_wp)) then 
-         print *,"Not identity"
+         write(out,'(a)') "Not identity, error during inversion"
          stop   
       endif
 
@@ -3034,15 +3078,17 @@ subroutine inverse_(ndim,matrix,inverse)
          a_inf(j)=sum(abs(matrix(j,:)))
       enddo
 
-      write (*,*) "a1", maxval(a_1)  
-      write (*,*) "ainf ", maxval(a_inf)
+      write (out,'(a,f12.6)') "a1: ", maxval(a_1)  
+      write (out,'(a,f12.6)') "ainf: ", maxval(a_inf)
       
       inverse = (1.0_wp/(maxval(a_1) * maxval(a_inf))) * matrix
 
       
-      !> check 
-      print*,"Is the largest spectral norm of initial guess  < 1? ", 1 > maxval(identity - matmul(inverse,matrix))
-
+      !> check  
+      call la_gemm(inverse,matrix,tmp)
+      spect_norm = 1 > maxval(identity - tmp)
+      write(out,'(a,l)'),"Is the largest spectral norm of initial guess < 1? ", spect_norm
+      tmp=0.0_wp
 
       !-------------------------------------------------
       !                       (25)
@@ -3050,11 +3096,17 @@ subroutine inverse_(ndim,matrix,inverse)
       
       !> The Newton-Schulz iteration
       do i=1,2
-         inverse=(2*inverse - matmul(inverse,inverse) * matrix) 
+         call la_gemm(inverse,inverse,tmp)
+         call la_gemm(tmp,matrix,tmp)
+         inverse= (2.0_wp * inverse - tmp) 
       enddo
 
-      check=matmul(matrix,inverse)
-      call print_blowed_matrix(ndim,check,'CHECK')     
+      call la_gemm(matrix,inverse,check)
+      
+      if (any(abs(check)>1.5_wp)) then 
+         write(out,'(a,l)') "Not identity, error during inversion"
+         stop   
+      endif
 
    endif 
    
@@ -3063,7 +3115,8 @@ end subroutine inverse_
 subroutine eigendecompostion(ndim,matrix,eigvec,eigval)
   
    use gtb_lapack_eig, only : la_syevd
-   use iso_fortran_env, only : wp => real64
+   use gtb_la, only : la_gemm
+   use iso_fortran_env, only : wp => real64, out => output_unit
    
    !> dimension
    integer, intent(in)  :: ndim
@@ -3083,7 +3136,9 @@ subroutine eigendecompostion(ndim,matrix,eigvec,eigval)
    !> workspace dim
    integer  :: lwork, liwork
 
-   real(wp), dimension(ndim,ndim) :: matrix_syev, check
+   logical, parameter :: debug = .false.
+
+   real(wp), dimension(ndim,ndim) :: matrix_syev, check, tmp
    integer  :: ipiv(ndim)
    integer  :: info
    integer  :: i,j
@@ -3111,7 +3166,6 @@ subroutine eigendecompostion(ndim,matrix,eigvec,eigval)
    !-------!
    if (info==0) then
       
-      
       eigvec = matrix_syev
       check = 0.0_wp 
       
@@ -3119,18 +3173,19 @@ subroutine eigendecompostion(ndim,matrix,eigvec,eigval)
          check(i,i) = eigval(i)
       enddo
       
-      check = matmul(eigvec,matmul(check,transpose(eigvec)))
+      if (debug) then
+         call la_gemm(check,eigvec,tmp,transb='T')
+         call la_gemm(eigvec,tmp,check)
 
-      if (any(abs(matrix-check) > 1E-8_wp)) then
-         print *, "Diagoalized not right"
-         stop
+         if (any(abs(matrix-check) > 1E-8_wp)) then
+            write(out,'(a)') , "Diagonalization failure!"
+            stop
+         endif
       endif
-
    else 
       
-      write (*,'(6x,a)') "Matrix can not be diagonalized"
+      write (out,'(6x,a)') "Matrix can not be diagonalized."
       stop
-
    endif
 
 end subroutine eigendecompostion
@@ -3155,8 +3210,8 @@ subroutine apply_submatrix_method(ndim, input_matrix, result, verbose, thr)
    debug = ndim < 20 .and. verbose
    N = shape(input_matrix)
    result=0.0_wp
-
-   write(out,'(a,2x,i0)') "Applying submatrix method to matrix of dimension", ndim   
+   if (verbose) &
+      write(out,'(a,2x,i0)') "Applying submatrix method to matrix of dimension", ndim   
 
    ! We generate and process a submatrix for each column i of the input matrix
    do i = 1, ndim
@@ -3201,7 +3256,7 @@ subroutine apply_submatrix_method(ndim, input_matrix, result, verbose, thr)
 
 
       ! Apply the function of interest to the submatrix.
-      call sign_diagonalization(nonzero,submatrix,verbose)
+      call sign_diagonalization(nonzero,submatrix)
       
       ! print submatrices if it is small enough !
       if (debug) then
@@ -3221,16 +3276,16 @@ end subroutine apply_submatrix_method
 !> check if matrix should be decomposed 
 subroutine chk_sparsity(ndim,A,verbose,sparse)
 
-   use ISO_FORTRAN_ENV, only : wp => real64, out => output_unit
+   use ISO_FORTRAN_ENV, only : wp => real64, out => output_unit, int => int64
    implicit none
   
    !> thresholds 
    real(wp), parameter :: thr = 1.0e-5_wp
-   real(wp), parameter :: spars = 50.0_wp
+   real(wp), parameter :: sparse_thr = 65.0_wp
    
    !> dimension
    integer, intent(in) :: ndim
-
+   
    !> matrix
    real(wp), dimension(ndim,ndim), intent(in) :: A
 
@@ -3244,38 +3299,53 @@ subroutine chk_sparsity(ndim,A,verbose,sparse)
    real(wp) :: ratio
    
    !> temp
-   integer :: i, nonzero
+   integer(int) :: i, nonzero, full, dense
 
    !> max number of nonzero elements in a column
    real(wp) :: max
-
+   
+   dense = 0.0_wp
+   max   = 0
+    
    ! check overall sparsity !
    ratio = count(abs(A(:,:)) < thr) 
    ratio = ratio / (ndim**2) * 100.0_wp
+   sparse = ratio > sparse_thr
+
    if (verbose) &
-      write(out,'(a, 1x, F12.1, a)') "Sparsity ratio:", ratio , "%"
+      write(out,'(a, 1x, f9.2, a)') "Sparsity ratio:", ratio , "%"
 
    ! check sparsity of columns !
-   max = 0
    do i=1,ndim
       nonzero = count(abs(A(:,i)) > thr)
-      ! swap if nonzero is larger
-      if (nonzero > max) max = nonzero
+      dense = dense + (nonzero * nonzero * nonzero) ! comp time for submatrices
+      if (nonzero > max) max = nonzero ! swap if nonzero is larger
    enddo
-   max = max / ndim * 100.0_wp
+
+   ratio = real(max)/real(ndim) * 100.0_wp
+   sparse = ratio < sparse_thr
    if(verbose) &
-      write(out,'(a, 1x, F12.1, a)') "(max nonzero column / dimension) ratio ", max, "%"
+      write(out,'(a, 1x, f9.2, a)') "(max nonzero column / dimension) ratio ", ratio, "%"
    
-   if (ratio > spars .and. spars > max ) then
-      sparse = .true.
-   else 
-      sparse = .false.
+   !  check comp time !
+   full = ndim * ndim * ndim ! comp time for full matrix
+   ratio = real(dense)/real(full) 
+   sparse = ratio < 1.0_wp
+   
+   if (verbose) then
+      if (sparse) then
+         write(out,'(a,f12.1)') "The approximate decrease of comp time: ", 1.0_wp/ratio
+      else
+         write(out,'(a,f12.1)') "The approximate increase of comp time: ", ratio
+      endif
    endif
+
 
 end subroutine chk_sparsity
 
 subroutine print_summary(ndim, chempot, sign_A, P, H, identity, iterative, NaN_, conv)
    
+   use gtb_la, only : la_symm
    use iso_fortran_env, only : wp => real64, out => output_unit
    implicit none
 
@@ -3314,6 +3384,7 @@ subroutine print_summary(ndim, chempot, sign_A, P, H, identity, iterative, NaN_,
 
    !> temp
    integer :: i
+   real(wp) :: tmp(ndim,ndim)
 
    !> format holder
    character(len=*), parameter :: fmt_conv = '(2x,a,f14.9,a,f14.9,a,f14.9)'
@@ -3324,7 +3395,8 @@ subroutine print_summary(ndim, chempot, sign_A, P, H, identity, iterative, NaN_,
       return
    endif
 
-   PH=matmul(P,H)  ! TODO: dgemm  
+   call la_symm(P,H,PH) 
+   
    band=0.0_wp
    do i=1,ndim
       band=band+PH(i,i)

@@ -76,15 +76,12 @@ Band structure energy:   -37.881638
   Purification type:                 sign
   Sign mode:                         diagonalisation
   Overlap metric (S^metric):         -0.5
-  Purification cycle number:         40
+  Purification cycle number:         20
   Initial chemical potential:        -1.60000000
   Fixed mode:                         T
   Verbose:                           T
  
 Sparsity ratio:     10.97%
-(max nonzero column / dimension) ratio     100.00%
-The approximate increase of comp time:         41.4
- sign_A  8.764055899121873E-002 -0.139525904963424       9.381202580744999E-003
 chempot =   -1.6000, electrons =   14.0000, band-str E =  -37.8816
  
 ----------------------------------------------------------------------

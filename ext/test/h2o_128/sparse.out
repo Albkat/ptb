@@ -28,7 +28,7 @@
  nbeta           512
  ntotal         1024
  nopen             0
-cpu  time for startup and initial S    0.74 s
+cpu  time for startup and initial S    0.71 s
 wall time for startup and initial S    1.00 s
                -----------------------
                |      PTB  model      |
@@ -450,15 +450,15 @@ Band structure energy: -2659.084188
 
   __SETTINGS__
   Purification type:                 sign
-  Sign mode:                         iterative
-  Overlap metric (S^metric):         -0.5
-  Purification cycle number:         40
+  Sign mode:                         diagonalisation
+  Overlap metric (S^metric):         -1
+  Purification cycle number:         50
   Initial chemical potential:        -1.60000000
   Fixed mode:                         T
   Verbose:                           T
  
-Gershgorin norm  3293.720886
-Frobenuis norm  3338.007775
-Sparsity ratio:         86.7%
-Max nonzero column / dimension ratio          68.2%
- F
+Sparsity ratio:         86.0%
+(max nonzero column / dimension) ratio          79.9%
+ dense matrices         1405709776860
+ ratio2   55.0000000000000     
+ The approximate increase of comp time:    55.0000000000000     

@@ -28,8 +28,8 @@
  nbeta           336
  ntotal          672
  nopen             0
-cpu  time for startup and initial S    0.60 s
-wall time for startup and initial S    0.00 s
+cpu  time for startup and initial S    0.62 s
+wall time for startup and initial S    1.00 s
                -----------------------
                |      PTB  model      |
                | SG, MM, AH 2020-2022 |
@@ -366,3 +366,26 @@ EEQ done. sum q :    0.000
 Number of electrons:       0.000000
 Band structure energy:     0.000000
 ------------------------------------------------------------------------
+----------------------------------------------------------------------
+ PTB normal density:
+   1.42896311011515       0.525590986487748      -4.132217463921724E-002
+ -0.205837604875226       9.881049756890317E-002 -3.166443004980795E-003
+ -8.568040033390859E-002  3.469413018662486E-002 -2.791339868207834E-004
+ -2.869299161454479E-003  6.206394789985961E-004  8.669353733769983E-003
+
+Number of electrons:     672.000000
+Band structure energy: -1760.941023
+------------------------------------------------------------------------
+
+************************ PURIFICATION *************************
+
+  __SETTINGS__
+  Purification type:                 sign
+  Sign mode:                         diagonalisation
+  Overlap metric (S^metric):         -0.5
+  Purification cycle number:         20
+  Initial chemical potential:        -1.60000000
+  Fixed mode:                         T
+  Verbose:                           T
+ 
+Applying submatrix method to matrix of dimension  2415
