@@ -1,24 +1,26 @@
 PROG = ../build/ptb
 
+LIBACCEL_CUDA_PATH = /tmp1/albert/ptb/ptb-libaccel/libaccel.so
+
 #--------------------------------------------------------------------------
  OSTYPE=LINUXI
 #--------------------------------------------------------------------------
 
-SOURCES = accuracy.f90 la.f90 blas_level1.f90 blas_level2.f90 blas_level3.f90 lapack_eig.f90
+SOURCES = accuracy.f90 la.f90 blas_level1.f90 blas_level2.f90 blas_level3.f90 lapack_eig.f90 
 $(foreach src, $(SOURCES), $(eval $(src) := $(patsubst %.f90, %.o, $(src))))
 
 MODULES= iso_fortran_env.o bascom.o parcom.o com.o thresholds.o cbascom.o mocom.o dftd4.o aescom.o \
-			$(foreach src, $(SOURCES), $($(src)))
+			$(foreach src, $(SOURCES), $($(src))) 
 
 CFILES= symmetry_i.o
 
-OBJS1= 
+OBJS1=  
 
-OBJS2= rdcoord.o readl.o asym.o elem.o readl2.o readline.o prmat.o timing.o timer.o echo.o solve.o rdstvint.o \
+OBJS2= checks.o cuda_context.o pur_cli.o timer.o  purification.o accel_lib.o rdcoord.o readl.o asym.o elem.o readl2.o readline.o prmat.o timing.o echo.o solve.o rdstvint.o \
        ints.o intpack.o pop.o rdmat.o fermi.o reorder.o bas.o occ.o dtrf2.o lin.o energy.o mrec.o \
        cma.o dtrf3.o drsp.o mlpop.o calcrab.o pgtb.o eeq.o ncoord.o prdipole.o itabrow.o \
        sscal.o cbas.o gauss.o printmos.o qsort.o rdtm.o shellocc_ref.o wr_control_atoms.o \
-       egtbcorr.o symmetry.o guess_qsh.o eptb.o symmetry2.o symtranslib.o spinden.o camm.o
+       egtbcorr.o symmetry.o guess_qsh.o eptb.o symmetry2.o symtranslib.o spinden.o camm.o 
      
 OBJS3= 
       
@@ -29,6 +31,7 @@ MAINFILES= main.o
 OBJS = $(MODULES) $(CFILES) $(OBJS1) $(OBJS2) $(OBJS3) $(OBJS4) $(MAINFILES)
 #--------------------------------------------------------------------------
 
+#-----------------------------------------------------------------------------
 WITH_DFTD4=FALSE
 
 ifeq ($(OSTYPE),LINUXI)
@@ -36,7 +39,7 @@ ifeq ($(OSTYPE),LINUXI)
   FC = ifort
   #FC = gfortran
   CC  = gcc
-  LINKER = $(FC) -g -O -static -fopenmp  -I$(MKLROOT)/include/intel64/lp64 -I$(MKLROOT)/include
+  LINKER = $(FC) -g -O -fopenmp  -I$(MKLROOT)/include/intel64/lp64 -I$(MKLROOT)/include
   LIBS = $(MKLROOT)/lib/intel64/libmkl_blas95_lp64.a $(MKLROOT)/lib/intel64/libmkl_lapack95_lp64.a -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKLROOT)/lib/intel64/libmkl_core.a $(MKLROOT)/lib/intel64/libmkl_intel_thread.a -Wl,--end-group -lpthread -lm
   PREFLAG = -E -P
 
@@ -51,6 +54,7 @@ endif
 ifeq ($(OSTYPE),LINUXL)
   FC = lfc 
   CC = icc 
+  CXX = icpc
   LINKER = lfc  
   PREFLAG = -E -P
   CCFLAGS = -O -DLINUX
@@ -78,6 +82,8 @@ ifeq ($(OSTYPE),SOMETHINGELSE)
   FFLAGS = 
   CCFLAGS = 
 endif
+
+
 
 
 .PHONY: all
@@ -115,7 +121,7 @@ fortran.o : $(CUDA)/src/fortran.c
 
 # linken
 $(PROG): $(OBJS) 
-	$(LINKER) $(OBJS) $(LIBS) -o $(PROG)
+	$(LINKER) $(OBJS) -L/tmp1/albert/ptb/ptb-libaccel/ -laccel $(LIBS) -o $(PROG)
 
 
 # dependencies
