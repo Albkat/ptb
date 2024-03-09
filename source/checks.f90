@@ -1,8 +1,14 @@
 module checks
    use iso_fortran_env, only : wp => real64, out => output_unit
+   use accel_lib
+   use cli
+   use cuda_
    implicit none
-   public :: check_density, check_electrons, bandStrEnergy, check_el2
+   public :: check_density, check_electrons, bandStrEnergy, check_el2, calculate_rmsd
    private
+   real(wp),save :: bndEnergy(2)
+   real(wp),save :: electrons(2)
+   logical, save :: run1 = .true.
 contains
 
 !> check density for number of electrons and band structure energy
@@ -30,8 +36,10 @@ subroutine check_density(ndim, P, S, H, str)
    real(wp), dimension(ndim,ndim) :: Psym, Ssym, Hsym
    
    !> format for I/O
-   character(len=*), parameter :: form = '( /, a, 3x, f12.6, /, a, 1x, f12.6)'
-   
+   character(len=*), parameter :: form = '( /, a, 3x, *, /, a, 1x, *)'
+
+   real(wp) :: bnd, el
+
    ! print all input matrices !
    call print_packed_matrix(ndim,P,str)
    
@@ -40,8 +48,22 @@ subroutine check_density(ndim, P, S, H, str)
    call blowsym(ndim,S,Ssym)
    call blowsym(ndim,H,Hsym)
 
-   write(6,form) "Number of electrons:", check_electrons(ndim,Ssym,Psym), "Band structure energy:", bandStrEnergy(ndim,Hsym,Psym) 
+   el=check_electrons(ndim,Ssym,Psym)
+   if(run1)then
+      electrons(1) = el
+   else
+      electrons(2) = el
+   endif
+   bnd=bandStrEnergy(ndim,Hsym,Psym) 
+   if(run1)then 
+      bndEnergy(1) = bnd
+   else
+      bndEnergy(2) = bnd
+   endif
+   write(6,*) "Number of electrons: ",el 
+   write(6,*)"Band structure energy: ",bnd 
    write(6, "(a)") repeat('-',72)
+   run1 =.false.
 
 end subroutine check_density
 
@@ -56,11 +78,15 @@ real(wp) function bandStrEnergy(ndim,H,P) result(band)
    real(wp), intent(in) :: P(ndim,ndim)
    
    real(wp) :: PH(ndim,ndim)
-   integer :: i 
+   integer :: i, err 
    
    band=0.0_wp
 
-   call la_symm(P,H,PH)
+   if(pur%cuda) then
+      call cuda_dgemm(ctx, 'N', 'N', ndim, ndim, ndim, 1.0_wp, P, H, 0.0_wp,PH,err)
+   else
+      call la_symm(P,H,PH)
+   endif
 
    do i=1, ndim
       band = band + PH(i,i)
@@ -99,10 +125,13 @@ real(wp) function check_electrons(ndim,S,P) result(check_nel)
    real(wp), intent(in) :: P(ndim,ndim)
    
    real(wp) ::  PS(ndim,ndim) 
-   integer :: i 
-   
+   integer :: i,err 
    check_nel=0.0_wp
-   call la_symm(P,S,PS) 
+   if(pur%cuda) then
+      call cuda_dgemm(ctx, 'N', 'N', ndim, ndim, ndim, 1.0_wp, P, S, 0.0_wp,PS,err)
+   else
+      call la_symm(P,S,PS) 
+   endif
    
    do i=1, ndim
       check_nel=check_nel+PS(i,i)
@@ -133,4 +162,30 @@ subroutine idempotency(ndim, mat, S, msg)
    call print_blowed_matrix(ndim,matSmat,msg)
 
 end subroutine idempotency
+subroutine calculate_rmsd(ndim, A, B)
+   use ISO_FORTRAN_ENV, only : wp => real64
+   implicit none
+   integer, intent(in) :: ndim
+   real(wp), intent(in) :: A(ndim*(ndim+1)/2), B(ndim*(ndim+1)/2)
+   real(wp) :: rmsd
+   real(wp), dimension(ndim,ndim) :: P1, P2
+   integer :: i, j
+   real(wp) :: sum_sq_diff
+   
+   call blowsym(ndim,A,P1)
+   call blowsym(ndim,B,P2)
+   sum_sq_diff = 0.0_wp
+   do i = 1, ndim
+       do j = 1, ndim
+           sum_sq_diff = sum_sq_diff + (P1(i, j) - P2(i, j))**2
+       end do
+   end do
+   
+   rmsd = sqrt(sum_sq_diff / (ndim**2))
+   write(6,*)"RMSD: ", rmsd 
+   write(6,*)"d_el: ", electrons(1)-electrons(2)
+   write(6,*)"d_bnd:", bndEnergy(1)-bndEnergy(2)
+
+end subroutine calculate_rmsd
+
 end module checks

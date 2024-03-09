@@ -11,8 +11,7 @@ module purify
 contains
 
 !> non-orthogonal purification
-subroutine purification(H, ndim, S, P, P_purified,method,&
-      & verbose,chempot,metr,fix,upper_limit,step,iter,cycle,sparse_cli,cuda)
+subroutine purification(H, ndim, S, P, P_purified)
    
    use timing_utilities
    implicit none
@@ -31,39 +30,6 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
    
    !> purified density matrix
    real(wp), intent(out)    :: P_purified(ndim*(ndim+1)/2)
-
-   !> settigns
-   character(len=*), intent(in) :: method
-   
-   !> intial guess
-   real(wp), intent(inout) :: chempot
-
-   !> if verbose
-   logical, intent(in) :: verbose
-
-   !> metric
-   character(len=*), intent(in) :: metr   
-
-   !> fixed chemical potential
-   logical, intent(in) :: fix
-
-   !> step size
-   real(wp),intent(in) :: step
-
-   !> upper limit for chempot scan
-   real(wp),intent(in) :: upper_limit
-
-   !> fixed chemical potential
-   logical, intent(in) :: iter
-
-   !> number of purification cycles
-   integer, intent(in) :: cycle
-
-   !> sparse 
-   logical, intent(in) :: sparse_cli
-
-   !> CUDA support
-   logical, intent(in) :: cuda
 
 
    ! local vars !
@@ -95,6 +61,7 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
    !> debug mode
    logical, parameter :: time(2) = [.false.,.true.]
    
+   call timer%click(2,'prep time')
    
    !-------!
    ! SETUP !
@@ -111,79 +78,84 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
    call blowsym(ndim,H,Hsym)  
    call blowsym(ndim,S,Ssym)
    
+
    ! max and min eigenvalues !
-   if (method .eq. "mcweeny".or. method .eq. "cp") &
+   if (pur%method .eq. "mcweeny".or. pur%method .eq. "cp") &
       call eigs(ndim, Hsym, hmax, hmin)
    
    ! obtain S^(-1) !
-   if (metr .eq. "-1") then
-      
+   select case(pur%metric)
+   case('-1')
       call inverse_(ndim,Ssym,metric)
    
    ! obtain the S^(1/2) !
-   else if (metr == "0.5") then
-
+   case('0.5') 
       call sq_root(ndim,Ssym,root)
       metric = root
 
    ! obtain the S^(-1/2) !
-   else if (metr == "-0.5") then
-      
+   case('-0.5')
       call sq_root(ndim,Ssym,root)
       call inverse_(ndim,root,root_inv)
       metric = root_inv
+
+   endselect
+   call timer%click(2)
    
-   endif
-   
-   
+   call timer%click(3,'settings')
    ! print the purification settings !
    write(out,'(/,a,1x,a,1x,a,/)') repeat('*',24), "PURIFICATION", repeat('*',25)
    write(out,'(2x,a)') "__SETTINGS__" 
-   write(out,'(2x,a,5x,a)') "Purification type:            ", method
-   if (method.eq."sign") then
-      if (iter) then
+   write(out,'(2x,a,5x,a)') "Purification type:            ", pur%method
+   if (pur%method.eq."sign") then
+      if (pur%iter) then
          write(out,'(2x,a,5x,a)') "Sign mode:                    ", "iterative"
       else
          write(out,'(2x,a,5x,a)') "Sign mode:                    ", "diagonalisation"
       endif
    endif
-   write(out,'(2x,a,5x,a)') "Overlap metric (S^metric):    ", metr 
-   write(out,'(2x,a,5x,I0)') "Purification cycle number:    ", cycle
+   write(out,'(2x,a,5x,a)') "Overlap metric (S^metric):    ", pur%metric 
+   if(pur%method.eq.'sign' .and. .not.pur%iter) &
+      write(out,'(2x,a,5x,I0)') "Purification cycle number:    ", pur%cycle
 
-   if (method .ne. 'cp') &
-      &  write(out,'(2x,a,2x,f14.8)') "Initial chemical potential:   ", chempot
-   if (.not.fix .and. method.ne."cp") then
-      write(out,'(2x,a,2x,f14.8)') "Upper limit               :   ", upper_limit
-      write(out,'(2x,a,2x,f14.8)') "Step (initial -> limit)   :   ", step
-   else if(method.ne."cp") then
-      write(out,'(2x,a,6x,L1)') "Fixed mode:                   ",fix
+   if (pur%method .ne. 'cp') &
+      &  write(out,'(2x,a,2x,f14.8)') "Initial chemical potential:   ", pur%chempot
+   if (.not.pur%fixed .and. pur%method.ne."cp") then
+      write(out,'(2x,a,2x,f14.8)') "Upper limit               :   ", pur%limit
+      write(out,'(2x,a,2x,f14.8)') "Step (initial -> limit)   :   ", pur%step
+   else if(pur%method.ne."cp") then
+      write(out,'(2x,a,6x,L1)') "Fixed mode:                   ",pur%fixed
    endif
-   if (verbose) & 
-      & write(out,'(2x,a,6x,L1)') "Verbose:                      ", verbose
+   if (pur%verbose) & 
+      & write(out,'(2x,a,6x,L1)') "Verbose:                      ", pur%verbose
    write(out,'(2x,a,5x,l)') "Cuda support:                 ", pur%cuda
 
    write(out,'()')
+   call timer%click(3)
 
 !------------------------------------------!
 !-------------- Purification --------------!
 !------------------------------------------! 
+   call timer%click(4,'only purification')
       
-   
-   if (method .eq. "cp")then
-      call cp_purification(ndim, metric, Ssym, Psym, Hsym, hmax, hmin, tmp, cycle, verbose)
-   
-   else
-      if (method .eq. "mcweeny") then
-         call gcp_purification(ndim,metric,Ssym,Hsym,hmax,hmin,chempot, &
-            & upper_limit,step,tmp,cycle,fix,verbose)
-      else
-         call sign_purification(ndim,metric,Ssym,Hsym,chempot, &
-            & upper_limit,step,tmp,verbose,fix,iter,cycle,sparse_cli)
-      endif
-   endif
+   select case(pur%method) 
+   case default
+      stop "no such method!"
+   case('cp')
+      !call timer_cp%click(,'cp')
+      call cp_purification(ndim, metric, Ssym, Psym, Hsym, hmax, hmin, tmp, pur%cycle, pur%verbose)
+   case('mcweeny') 
+      ! call timer%click(,'mcweeny')
+      call gcp_purification(ndim,metric,Ssym,Hsym,hmax,hmin,pur%chempot, &
+         & pur%limit,pur%step,tmp,pur%cycle,pur%fixed,pur%verbose)
+   case('sign')
+      ! call timer%click(,'sign')
+      call sign_purification(ndim,metric,Ssym,Hsym,pur%chempot, &
+            & pur%limit,pur%step,tmp,pur%verbose,pur%fixed,pur%iter,pur%cycle,pur%sparse)
+   endselect
 
    call packsym(ndim,tmp,P_purified)
-
+   call timer%click(4)
 
 end subroutine purification
 

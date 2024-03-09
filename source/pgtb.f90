@@ -342,7 +342,7 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    use timing_utilities
    use accel_lib
    use cli, only : pur, get_purification_cli
-   use checks, only : check_density
+   use checks, only : check_density, calculate_rmsd
    use purify, only : purification
    implicit none 
 !! ------------------------------------------------------------------------
@@ -578,28 +578,27 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    call get_purification_cli()
 
    ! SCF steps !
-   if (allocated(pur%type)) then
+   if (allocated(pur%method)) then
 
-      call timer%new(3,.true.)
-      call timer%click(3,'whole scf step')   
+      call timer%new(6,.true.)
+      call timer%click(6,'whole scf step')   
       
-      if (pur%verbose) &
-         & call check_density(ndim, P, S, Hmat, 'Initial density')
+      !if (pur%verbose) &
+      !  & call check_density(ndim, P, S, Hmat, 'Initial density')
       call timer%click(1,'solve2')
       call solve2(mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
       call timer%click(1)
 
       call check_density(ndim, P, S, Hmat, 'PTB normal density')
       
-      call timer%click(2,'purification')
-      call purification(Hmat,ndim,S,P,P_purified, pur%type,pur%verbose, &
-            & pur%chempot,pur%metric,pur%fixed,pur%limit,&
-            & pur%step,pur%iter,pur%cycle,pur%sparse,pur%cuda)  
-      call timer%click(2)
-      if (pur%type=="cp" .or. pur%fixed) &
+      call timer%click(5,'purification')
+      call purification(Hmat,ndim,S,P,P_purified)
+      call timer%click(5)
+
+      if (pur%method.eq."cp" .or. pur%fixed) &
             call check_density(ndim, P_purified, S, Hmat, 'Purified density')
          
-      call timer%click(3)
+      call timer%click(6)
    else
          
       call timer%new(1,.true.)
@@ -608,6 +607,7 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
       call timer%click(1)
    endif
    call timer%write(output) 
+   call calculate_rmsd(ndim,P,P_purified)
    stop
    
    if(fail) stop 'diag error'

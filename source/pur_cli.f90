@@ -12,7 +12,7 @@ module cli
       character(len=:), allocatable :: metric
 
       !> purification type
-      character(len=:), allocatable :: type
+      character(len=:), allocatable :: method
       
       !> for sign: iterative or diagonalisation
       logical :: iter = .false.
@@ -128,7 +128,7 @@ subroutine get_purification_cli()
          allocate( character(len=leng) :: line)
          call get_command_argument(i+1,value=line)
          if (line.eq."sign" .or. line.eq."mcweeny" .or. line.eq."cp") then
-            pur%type = line
+            pur%method = line
 
             if (line.eq."sign") then
                deallocate(line)

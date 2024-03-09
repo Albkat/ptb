@@ -3,7 +3,7 @@ module timing_utilities
    use iso_fortran_env, only: wp => real64, int64
    implicit none
    private
-   public :: timer
+   public :: timer, timer_cp, timer_mcweeny, timer_sign
    type ::typeTimer
       integer :: n 
       logical, private :: verbose = .false. 
@@ -22,6 +22,9 @@ module timing_utilities
    endtype
 
    type(typeTimer) :: timer
+   type(typeTimer) :: timer_cp
+   type(typeTimer) :: timer_mcweeny
+   type(typeTimer) :: timer_sign
 
 contains
    !> initialize timer instance
@@ -261,7 +264,7 @@ subroutine write_all_timings(self,iunit,inmsg)
       walltime = self%twall(i)
       wallmins = int(walltime/60._wp)
       walltime = walltime - wallmins*60._wp
-      write(iunit,'(1x,a30,1x,"...",i20," min, ",f11.8," sec (",f7.3,"%)")') &
+      write(iunit,'(1x,a30,1x,"...",i35," min, ",f11.8," sec (",f7.3,"%)")') &
          self%tag(i), wallmins, walltime, 100*self%twall(i)/self%twall(0)
    enddo
    write(iunit,'(a)')
