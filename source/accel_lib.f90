@@ -25,7 +25,8 @@ module accel_lib
    implicit none
    private
 
-   public :: load_cuda, cuda_context, cuda_init, cuda_finalize, cuda_dsyevd, cuda_ssyevd, cuda_dgemm, cuda_sgemm
+   public :: load_cuda, cuda_context, cuda_init, cuda_finalize 
+   public :: cuda_dsyevd, cuda_ssyevd, cuda_dgemm, cuda_sgemm!, cuda_dsygvd, cuda_ssygvd
 
    type cuda_context
       type(c_ptr) :: c_ctx
@@ -76,6 +77,23 @@ module accel_lib
          real(kind=c_float), intent(in), value :: alpha, beta
          type(c_ptr), intent(in), value :: ctx, A, B, C, err
       end subroutine c_cuda_sgemm
+   !    subroutine c_cuda_dsygvd(ctx, itype, n, A, lda, B, ldb, W, err) bind(c, name="cuda_dsygvd")
+   !       use, intrinsic :: iso_c_binding
+   !       implicit none
+   !       type(c_ptr), intent(in), value :: ctx
+   !       integer(kind=c_int), intent(in), value :: itype
+   !       integer(kind=c_int64_t), intent(in), value :: n, lda, ldb
+   !       type(c_ptr), intent(in), value :: A, B, W, err
+   !   end subroutine c_cuda_dsygvd
+ 
+   !   subroutine c_cuda_ssygvd(ctx, itype, n, A, lda, B, ldb, W, err) bind(c, name="cuda_ssygvd")
+   !       use, intrinsic :: iso_c_binding
+   !       implicit none
+   !       type(c_ptr), intent(in), value :: ctx
+   !       integer(kind=c_int), intent(in), value :: itype
+   !       integer(kind=c_int64_t), intent(in), value :: n, lda, ldb
+   !       type(c_ptr), intent(in), value :: A, B, W, err
+   !   end subroutine c_cuda_ssygvd
    end interface
 
 contains
@@ -149,5 +167,27 @@ contains
                         int(m, kind=c_int64_t), c_loc(B), int(k, kind=c_int64_t), beta, c_loc(C), int(m, kind=c_int64_t), &
                         c_loc(err))
    end subroutine cuda_sgemm
-
+!    subroutine cuda_dsygvd(ctx, itype, n, A, lda, B, ldb, W, err)
+!       type(cuda_context), intent(in) :: ctx
+!       integer(kind=c_int), intent(in) :: itype
+!       integer(kind=c_int64_t), intent(in) :: n, lda, ldb
+!       real(kind=c_double), dimension(n, n), target, intent(inout) :: A
+!       real(kind=c_double), dimension(n, n), target, intent(inout) :: B
+!       real(kind=c_double), dimension(n), target, intent(out) :: W
+!       integer(kind=c_int), target, intent(out) :: err
+  
+!       call c_cuda_dsygvd(ctx%c_ctx, itype, n, c_loc(A), lda, c_loc(B), ldb, c_loc(W), c_loc(err))
+!   end subroutine cuda_dsygvd
+  
+!   subroutine cuda_ssygvd(ctx, itype, n, A, lda, B, ldb, W, err)
+!       type(cuda_context), intent(in) :: ctx
+!       integer(kind=c_int), intent(in) :: itype
+!       integer(kind=c_int64_t), intent(in) :: n, lda, ldb
+!       real(kind=c_float), dimension(n, n), target, intent(inout) :: A
+!       real(kind=c_float), dimension(n, n), target, intent(inout) :: B
+!       real(kind=c_float), dimension(n), target, intent(out) :: W
+!       integer(kind=c_int), target, intent(out) :: err
+  
+!       call c_cuda_ssygvd(ctx%c_ctx, itype, n, c_loc(A), lda, c_loc(B), ldb, c_loc(W), c_loc(err))
+!   end subroutine cuda_ssygvd
 end module accel_lib

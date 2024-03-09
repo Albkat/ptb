@@ -404,6 +404,8 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    real(wp) :: identity(ndim,ndim)
    real(wp) :: eigval(ndim)
 
+
+
    identity(:,:)=0
    do i=1,ndim
      identity(i,i)=1.0D0
@@ -568,38 +570,44 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    mode = iter
    
-
    if(iter.eq.2.and.prop.eq.4) mode = 3     ! stda write
    if(iter.eq.2.and.prop.eq.5) mode = 4     ! TM write
    
    if(              prop.lt.0) mode = -iter ! IR/Raman  
    
    call get_purification_cli()
+
    ! SCF steps !
    if (allocated(pur%type)) then
 
+      call timer%new(3,.true.)
+      call timer%click(3,'whole scf step')   
+      
       if (pur%verbose) &
          & call check_density(ndim, P, S, Hmat, 'Initial density')
-
-      call start_timer()
+      call timer%click(1,'solve2')
       call solve2(mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
-      call stop_timer('solve2')
+      call timer%click(1)
 
       call check_density(ndim, P, S, Hmat, 'PTB normal density')
       
+      call timer%click(2,'purification')
       call purification(Hmat,ndim,S,P,P_purified, pur%type,pur%verbose, &
             & pur%chempot,pur%metric,pur%fixed,pur%limit,&
             & pur%step,pur%iter,pur%cycle,pur%sparse,pur%cuda)  
-
+      call timer%click(2)
       if (pur%type=="cp" .or. pur%fixed) &
             call check_density(ndim, P_purified, S, Hmat, 'Purified density')
          
+      call timer%click(3)
    else
          
+      call timer%new(1,.true.)
+      call timer%click(1,'solve2')
       call solve2 (mode,ndim,nel,nopen,homo,eT,focc,Hmat,S,P,eps,U,fail) 
-      
+      call timer%click(1)
    endif
-   
+   call timer%write(output) 
    stop
    
    if(fail) stop 'diag error'
@@ -1082,6 +1090,9 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
       use parcom
       use bascom, only: nsh
       use gtb_la, only : la_sygvx, la_sygvd
+      use accel_lib
+      use cuda_
+      use cli
       implicit none
       integer mode,ndim,nel,nopen,homo
       real*8 et        
@@ -1100,6 +1111,7 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
       real*8 ,allocatable ::sdum(:,:),work(:),snew(:,:)
       real*8 ,allocatable ::focca(:), foccb(:)
       real*8 ,allocatable ::hdum(:,:)            
+      integer :: err
 
       fail =.false.
       force=.true.
@@ -1116,34 +1128,39 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
       if(iu.eq.ndim) then                  
 ! full diag (faster if all eigenvalues are taken)
          call blowsym(ndim,H,U)    
-         allocate (work(1),iwork(1))
-         call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,-1,IWORK,LIWORK,INFO)
-         lwork=int(work(1))
-         liwork=iwork(1)
-         deallocate(work,iwork)
-         allocate (work(lwork),iwork(liwork)) 
-         call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,LWORK,IWORK,LIWORK,INFO)
+         !if(pur%cuda) then
+            !call cuda_dsygvd(ctx,1,ndim,U,ndim,sdum,ndim,e,err)
+         !else
+            allocate (work(1),iwork(1))
+            call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,-1,IWORK,LIWORK,INFO)
+            lwork=int(work(1))
+            liwork=iwork(1)
+            deallocate(work,iwork)
+            allocate (work(lwork),iwork(liwork)) 
+            call la_sygvd(1,'V','U',ndim,U,ndim,sdum,ndim,e,work,LWORK,IWORK,LIWORK,INFO)
+         !endif
       else
 ! for a large basis, taking only the occ.+few virt eigenvalues is faster than a full diag
-       allocate(hdum(ndim,ndim))  
-       call blowsym(ndim,H,hdum) 
-       allocate(iwork(5*ndim),ifail(ndim),work(1))
-       call la_sygvx(1,'V','I','U',ndim, hdum, ndim, sdum, ndim, ga, gb, &
-     &               1, IU, 1d-7, ij, e, U, ndim, WORK, -1, IWORK, &
-     &              IFAIL, INFO )
-       lwork=idint(work(1))
-       deallocate(work)
-       allocate(work(lwork))          
-       call la_sygvx(1,'V','I','U',ndim, hdum, ndim, sdum, ndim, ga, gb, &
-     &               1, IU, 1d-7, ij, e, U, ndim, WORK, LWORK, IWORK, &
-     &               IFAIL, INFO )
-       do i=iu+1,ndim     
-         e(i)=10d0
-         U(1:ndim,i)=0d0
-         U(i,i)     =1d0
-       enddo
-! end of diag case branch      
+         allocate(hdum(ndim,ndim))  
+         call blowsym(ndim,H,hdum) 
+         allocate(iwork(5*ndim),ifail(ndim),work(1))
+         call la_sygvx(1,'V','I','U',ndim, hdum, ndim, sdum, ndim, ga, gb, &
+      &               1, IU, 1d-7, ij, e, U, ndim, WORK, -1, IWORK, &
+      &              IFAIL, INFO )
+         lwork=idint(work(1))
+         deallocate(work)
+         allocate(work(lwork))          
+         call la_sygvx(1,'V','I','U',ndim, hdum, ndim, sdum, ndim, ga, gb, &
+      &               1, IU, 1d-7, ij, e, U, ndim, WORK, LWORK, IWORK, &
+      &               IFAIL, INFO )
+         do i=iu+1,ndim     
+            e(i)=10d0
+            U(1:ndim,i)=0d0
+            U(i,i)     =1d0
+         enddo
+   ! end of diag case branch      
       endif
+
 
       if(info.ne.0) fail=.true.
 

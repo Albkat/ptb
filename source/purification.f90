@@ -105,8 +105,7 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
    Ssym(:,:)=0.0_wp
    Psym(:,:)=0.0_wp
 
-   if(time(1)) call start_timer()
-   
+    
    ! transform array to matrix ! 
    call blowsym(ndim,P,Psym)
    call blowsym(ndim,H,Hsym)  
@@ -136,7 +135,6 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
    
    endif
    
-   if(time(1)) call stop_timer('metric setup')
    
    ! print the purification settings !
    write(out,'(/,a,1x,a,1x,a,/)') repeat('*',24), "PURIFICATION", repeat('*',25)
@@ -170,7 +168,6 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
 !-------------- Purification --------------!
 !------------------------------------------! 
       
-   if(time(2)) call start_timer()
    
    if (method .eq. "cp")then
       call cp_purification(ndim, metric, Ssym, Psym, Hsym, hmax, hmin, tmp, cycle, verbose)
@@ -187,7 +184,6 @@ subroutine purification(H, ndim, S, P, P_purified,method,&
 
    call packsym(ndim,tmp,P_purified)
 
-   if(time(2)) call stop_timer('purification')
 
 end subroutine purification
 
@@ -1111,14 +1107,17 @@ subroutine eigs(ndim,matrix,maxim,minim)
    
    if (lapack) then
       matrix_syev=matrix
-      allocate(work(1))
-      lwork=-1
-      call la_syev('N','U',ndim,matrix_syev,ndim,w,work,lwork,info)
-      lwork=idint(work(1))
-      deallocate(work)
-      allocate(work(lwork))
-
-      call la_syev('N','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+      if(pur%cuda) then
+         call cuda_dsyevd(ctx,ndim,matrix_syev,w,info)
+      else
+         allocate(work(1))
+         lwork=-1
+         call la_syev('N','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+         lwork=idint(work(1))
+         deallocate(work)
+         allocate(work(lwork))
+         call la_syev('N','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+      endif
       maxim = maxval(w)
       minim = minval(w)
 
@@ -1182,17 +1181,20 @@ subroutine sq_root(ndim,matrix,root)
    
 
    matrix_syev=matrix
-   allocate(work(1))
-   w = 0.0_wp
-   lwork = -1
-   call la_syev('V','U',ndim,matrix_syev,ndim,w,work,lwork,info)
-   lwork=idint(work(1))
-   deallocate(work)
-   allocate(work(lwork))
+   if(pur%cuda) then
+      call cuda_dsyevd(ctx,ndim,matrix_syev,w,info)
+   else
+      allocate(work(1))
+      w = 0.0_wp
+      lwork = -1
+      call la_syev('V','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+      lwork=idint(work(1))
+      deallocate(work)
+      allocate(work(lwork))
 
-   ! V, D !
-   call la_syev('V','U',ndim,matrix_syev,ndim,w,work,lwork,info)
-   
+      ! V, D !
+      call la_syev('V','U',ndim,matrix_syev,ndim,w,work,lwork,info)
+   endif 
    ! D^(1/2) !
    sqrtW=sqrt(w)
    D = 0.0_wp
@@ -1212,9 +1214,15 @@ subroutine sq_root(ndim,matrix,root)
    call inverse_(ndim,matrix_syev,matrix_syev_inv)
    
    ! r = V * D^(1/2) * V^(-1)
-   call la_gemm(D,matrix_syev_inv,tmp)
-   call la_gemm(matrix_syev,tmp,root)
-   call la_gemm(root,root,root2)
+   if(pur%cuda) then
+      call cuda_dgemm(ctx, 'N', 'N', ndim, ndim, ndim, 1.0_wp, D, matrix_syev_inv, 0.0_wp,tmp,info)
+      call cuda_dgemm(ctx, 'N', 'N', ndim, ndim, ndim, 1.0_wp, matrix_syev, tmp, 0.0_wp,root,info)
+      call cuda_dgemm(ctx, 'N', 'N', ndim, ndim, ndim, 1.0_wp, root, root, 0.0_wp,root2,info)
+   else
+      call la_gemm(D,matrix_syev_inv,tmp)
+      call la_gemm(matrix_syev,tmp,root)
+      call la_gemm(root,root,root2)
+   endif
 
 end subroutine sq_root
 
@@ -1266,6 +1274,8 @@ subroutine inverse_(ndim,matrix,inverse)
    
    !> max absolute row sum of matrix
    real(wp) :: a_inf(ndim)
+   
+   real(wp),allocatable :: eigvals(:), eigvecs(:,:) 
 
    lapack   = .true.
    check    = 0.0_wp 
@@ -1273,28 +1283,43 @@ subroutine inverse_(ndim,matrix,inverse)
    ! check if matrix sym !
    sy = matrix(1,2) == matrix(2,1)
 
-
    ! get inverse of matrix using LAPACK !
    if (lapack) then
 
-      inverse=matrix
-
       if (sy) then
+         if(pur%cuda) then
+            allocate(eigvecs(ndim,ndim), eigvals(ndim))
+            eigvecs=matrix
+            call cuda_dsyevd(ctx, ndim, eigvecs, eigvals, info)
+            do j = 1, ndim
+               do i = 1, ndim
+                  inverse(i, j) = 1.0_wp/eigvals(j)*eigvecs(i, j)
+               end do
+            end do
+            call cuda_dgemm(ctx, 'N', 'T', ndim, ndim, ndim, 1.0_wp, inverse, eigvecs, &
+                     0.0_wp, inverse, info)
+            call cuda_dgemm(ctx, 'N', 'N', ndim, ndim, ndim, 1.0_wp, matrix, inverse, &
+                     0.0_wp, check, info)
+         else
+            inverse=matrix
 
-         call sytrf(inverse, ipiv, info=info, uplo='l')
-         if (info == 0) then
-               call sytri(inverse, ipiv, info=info, uplo='l')
-               if (info == 0) then
-                  do ic = 1, ndim
-                     do jc = ic+1, ndim
-                        inverse(ic, jc) = inverse(jc, ic)
+            call sytrf(inverse, ipiv, info=info, uplo='l')
+            if (info == 0) then
+                  call sytri(inverse, ipiv, info=info, uplo='l')
+                  if (info == 0) then
+                     do ic = 1, ndim
+                        do jc = ic+1, ndim
+                           inverse(ic, jc) = inverse(jc, ic)
+                        end do
                      end do
-                  end do
-               end if
-         end if
+                  end if
+            end if
+            call la_gemm(matrix,inverse,check)
+         endif
 
       else
 
+         inverse=matrix
          call getrf(ndim,ndim,inverse,ndim,ipiv,info)
          if (info == 0) then
             call getri(inverse, ipiv, info)  
@@ -1303,15 +1328,12 @@ subroutine inverse_(ndim,matrix,inverse)
                stop
             endif
          endif
+         call la_gemm(matrix,inverse,check)
       
       endif
-      
-      call la_gemm(matrix,inverse,check)
 
-      if (any(abs(check)>1.5_wp)) then 
-         write(out,'(a)') "Not identity, error during inversion"
-         stop   
-      endif
+      if (any(abs(check)>1.5_wp)) & 
+         stop "Not identity, error during inversion"
 
    else
        

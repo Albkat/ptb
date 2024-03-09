@@ -1,0 +1,145 @@
+ 
+       ==============================================
+       |                 P T B                      |
+       |                S.Grimme                    |
+       |          Universitaet Bonn, MCTC           |
+       ==============================================
+       Version 3.7, Do 28. Apr 14:28:45 CEST 2022
+ 
+       Cite work conducted with this code as
+       S. Grimme, M. Mueller, A. Hansen, unpublished.
+ 
+ ~/.atompara                                                                    
+  
+          =========================
+          reading ... ethan.xyz
+          =========================
+ basis read done.
+ ncao           58
+ nsao           56
+ npr           156
+ basis setup done. Ndim          56
+ coreat            2
+ cncao             2
+ cnsao             2
+ cnpr             12
+ 
+ nalpha            7
+ nbeta             7
+ ntotal           14
+ nopen             0
+cpu  time for startup and initial S    0.03 s
+wall time for startup and initial S    0.00 s
+               -----------------------
+               |      PTB  model      |
+               | SG, MM, AH 2020-2022 |
+               -----------------------
+ prop :           1
+ PA setup with Mull-Loew partitioning   0.333333 ...
+ done.
+EEQ done. sum q :    0.000
+    atom   Zeff  qEEQ  mod   srCN   noHCN   CN(EEQ)
+    1    6  4.0    -0.081   3.974   0.405   4.014
+    2    6  4.0    -0.081   3.974   0.405   4.014
+    3    1  1.0     0.027   1.026   0.004   1.005
+    4    1  1.0     0.027   1.026   0.004   1.005
+    5    1  1.0     0.027   1.026   0.004   1.005
+    6    1  1.0     0.027   1.026   0.004   1.005
+    7    1  1.0     0.027   1.026   0.004   1.005
+    8    1  1.0     0.027   1.026   0.004   1.005
+ computing Vecp ...
+ PTB H matrix iteration            1  done. Now diag ...
+----------------------------------------------------------------------
+ Initial density:
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+
+Number of electrons:       0.000000
+Band structure energy:     0.000000
+------------------------------------------------------------------------
+----------------------------------------------------------------------
+ PTB normal density:
+  0.852798586490095       0.155626532079162       1.053010600971827E-002
+ -2.116567128307931E-009  4.383332384591223E-007  8.151640034540756E-003
+  5.087997836098764E-007  6.189927291793698E-007 -1.492580467102770E-002
+  8.617861723803841E-003 -5.127013317760393E-007 -3.159234388076951E-007
+
+Number of electrons:      14.000000
+Band structure energy:   -37.881638
+------------------------------------------------------------------------
+
+************************ PURIFICATION *************************
+
+  __SETTINGS__
+  Purification type:                 mcweeny
+  Overlap metric (S^metric):         -1
+  Purification cycle number:         50
+  Initial chemical potential:        -1.60000000
+  Fixed mode:                         T
+  Verbose:                           T
+ 
+  Gershgorin Norm  = **************
+  Frobenius Norm   = **************
+Fixed chempot purification
+chempot =   -1.600000000, iterations = 1, electrons =   55.995910229, Band-str E = 1042.388082095, norm2= 355.183095340
+chempot =   -1.600000000, iterations = 2, electrons =   55.993865348, Band-str E = 1041.682173576, norm2= 354.815569975
+chempot =   -1.600000000, iterations = 3, electrons =   55.990798040, Band-str E = 1040.623318492, norm2= 354.264315492
+chempot =   -1.600000000, iterations = 4, electrons =   55.986197121, Band-str E = 1039.035061836, norm2= 353.437514334
+chempot =   -1.600000000, iterations = 5, electrons =   55.979295888, Band-str E = 1036.652764496, norm2= 352.197510908
+chempot =   -1.600000000, iterations = 6, electrons =   55.968944527, Band-str E = 1033.079614267, norm2= 350.338009467
+chempot =   -1.600000000, iterations = 7, electrons =   55.953419133, Band-str E = 1027.720887032, norm2= 347.550084696
+chempot =   -1.600000000, iterations = 8, electrons =   55.930136608, Band-str E = 1019.686163631, norm2= 343.371839108
+chempot =   -1.600000000, iterations = 9, electrons =   55.895231583, Band-str E = 1007.645434884, norm2= 337.114873249
+chempot =   -1.600000000, iterations = 10, electrons =   55.842937264, Band-str E =  989.622602744, norm2= 327.760269820
+chempot =   -1.600000000, iterations = 11, electrons =   55.764708317, Band-str E =  962.716980310, norm2= 313.822732192
+chempot =   -1.600000000, iterations = 12, electrons =   55.648075928, Band-str E =  922.788851004, norm2= 293.211806157
+chempot =   -1.600000000, iterations = 13, electrons =   55.475480283, Band-str E =  864.320481710, norm2= 263.230730997
+chempot =   -1.600000000, iterations = 14, electrons =   55.224185265, Band-str E =  781.214930268, norm2= 221.204240303
+chempot =   -1.600000000, iterations = 15, electrons =   54.870485963, Band-str E =  670.611138699, norm2= 167.104804402
+chempot =   -1.600000000, iterations = 16, electrons =   54.403104655, Band-str E =  542.849110320, norm2= 110.403198780
+chempot =   -1.600000000, iterations = 17, electrons =   53.835900452, Band-str E =  431.707653715, norm2=  74.530256440
+chempot =   -1.600000000, iterations = 18, electrons =   53.160229236, Band-str E =  368.476714914, norm2=  63.653151584
+chempot =   -1.600000000, iterations = 19, electrons =   52.254782739, Band-str E =  329.417751436, norm2=  56.672985214
+chempot =   -1.600000000, iterations = 20, electrons =   50.965571898, Band-str E =  281.237681121, norm2=  47.622483233
+chempot =   -1.600000000, iterations = 21, electrons =   49.201608251, Band-str E =  219.186639942, norm2=  36.722360782
+chempot =   -1.600000000, iterations = 22, electrons =   46.984635379, Band-str E =  151.256513146, norm2=  26.229619442
+chempot =   -1.600000000, iterations = 23, electrons =   44.466996785, Band-str E =   94.228101407, norm2=  18.424657355
+chempot =   -1.600000000, iterations = 24, electrons =   41.686975791, Band-str E =   54.788510378, norm2=  12.691760540
+chempot =   -1.600000000, iterations = 25, electrons =   38.545602612, Band-str E =   24.352855632, norm2=   8.700683922
+chempot =   -1.600000000, iterations = 26, electrons =   35.139146743, Band-str E =    0.751423229, norm2=   5.992966896
+chempot =   -1.600000000, iterations = 27, electrons =   31.688198074, Band-str E =  -15.733736878, norm2=   4.248935714
+chempot =   -1.600000000, iterations = 28, electrons =   28.343547235, Band-str E =  -25.449511622, norm2=   3.089722940
+chempot =   -1.600000000, iterations = 29, electrons =   25.053428329, Band-str E =  -31.667777664, norm2=   2.229184140
+chempot =   -1.600000000, iterations = 30, electrons =   22.080666362, Band-str E =  -35.933601913, norm2=   1.731250776
+chempot =   -1.600000000, iterations = 31, electrons =   19.692028423, Band-str E =  -38.360319285, norm2=   1.536310092
+chempot =   -1.600000000, iterations = 32, electrons =   17.822649628, Band-str E =  -39.451170366, norm2=   1.495729406
+chempot =   -1.600000000, iterations = 33, electrons =   16.369873116, Band-str E =  -39.625742577, norm2=   1.512411404
+chempot =   -1.600000000, iterations = 34, electrons =   15.300088614, Band-str E =  -39.200642728, norm2=   1.539736775
+chempot =   -1.600000000, iterations = 35, electrons =   14.535198452, Band-str E =  -38.522435820, norm2=   1.551844772
+chempot =   -1.600000000, iterations = 36, electrons =   14.112019262, Band-str E =  -38.024082868, norm2=   1.551172451
+chempot =   -1.600000000, iterations = 37, electrons =   14.006539160, Band-str E =  -37.890070275, norm2=   1.550432744
+chempot =   -1.600000000, iterations = 38, electrons =   14.000032335, Band-str E =  -37.881679820, norm2=   1.550374152
+chempot =   -1.600000000, iterations = 39, electrons =   14.000000001, Band-str E =  -37.881637784, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 40, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 41, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 42, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 43, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 44, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 45, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 46, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 47, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 48, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 49, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+chempot =   -1.600000000, iterations = 50, electrons =   14.000000000, Band-str E =  -37.881637783, norm2=   1.550373767
+----------------------------------------------------------------------
+ Purified density:
+  0.852798578117526       0.155626530360422       1.053010705785519E-002
+ -1.962653424871820E-009  4.379629665989806E-007  8.151638913324443E-003
+  5.087626649619484E-007  6.193410349468123E-007 -1.492580361112826E-002
+  8.617860928335930E-003 -5.128597463826591E-007 -3.158804090296692E-007
+
+Number of electrons:      14.000000
+Band structure energy:   -37.881638
+------------------------------------------------------------------------
