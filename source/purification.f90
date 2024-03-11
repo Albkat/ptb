@@ -78,7 +78,7 @@ subroutine purification(H, ndim, S, P, P_purified)
    call blowsym(ndim,H,Hsym)  
    call blowsym(ndim,S,Ssym)
    
-
+   call timer_gpu%new(1,.false.)
    ! max and min eigenvalues !
    if (pur%method .eq. "mcweeny".or. pur%method .eq. "cp") &
       call eigs(ndim, Hsym, hmax, hmin)
@@ -1393,7 +1393,9 @@ subroutine eigendecompostion(ndim,matrix,eigvec,eigval)
    ! CUDA support !
    if (pur%cuda) then
       
+      call timer_gpu%click(1,'cuda_syevd')
       call cuda_dsyevd(ctx,ndim,matrix_syev,eigval,err)
+      call timer_gpu%click(1)
       
       if (err == 0) then
          eigvec = matrix_syev

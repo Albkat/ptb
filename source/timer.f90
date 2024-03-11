@@ -3,7 +3,7 @@ module timing_utilities
    use iso_fortran_env, only: wp => real64, int64
    implicit none
    private
-   public :: timer, timer_cp, timer_mcweeny, timer_sign
+   public :: timer, timer_cpu, timer_gpu, timer_gpu_submatrix
    type ::typeTimer
       integer :: n 
       logical, private :: verbose = .false. 
@@ -22,9 +22,9 @@ module timing_utilities
    endtype
 
    type(typeTimer) :: timer
-   type(typeTimer) :: timer_cp
-   type(typeTimer) :: timer_mcweeny
-   type(typeTimer) :: timer_sign
+   type(typeTimer) :: timer_cpu
+   type(typeTimer) :: timer_gpu
+   type(typeTimer) :: timer_gpu_submatrix
 
 contains
    !> initialize timer instance

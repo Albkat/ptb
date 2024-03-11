@@ -608,6 +608,9 @@ subroutine twoscf(pr,prop,n,ndim,nel,nopen,homo,at,xyz,z,rab,cn,S,SS,Vecp,Hdiag,
    endif
    call timer%write(output) 
    call calculate_rmsd(ndim,P,P_purified)
+   call timer_cpu%write(output)
+   if(pur%cuda) &
+   call timer_gpu%write(output)
    stop
    
    if(fail) stop 'diag error'
@@ -1093,6 +1096,7 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
       use accel_lib
       use cuda_
       use cli
+      use timing_utilities
       implicit none
       integer mode,ndim,nel,nopen,homo
       real*8 et        
@@ -1122,7 +1126,9 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
       iu=min(homo+4,ndim)                 ! normal case 
       if(mode.eq.3) iu = min(ndim,5*homo) ! sTDA write, guess for highest relevant virt
       if(mode.eq.4 .or. force) iu = ndim             ! all virts MUST be given to TM (otherwise virts are strange orthogonalized and results
-       
+      call timer_cpu%new(1,.false.)
+
+      call timer_cpu%click(1,'DSYGVD')
       ! are worse! (i.e. iu = ndim)
 ! diag case branch
       if(iu.eq.ndim) then                  
@@ -1160,6 +1166,7 @@ subroutine solve2(mode,ndim,nel,nopen,homo,et,focc,H,S,P,e,U,fail)
          enddo
    ! end of diag case branch      
       endif
+      call timer_cpu%click(1)
 
 
       if(info.ne.0) fail=.true.
