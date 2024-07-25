@@ -123,7 +123,7 @@ End Subroutine get_schoenflies
 !End Program test_call
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-Subroutine getsymmetry (pr,n, iat, xyz, symthr, maxatdesy, highsym)
+subroutine getsymmetry (pr,n, iat, xyz, symthr, maxatdesy, highsym)
       Use iso_c_binding, Only: C_CHAR, C_NULL_CHAR
       Implicit None
       Integer n, iat(n), maxatdesy, extcode
@@ -155,9 +155,9 @@ Subroutine getsymmetry (pr,n, iat, xyz, symthr, maxatdesy, highsym)
       paramar (11) = 5          ! OptChangeHits
 
       atmp='    '
-      Call get_schoenflies (n, iat, xyz, atmp, paramar)
+      Call get_schoenflies(n, iat, xyz, atmp, paramar)
 
-!TM stuff (trafo table)
+      !TM stuff (trafo table)
       sfsym(1:3)=atmp(2:4)
       if(sfsym(1:1).eq.'D') sfsym(1:1)='d'
       if(sfsym(1:1).eq.'C') sfsym(1:1)='c'
@@ -177,5 +177,5 @@ Subroutine getsymmetry (pr,n, iat, xyz, symthr, maxatdesy, highsym)
       if(index(sfsym,'oh').ne.0     ) highsym=.true. ! Oh    
       if(index(sfsym,'ih').ne.0     ) highsym=.true. ! Ih    
 
-End
+end subroutine 
 

@@ -1,0 +1,37 @@
+ 
+       ==============================================
+       |                 P T B                      |
+       |                S.Grimme                    |
+       |          Universitaet Bonn, MCTC           |
+       ==============================================
+       Version 3.7, Do 28. Apr 14:28:45 CEST 2022
+ 
+       Cite work conducted with this code as
+       S. Grimme, M. Mueller, A. Hansen, unpublished.
+ 
+ ~/.atompara                                                                    
+  
+          =========================
+          reading ... SHardonnay-6.xyz
+          =========================
+ basis read done.
+ ncao        40215
+ nsao        38145
+ npr        105978
+ basis setup done. Ndim       38145
+ coreat         2070
+ cncao          2098
+ cnsao          2098
+ cnpr          12588
+ 
+ nalpha         6004
+ nbeta          6004
+ ntotal        12008
+ nopen             0
+cpu  time for startup and initial S   38.42 s
+wall time for startup and initial S   39.00 s
+               -----------------------
+               |      PTB  model      |
+               | SG, MM, AH 2020-2022 |
+               -----------------------
+ prop :           1

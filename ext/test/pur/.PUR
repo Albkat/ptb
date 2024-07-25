@@ -1,0 +1,5 @@
+cuda
+!method = mcw    
+!metric = inverse
+sparse = false
+!chempot = 20

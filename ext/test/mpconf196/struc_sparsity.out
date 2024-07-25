@@ -1,0 +1,1391 @@
+ 
+       ==============================================
+       |                 P T B                      |
+       |                S.Grimme                    |
+       |          Universitaet Bonn, MCTC           |
+       ==============================================
+       Version 3.7, Do 28. Apr 14:28:45 CEST 2022
+ 
+       Cite work conducted with this code as
+       S. Grimme, M. Mueller, A. Hansen, unpublished.
+ 
+ ~/.atompara                                                                    
+  
+          =========================
+          reading ... struc.xyz
+          =========================
+ basis read done.
+ ncao         1234
+ nsao         1173
+ npr          3260
+ basis setup done. Ndim        1173
+ coreat           61
+ cncao            61
+ cnsao            61
+ cnpr            366
+ 
+ nalpha          176
+ nbeta           176
+ ntotal          352
+ nopen             0
+cpu  time for startup and initial S    0.22 s
+wall time for startup and initial S    1.00 s
+               -----------------------
+               |      PTB  model      |
+               | SG, MM, AH 2020-2022 |
+               -----------------------
+ prop :           1
+ PA setup with Mull-Loew partitioning   0.333333 ...
+ done.
+EEQ done. sum q :    0.000
+    atom   Zeff  qEEQ  mod   srCN   noHCN   CN(EEQ)
+    1    8  6.0    -0.130   1.513   0.272   1.001
+    2    8  6.0    -0.131   1.492   0.270   1.002
+    3    7  5.0    -0.024   3.446   0.377   2.988
+    4    7  5.0    -0.017   3.317   0.372   2.987
+    5    7  5.0    -0.016   3.295   0.362   2.997
+    6    7  5.0    -0.007   3.425   0.378   2.990
+    7    7  5.0    -0.016   3.217   0.363   2.998
+    8    6  4.0    -0.056   3.960   0.179   3.988
+    9    6  4.0    -0.058   3.855   0.108   3.971
+   10    6  4.0    -0.054   4.019   0.180   3.983
+   11    6  4.0    -0.055   4.114   0.179   3.981
+   12    6  4.0    -0.054   4.121   0.176   3.987
+   13    6  4.0    -0.044   3.983   0.182   3.990
+   14    6  4.0    -0.048   3.280   0.521   2.999
+   15    6  4.0    -0.056   3.814   0.190   3.982
+   16    6  4.0    -0.058   3.937   0.184   3.988
+   17    6  4.0    -0.056   3.956   0.185   3.985
+   18    6  4.0    -0.059   3.815   0.186   3.978
+   19    6  4.0    -0.048   3.217   0.518   2.994
+   20    6  4.0    -0.044   4.059   0.186   3.993
+   21    6  4.0    -0.043   3.602   0.276   3.014
+   22    6  4.0    -0.071   3.404   0.222   3.020
+   23    6  4.0    -0.071   3.183   0.223   3.015
+   24    6  4.0    -0.071   3.182   0.223   3.017
+   25    6  4.0    -0.073   3.245   0.223   3.014
+   26    6  4.0    -0.071   3.390   0.221   3.021
+   27    6  4.0    -0.042   4.083   0.191   3.993
+   28    1  1.0     0.054   1.007   0.032   0.997
+   29    1  1.0     0.045   0.990   0.032   0.997
+   30    1  1.0     0.036   0.894   0.002   0.992
+   31    1  1.0     0.037   0.895   0.002   0.992
+   32    1  1.0     0.038   0.879   0.002   0.992
+   33    1  1.0     0.034   0.899   0.002   0.992
+   34    1  1.0     0.047   0.899   0.002   0.991
+   35    1  1.0     0.037   0.887   0.002   0.992
+   36    1  1.0     0.038   0.894   0.002   0.992
+   37    1  1.0     0.043   0.918   0.002   0.993
+   38    1  1.0     0.042   0.902   0.002   0.993
+   39    1  1.0     0.038   0.897   0.002   0.992
+   40    1  1.0     0.044   0.893   0.002   0.992
+   41    1  1.0     0.046   0.899   0.002   0.992
+   42    1  1.0     0.045   0.913   0.002   0.993
+   43    1  1.0     0.037   0.886   0.002   0.992
+   44    1  1.0     0.036   0.879   0.002   0.991
+   45    1  1.0     0.043   0.908   0.002   0.993
+   46    1  1.0     0.036   0.906   0.002   0.992
+   47    1  1.0     0.035   0.882   0.002   0.991
+   48    1  1.0     0.046   0.921   0.003   0.993
+   49    1  1.0     0.036   0.879   0.002   0.992
+   50    1  1.0     0.039   0.884   0.002   0.991
+   51    1  1.0     0.040   0.930   0.002   0.993
+   52    1  1.0     0.057   0.896   0.003   0.993
+   53    1  1.0     0.058   0.891   0.003   0.994
+   54    1  1.0     0.059   0.891   0.003   0.994
+   55    1  1.0     0.059   0.924   0.003   0.993
+   56    1  1.0     0.056   0.896   0.003   0.993
+   57    1  1.0     0.043   0.886   0.002   0.991
+   58    1  1.0     0.043   0.910   0.002   0.992
+   59    6  4.0    -0.043   4.082   0.199   3.985
+   60    6  4.0    -0.049   3.257   0.532   3.001
+   61    7  5.0    -0.007   3.393   0.412   2.991
+   62    1  1.0     0.059   0.936   0.002   0.992
+   63    1  1.0     0.041   0.907   0.002   0.992
+   64    8  6.0    -0.130   1.546   0.269   1.001
+   65    7  5.0    -0.020   3.304   0.375   2.999
+   66    6  4.0    -0.055   3.967   0.187   3.983
+   67    6  4.0    -0.054   4.075   0.187   3.980
+   68    6  4.0    -0.057   3.847   0.186   3.980
+   69    1  1.0     0.040   1.027   0.031   0.996
+   70    6  4.0    -0.057   3.857   0.108   3.971
+   71    1  1.0     0.037   0.887   0.002   0.991
+   72    1  1.0     0.040   0.905   0.002   0.992
+   73    6  4.0    -0.053   4.122   0.175   3.982
+   74    1  1.0     0.041   0.909   0.002   0.992
+   75    1  1.0     0.047   0.900   0.002   0.992
+   76    6  4.0    -0.057   3.980   0.184   3.985
+   77    1  1.0     0.046   0.904   0.002   0.993
+   78    1  1.0     0.037   0.882   0.002   0.993
+   79    6  4.0    -0.055   4.026   0.179   3.984
+   80    1  1.0     0.034   0.896   0.002   0.992
+   81    1  1.0     0.045   0.885   0.002   0.992
+   82    7  5.0    -0.016   3.312   0.369   2.987
+   83    1  1.0     0.042   0.904   0.002   0.992
+   84    1  1.0     0.049   0.912   0.002   0.993
+   85    7  5.0    -0.022   3.408   0.388   2.990
+   86    1  1.0     0.041   0.914   0.002   0.993
+   87    1  1.0     0.036   0.885   0.002   0.992
+   88    1  1.0     0.036   0.888   0.002   0.992
+   89    1  1.0     0.046   0.890   0.002   0.991
+   90    6  4.0    -0.044   3.993   0.181   3.990
+   91    6  4.0    -0.055   4.002   0.183   3.983
+   92    6  4.0    -0.042   4.089   0.191   3.990
+   93    6  4.0    -0.047   3.292   0.521   2.999
+   94    1  1.0     0.044   0.901   0.002   0.992
+   95    1  1.0     0.048   0.901   0.002   0.992
+   96    6  4.0    -0.056   3.798   0.184   3.979
+   97    1  1.0     0.050   0.924   0.002   0.992
+   98    1  1.0     0.041   0.900   0.002   0.992
+   99    6  4.0    -0.042   3.646   0.277   3.017
+  100    1  1.0     0.040   0.881   0.002   0.991
+  101    1  1.0     0.042   0.910   0.002   0.992
+  102    8  6.0    -0.128   1.495   0.271   1.001
+  103    7  5.0    -0.017   3.282   0.361   2.997
+  104    1  1.0     0.048   0.899   0.002   0.992
+  105    1  1.0     0.037   0.879   0.002   0.993
+  106    6  4.0    -0.068   3.412   0.223   3.020
+  107    6  4.0    -0.069   3.356   0.222   3.020
+  108    1  1.0     0.054   1.065   0.030   0.996
+  109    6  4.0    -0.068   3.176   0.224   3.016
+  110    1  1.0     0.065   0.902   0.003   0.994
+  111    6  4.0    -0.068   3.174   0.223   3.015
+  112    1  1.0     0.059   0.895   0.003   0.993
+  113    6  4.0    -0.068   3.166   0.223   3.016
+  114    1  1.0     0.062   0.891   0.003   0.994
+  115    1  1.0     0.061   0.891   0.003   0.994
+  116    1  1.0     0.061   0.890   0.003   0.994
+  117    8  6.0    -0.084   1.518   0.081   1.987
+  118    1  1.0     0.041   0.763   0.043   0.994
+  119    1  1.0     0.048   0.828   0.038   0.992
+  120    8  6.0    -0.086   1.527   0.082   1.987
+  121    1  1.0     0.048   0.763   0.043   0.994
+  122    1  1.0     0.063   0.840   0.039   0.993
+  123    8  6.0    -0.083   1.518   0.083   1.987
+  124    1  1.0     0.063   0.829   0.040   0.993
+  125    1  1.0     0.047   0.764   0.043   0.994
+  126    8  6.0    -0.086   1.562   0.081   1.987
+  127    1  1.0     0.060   0.842   0.038   0.992
+  128    1  1.0     0.045   0.762   0.043   0.994
+  129    8  6.0    -0.084   1.525   0.081   1.987
+  130    1  1.0     0.050   0.788   0.041   0.994
+  131    1  1.0     0.059   0.800   0.041   0.994
+  132    8  6.0    -0.085   1.524   0.082   1.987
+  133    1  1.0     0.062   0.848   0.039   0.993
+  134    1  1.0     0.044   0.763   0.043   0.994
+  135    8  6.0    -0.090   1.615   0.081   1.987
+  136    1  1.0     0.059   0.830   0.039   0.993
+  137    1  1.0     0.044   0.762   0.043   0.994
+ computing Vecp ...
+ PTB H matrix iteration            1  done. Now diag ...
+----------------------------------------------------------------------
+ Initial density:
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+
+Number of electrons:       0.000000
+Band structure energy:     0.000000
+------------------------------------------------------------------------
+----------------------------------------------------------------------
+ PTB normal density:
+   1.31427427658816       0.445835157210487       8.661712350013928E-002
+ -0.185240770832409      -0.153042574030280       4.549073769264663E-002
+ -6.997147068374483E-002 -3.408108625880347E-002  6.789298786921907E-003
+ -1.656529123295497E-003  4.787002878062655E-003  4.506551863530495E-003
+
+Number of electrons:     352.000000
+Band structure energy:  -937.442908
+------------------------------------------------------------------------
+
+************************ PURIFICATION *************************
+
+  __SETTINGS__
+  Purification type:                 sign
+  Sign mode:                         diagonalisation
+  Overlap metric (S^metric):         -0.5
+  Purification cycle number:         20
+  Initial chemical potential:       -10.00000000
+  Upper limit               :         3.00000000
+  Step (initial -> limit)   :         0.01000000
+  Verbose:                           T
+ 
+Gershgorin norm  5791.171856
+Frobenuis norm  6110.882682
+Sparsity ratio:      72.4577%
+
+Applying submatrix method to matrix of dimension  1173
+Nonzero elements in column 1 : 338
+Nonzero elements in column 2 : 624
+Nonzero elements in column 3 : 130
+Nonzero elements in column 4 : 113
+Nonzero elements in column 5 : 101
+Nonzero elements in column 6 : 432
+Nonzero elements in column 7 : 398
+Nonzero elements in column 8 : 409
+Nonzero elements in column 9 : 92
+Nonzero elements in column 10 : 87
+Nonzero elements in column 11 : 129
+Nonzero elements in column 12 : 115
+Nonzero elements in column 13 : 126
+Nonzero elements in column 14 : 400
+Nonzero elements in column 15 : 773
+Nonzero elements in column 16 : 153
+Nonzero elements in column 17 : 161
+Nonzero elements in column 18 : 148
+Nonzero elements in column 19 : 579
+Nonzero elements in column 20 : 528
+Nonzero elements in column 21 : 540
+Nonzero elements in column 22 : 147
+Nonzero elements in column 23 : 133
+Nonzero elements in column 24 : 135
+Nonzero elements in column 25 : 135
+Nonzero elements in column 26 : 123
+Nonzero elements in column 27 : 522
+Nonzero elements in column 28 : 830
+Nonzero elements in column 29 : 171
+Nonzero elements in column 30 : 169
+Nonzero elements in column 31 : 196
+Nonzero elements in column 32 : 679
+Nonzero elements in column 33 : 665
+Nonzero elements in column 34 : 652
+Nonzero elements in column 35 : 160
+Nonzero elements in column 36 : 166
+Nonzero elements in column 37 : 178
+Nonzero elements in column 38 : 159
+Nonzero elements in column 39 : 145
+Nonzero elements in column 40 : 509
+Nonzero elements in column 41 : 766
+Nonzero elements in column 42 : 173
+Nonzero elements in column 43 : 163
+Nonzero elements in column 44 : 146
+Nonzero elements in column 45 : 598
+Nonzero elements in column 46 : 631
+Nonzero elements in column 47 : 657
+Nonzero elements in column 48 : 114
+Nonzero elements in column 49 : 170
+Nonzero elements in column 50 : 125
+Nonzero elements in column 51 : 139
+Nonzero elements in column 52 : 132
+Nonzero elements in column 53 : 519
+Nonzero elements in column 54 : 813
+Nonzero elements in column 55 : 199
+Nonzero elements in column 56 : 189
+Nonzero elements in column 57 : 198
+Nonzero elements in column 58 : 671
+Nonzero elements in column 59 : 771
+Nonzero elements in column 60 : 726
+Nonzero elements in column 61 : 186
+Nonzero elements in column 62 : 147
+Nonzero elements in column 63 : 189
+Nonzero elements in column 64 : 157
+Nonzero elements in column 65 : 206
+Nonzero elements in column 66 : 431
+Nonzero elements in column 67 : 667
+Nonzero elements in column 68 : 195
+Nonzero elements in column 69 : 188
+Nonzero elements in column 70 : 181
+Nonzero elements in column 71 : 540
+Nonzero elements in column 72 : 584
+Nonzero elements in column 73 : 597
+Nonzero elements in column 74 : 141
+Nonzero elements in column 75 : 133
+Nonzero elements in column 76 : 129
+Nonzero elements in column 77 : 130
+Nonzero elements in column 78 : 137
+Nonzero elements in column 79 : 503
+Nonzero elements in column 80 : 776
+Nonzero elements in column 81 : 135
+Nonzero elements in column 82 : 167
+Nonzero elements in column 83 : 150
+Nonzero elements in column 84 : 653
+Nonzero elements in column 85 : 479
+Nonzero elements in column 86 : 609
+Nonzero elements in column 87 : 132
+Nonzero elements in column 88 : 135
+Nonzero elements in column 89 : 138
+Nonzero elements in column 90 : 177
+Nonzero elements in column 91 : 118
+Nonzero elements in column 92 : 449
+Nonzero elements in column 93 : 639
+Nonzero elements in column 94 : 167
+Nonzero elements in column 95 : 189
+Nonzero elements in column 96 : 185
+Nonzero elements in column 97 : 602
+Nonzero elements in column 98 : 588
+Nonzero elements in column 99 : 605
+Nonzero elements in column 100 : 144
+Nonzero elements in column 101 : 172
+Nonzero elements in column 102 : 178
+Nonzero elements in column 103 : 145
+Nonzero elements in column 104 : 167
+Nonzero elements in column 105 : 428
+Nonzero elements in column 106 : 664
+Nonzero elements in column 107 : 146
+Nonzero elements in column 108 : 155
+Nonzero elements in column 109 : 172
+Nonzero elements in column 110 : 554
+Nonzero elements in column 111 : 568
+Nonzero elements in column 112 : 527
+Nonzero elements in column 113 : 128
+Nonzero elements in column 114 : 141
+Nonzero elements in column 115 : 165
+Nonzero elements in column 116 : 150
+Nonzero elements in column 117 : 162
+Nonzero elements in column 118 : 464
+Nonzero elements in column 119 : 665
+Nonzero elements in column 120 : 157
+Nonzero elements in column 121 : 146
+Nonzero elements in column 122 : 178
+Nonzero elements in column 123 : 565
+Nonzero elements in column 124 : 600
+Nonzero elements in column 125 : 567
+Nonzero elements in column 126 : 165
+Nonzero elements in column 127 : 160
+Nonzero elements in column 128 : 178
+Nonzero elements in column 129 : 131
+Nonzero elements in column 130 : 135
+Nonzero elements in column 131 : 557
+Nonzero elements in column 132 : 828
+Nonzero elements in column 133 : 195
+Nonzero elements in column 134 : 225
+Nonzero elements in column 135 : 202
+Nonzero elements in column 136 : 691
+Nonzero elements in column 137 : 836
+Nonzero elements in column 138 : 788
+Nonzero elements in column 139 : 203
+Nonzero elements in column 140 : 234
+Nonzero elements in column 141 : 217
+Nonzero elements in column 142 : 173
+Nonzero elements in column 143 : 206
+Nonzero elements in column 144 : 594
+Nonzero elements in column 145 : 900
+Nonzero elements in column 146 : 249
+Nonzero elements in column 147 : 230
+Nonzero elements in column 148 : 208
+Nonzero elements in column 149 : 808
+Nonzero elements in column 150 : 817
+Nonzero elements in column 151 : 860
+Nonzero elements in column 152 : 215
+Nonzero elements in column 153 : 242
+Nonzero elements in column 154 : 251
+Nonzero elements in column 155 : 223
+Nonzero elements in column 156 : 258
+Nonzero elements in column 157 : 477
+Nonzero elements in column 158 : 733
+Nonzero elements in column 159 : 152
+Nonzero elements in column 160 : 169
+Nonzero elements in column 161 : 162
+Nonzero elements in column 162 : 704
+Nonzero elements in column 163 : 727
+Nonzero elements in column 164 : 597
+Nonzero elements in column 165 : 180
+Nonzero elements in column 166 : 157
+Nonzero elements in column 167 : 192
+Nonzero elements in column 168 : 144
+Nonzero elements in column 169 : 146
+Nonzero elements in column 170 : 512
+Nonzero elements in column 171 : 720
+Nonzero elements in column 172 : 207
+Nonzero elements in column 173 : 187
+Nonzero elements in column 174 : 199
+Nonzero elements in column 175 : 771
+Nonzero elements in column 176 : 666
+Nonzero elements in column 177 : 713
+Nonzero elements in column 178 : 168
+Nonzero elements in column 179 : 182
+Nonzero elements in column 180 : 167
+Nonzero elements in column 181 : 173
+Nonzero elements in column 182 : 196
+Nonzero elements in column 183 : 486
+Nonzero elements in column 184 : 736
+Nonzero elements in column 185 : 205
+Nonzero elements in column 186 : 205
+Nonzero elements in column 187 : 174
+Nonzero elements in column 188 : 700
+Nonzero elements in column 189 : 667
+Nonzero elements in column 190 : 762
+Nonzero elements in column 191 : 180
+Nonzero elements in column 192 : 225
+Nonzero elements in column 193 : 177
+Nonzero elements in column 194 : 206
+Nonzero elements in column 195 : 200
+Nonzero elements in column 196 : 483
+Nonzero elements in column 197 : 724
+Nonzero elements in column 198 : 203
+Nonzero elements in column 199 : 191
+Nonzero elements in column 200 : 158
+Nonzero elements in column 201 : 638
+Nonzero elements in column 202 : 625
+Nonzero elements in column 203 : 645
+Nonzero elements in column 204 : 166
+Nonzero elements in column 205 : 170
+Nonzero elements in column 206 : 180
+Nonzero elements in column 207 : 153
+Nonzero elements in column 208 : 158
+Nonzero elements in column 209 : 421
+Nonzero elements in column 210 : 606
+Nonzero elements in column 211 : 164
+Nonzero elements in column 212 : 186
+Nonzero elements in column 213 : 158
+Nonzero elements in column 214 : 542
+Nonzero elements in column 215 : 565
+Nonzero elements in column 216 : 589
+Nonzero elements in column 217 : 160
+Nonzero elements in column 218 : 158
+Nonzero elements in column 219 : 142
+Nonzero elements in column 220 : 136
+Nonzero elements in column 221 : 157
+Nonzero elements in column 222 : 467
+Nonzero elements in column 223 : 675
+Nonzero elements in column 224 : 179
+Nonzero elements in column 225 : 159
+Nonzero elements in column 226 : 156
+Nonzero elements in column 227 : 614
+Nonzero elements in column 228 : 559
+Nonzero elements in column 229 : 588
+Nonzero elements in column 230 : 140
+Nonzero elements in column 231 : 169
+Nonzero elements in column 232 : 147
+Nonzero elements in column 233 : 160
+Nonzero elements in column 234 : 142
+Nonzero elements in column 235 : 542
+Nonzero elements in column 236 : 844
+Nonzero elements in column 237 : 218
+Nonzero elements in column 238 : 213
+Nonzero elements in column 239 : 209
+Nonzero elements in column 240 : 813
+Nonzero elements in column 241 : 725
+Nonzero elements in column 242 : 791
+Nonzero elements in column 243 : 199
+Nonzero elements in column 244 : 186
+Nonzero elements in column 245 : 180
+Nonzero elements in column 246 : 215
+Nonzero elements in column 247 : 192
+Nonzero elements in column 248 : 453
+Nonzero elements in column 249 : 705
+Nonzero elements in column 250 : 164
+Nonzero elements in column 251 : 154
+Nonzero elements in column 252 : 191
+Nonzero elements in column 253 : 537
+Nonzero elements in column 254 : 615
+Nonzero elements in column 255 : 670
+Nonzero elements in column 256 : 165
+Nonzero elements in column 257 : 172
+Nonzero elements in column 258 : 126
+Nonzero elements in column 259 : 160
+Nonzero elements in column 260 : 197
+Nonzero elements in column 261 : 459
+Nonzero elements in column 262 : 721
+Nonzero elements in column 263 : 186
+Nonzero elements in column 264 : 214
+Nonzero elements in column 265 : 201
+Nonzero elements in column 266 : 791
+Nonzero elements in column 267 : 810
+Nonzero elements in column 268 : 729
+Nonzero elements in column 269 : 169
+Nonzero elements in column 270 : 187
+Nonzero elements in column 271 : 188
+Nonzero elements in column 272 : 202
+Nonzero elements in column 273 : 201
+Nonzero elements in column 274 : 417
+Nonzero elements in column 275 : 693
+Nonzero elements in column 276 : 161
+Nonzero elements in column 277 : 140
+Nonzero elements in column 278 : 151
+Nonzero elements in column 279 : 472
+Nonzero elements in column 280 : 748
+Nonzero elements in column 281 : 719
+Nonzero elements in column 282 : 125
+Nonzero elements in column 283 : 156
+Nonzero elements in column 284 : 162
+Nonzero elements in column 285 : 147
+Nonzero elements in column 286 : 165
+Nonzero elements in column 287 : 423
+Nonzero elements in column 288 : 690
+Nonzero elements in column 289 : 141
+Nonzero elements in column 290 : 140
+Nonzero elements in column 291 : 166
+Nonzero elements in column 292 : 709
+Nonzero elements in column 293 : 489
+Nonzero elements in column 294 : 716
+Nonzero elements in column 295 : 157
+Nonzero elements in column 296 : 150
+Nonzero elements in column 297 : 163
+Nonzero elements in column 298 : 177
+Nonzero elements in column 299 : 156
+Nonzero elements in column 300 : 478
+Nonzero elements in column 301 : 767
+Nonzero elements in column 302 : 185
+Nonzero elements in column 303 : 164
+Nonzero elements in column 304 : 181
+Nonzero elements in column 305 : 720
+Nonzero elements in column 306 : 756
+Nonzero elements in column 307 : 611
+Nonzero elements in column 308 : 170
+Nonzero elements in column 309 : 159
+Nonzero elements in column 310 : 189
+Nonzero elements in column 311 : 173
+Nonzero elements in column 312 : 187
+Nonzero elements in column 313 : 516
+Nonzero elements in column 314 : 797
+Nonzero elements in column 315 : 210
+Nonzero elements in column 316 : 210
+Nonzero elements in column 317 : 223
+Nonzero elements in column 318 : 778
+Nonzero elements in column 319 : 816
+Nonzero elements in column 320 : 820
+Nonzero elements in column 321 : 181
+Nonzero elements in column 322 : 200
+Nonzero elements in column 323 : 208
+Nonzero elements in column 324 : 212
+Nonzero elements in column 325 : 191
+Nonzero elements in column 326 : 510
+Nonzero elements in column 327 : 790
+Nonzero elements in column 328 : 211
+Nonzero elements in column 329 : 189
+Nonzero elements in column 330 : 215
+Nonzero elements in column 331 : 777
+Nonzero elements in column 332 : 830
+Nonzero elements in column 333 : 826
+Nonzero elements in column 334 : 178
+Nonzero elements in column 335 : 170
+Nonzero elements in column 336 : 230
+Nonzero elements in column 337 : 181
+Nonzero elements in column 338 : 209
+Nonzero elements in column 339 : 534
+Nonzero elements in column 340 : 785
+Nonzero elements in column 341 : 192
+Nonzero elements in column 342 : 193
+Nonzero elements in column 343 : 191
+Nonzero elements in column 344 : 709
+Nonzero elements in column 345 : 704
+Nonzero elements in column 346 : 679
+Nonzero elements in column 347 : 148
+Nonzero elements in column 348 : 210
+Nonzero elements in column 349 : 198
+Nonzero elements in column 350 : 164
+Nonzero elements in column 351 : 171
+Nonzero elements in column 352 : 387
+Nonzero elements in column 353 : 954
+Nonzero elements in column 354 : 310
+Nonzero elements in column 355 : 332
+Nonzero elements in column 356 : 289
+Nonzero elements in column 357 : 236
+Nonzero elements in column 358 : 612
+Nonzero elements in column 359 : 199
+Nonzero elements in column 360 : 215
+Nonzero elements in column 361 : 183
+Nonzero elements in column 362 : 220
+Nonzero elements in column 363 : 539
+Nonzero elements in column 364 : 170
+Nonzero elements in column 365 : 194
+Nonzero elements in column 366 : 170
+Nonzero elements in column 367 : 269
+Nonzero elements in column 368 : 659
+Nonzero elements in column 369 : 197
+Nonzero elements in column 370 : 184
+Nonzero elements in column 371 : 190
+Nonzero elements in column 372 : 202
+Nonzero elements in column 373 : 554
+Nonzero elements in column 374 : 163
+Nonzero elements in column 375 : 152
+Nonzero elements in column 376 : 170
+Nonzero elements in column 377 : 179
+Nonzero elements in column 378 : 426
+Nonzero elements in column 379 : 157
+Nonzero elements in column 380 : 134
+Nonzero elements in column 381 : 150
+Nonzero elements in column 382 : 278
+Nonzero elements in column 383 : 613
+Nonzero elements in column 384 : 202
+Nonzero elements in column 385 : 176
+Nonzero elements in column 386 : 170
+Nonzero elements in column 387 : 199
+Nonzero elements in column 388 : 484
+Nonzero elements in column 389 : 152
+Nonzero elements in column 390 : 176
+Nonzero elements in column 391 : 132
+Nonzero elements in column 392 : 286
+Nonzero elements in column 393 : 739
+Nonzero elements in column 394 : 218
+Nonzero elements in column 395 : 260
+Nonzero elements in column 396 : 255
+Nonzero elements in column 397 : 447
+Nonzero elements in column 398 : 992
+Nonzero elements in column 399 : 268
+Nonzero elements in column 400 : 298
+Nonzero elements in column 401 : 265
+Nonzero elements in column 402 : 440
+Nonzero elements in column 403 : 904
+Nonzero elements in column 404 : 311
+Nonzero elements in column 405 : 276
+Nonzero elements in column 406 : 291
+Nonzero elements in column 407 : 444
+Nonzero elements in column 408 : 1026
+Nonzero elements in column 409 : 289
+Nonzero elements in column 410 : 322
+Nonzero elements in column 411 : 351
+Nonzero elements in column 412 : 327
+Nonzero elements in column 413 : 831
+Nonzero elements in column 414 : 148
+Nonzero elements in column 415 : 216
+Nonzero elements in column 416 : 221
+Nonzero elements in column 417 : 209
+Nonzero elements in column 418 : 506
+Nonzero elements in column 419 : 202
+Nonzero elements in column 420 : 195
+Nonzero elements in column 421 : 148
+Nonzero elements in column 422 : 290
+Nonzero elements in column 423 : 670
+Nonzero elements in column 424 : 219
+Nonzero elements in column 425 : 259
+Nonzero elements in column 426 : 245
+Nonzero elements in column 427 : 387
+Nonzero elements in column 428 : 926
+Nonzero elements in column 429 : 229
+Nonzero elements in column 430 : 227
+Nonzero elements in column 431 : 298
+Nonzero elements in column 432 : 238
+Nonzero elements in column 433 : 539
+Nonzero elements in column 434 : 169
+Nonzero elements in column 435 : 181
+Nonzero elements in column 436 : 206
+Nonzero elements in column 437 : 265
+Nonzero elements in column 438 : 631
+Nonzero elements in column 439 : 171
+Nonzero elements in column 440 : 166
+Nonzero elements in column 441 : 203
+Nonzero elements in column 442 : 220
+Nonzero elements in column 443 : 588
+Nonzero elements in column 444 : 155
+Nonzero elements in column 445 : 153
+Nonzero elements in column 446 : 160
+Nonzero elements in column 447 : 206
+Nonzero elements in column 448 : 509
+Nonzero elements in column 449 : 165
+Nonzero elements in column 450 : 172
+Nonzero elements in column 451 : 183
+Nonzero elements in column 452 : 290
+Nonzero elements in column 453 : 688
+Nonzero elements in column 454 : 218
+Nonzero elements in column 455 : 160
+Nonzero elements in column 456 : 220
+Nonzero elements in column 457 : 194
+Nonzero elements in column 458 : 450
+Nonzero elements in column 459 : 170
+Nonzero elements in column 460 : 141
+Nonzero elements in column 461 : 185
+Nonzero elements in column 462 : 212
+Nonzero elements in column 463 : 498
+Nonzero elements in column 464 : 153
+Nonzero elements in column 465 : 171
+Nonzero elements in column 466 : 204
+Nonzero elements in column 467 : 276
+Nonzero elements in column 468 : 666
+Nonzero elements in column 469 : 155
+Nonzero elements in column 470 : 216
+Nonzero elements in column 471 : 174
+Nonzero elements in column 472 : 210
+Nonzero elements in column 473 : 505
+Nonzero elements in column 474 : 169
+Nonzero elements in column 475 : 197
+Nonzero elements in column 476 : 190
+Nonzero elements in column 477 : 173
+Nonzero elements in column 478 : 427
+Nonzero elements in column 479 : 204
+Nonzero elements in column 480 : 152
+Nonzero elements in column 481 : 210
+Nonzero elements in column 482 : 225
+Nonzero elements in column 483 : 632
+Nonzero elements in column 484 : 227
+Nonzero elements in column 485 : 228
+Nonzero elements in column 486 : 223
+Nonzero elements in column 487 : 448
+Nonzero elements in column 488 : 1002
+Nonzero elements in column 489 : 307
+Nonzero elements in column 490 : 303
+Nonzero elements in column 491 : 279
+Nonzero elements in column 492 : 343
+Nonzero elements in column 493 : 921
+Nonzero elements in column 494 : 262
+Nonzero elements in column 495 : 285
+Nonzero elements in column 496 : 233
+Nonzero elements in column 497 : 310
+Nonzero elements in column 498 : 754
+Nonzero elements in column 499 : 182
+Nonzero elements in column 500 : 213
+Nonzero elements in column 501 : 204
+Nonzero elements in column 502 : 253
+Nonzero elements in column 503 : 585
+Nonzero elements in column 504 : 175
+Nonzero elements in column 505 : 206
+Nonzero elements in column 506 : 194
+Nonzero elements in column 507 : 575
+Nonzero elements in column 508 : 828
+Nonzero elements in column 509 : 210
+Nonzero elements in column 510 : 192
+Nonzero elements in column 511 : 193
+Nonzero elements in column 512 : 817
+Nonzero elements in column 513 : 777
+Nonzero elements in column 514 : 807
+Nonzero elements in column 515 : 190
+Nonzero elements in column 516 : 225
+Nonzero elements in column 517 : 218
+Nonzero elements in column 518 : 240
+Nonzero elements in column 519 : 210
+Nonzero elements in column 520 : 521
+Nonzero elements in column 521 : 745
+Nonzero elements in column 522 : 200
+Nonzero elements in column 523 : 183
+Nonzero elements in column 524 : 219
+Nonzero elements in column 525 : 796
+Nonzero elements in column 526 : 719
+Nonzero elements in column 527 : 778
+Nonzero elements in column 528 : 186
+Nonzero elements in column 529 : 189
+Nonzero elements in column 530 : 195
+Nonzero elements in column 531 : 195
+Nonzero elements in column 532 : 185
+Nonzero elements in column 533 : 569
+Nonzero elements in column 534 : 890
+Nonzero elements in column 535 : 219
+Nonzero elements in column 536 : 181
+Nonzero elements in column 537 : 191
+Nonzero elements in column 538 : 817
+Nonzero elements in column 539 : 748
+Nonzero elements in column 540 : 756
+Nonzero elements in column 541 : 175
+Nonzero elements in column 542 : 151
+Nonzero elements in column 543 : 181
+Nonzero elements in column 544 : 171
+Nonzero elements in column 545 : 168
+Nonzero elements in column 546 : 461
+Nonzero elements in column 547 : 983
+Nonzero elements in column 548 : 292
+Nonzero elements in column 549 : 307
+Nonzero elements in column 550 : 278
+Nonzero elements in column 551 : 290
+Nonzero elements in column 552 : 693
+Nonzero elements in column 553 : 242
+Nonzero elements in column 554 : 230
+Nonzero elements in column 555 : 230
+Nonzero elements in column 556 : 407
+Nonzero elements in column 557 : 744
+Nonzero elements in column 558 : 118
+Nonzero elements in column 559 : 121
+Nonzero elements in column 560 : 156
+Nonzero elements in column 561 : 453
+Nonzero elements in column 562 : 463
+Nonzero elements in column 563 : 527
+Nonzero elements in column 564 : 110
+Nonzero elements in column 565 : 111
+Nonzero elements in column 566 : 122
+Nonzero elements in column 567 : 127
+Nonzero elements in column 568 : 110
+Nonzero elements in column 569 : 501
+Nonzero elements in column 570 : 790
+Nonzero elements in column 571 : 171
+Nonzero elements in column 572 : 166
+Nonzero elements in column 573 : 185
+Nonzero elements in column 574 : 701
+Nonzero elements in column 575 : 553
+Nonzero elements in column 576 : 704
+Nonzero elements in column 577 : 143
+Nonzero elements in column 578 : 158
+Nonzero elements in column 579 : 150
+Nonzero elements in column 580 : 159
+Nonzero elements in column 581 : 127
+Nonzero elements in column 582 : 503
+Nonzero elements in column 583 : 742
+Nonzero elements in column 584 : 201
+Nonzero elements in column 585 : 200
+Nonzero elements in column 586 : 184
+Nonzero elements in column 587 : 649
+Nonzero elements in column 588 : 639
+Nonzero elements in column 589 : 630
+Nonzero elements in column 590 : 186
+Nonzero elements in column 591 : 167
+Nonzero elements in column 592 : 161
+Nonzero elements in column 593 : 154
+Nonzero elements in column 594 : 175
+Nonzero elements in column 595 : 585
+Nonzero elements in column 596 : 890
+Nonzero elements in column 597 : 248
+Nonzero elements in column 598 : 230
+Nonzero elements in column 599 : 221
+Nonzero elements in column 600 : 888
+Nonzero elements in column 601 : 915
+Nonzero elements in column 602 : 785
+Nonzero elements in column 603 : 210
+Nonzero elements in column 604 : 227
+Nonzero elements in column 605 : 272
+Nonzero elements in column 606 : 250
+Nonzero elements in column 607 : 241
+Nonzero elements in column 608 : 550
+Nonzero elements in column 609 : 841
+Nonzero elements in column 610 : 196
+Nonzero elements in column 611 : 195
+Nonzero elements in column 612 : 204
+Nonzero elements in column 613 : 744
+Nonzero elements in column 614 : 660
+Nonzero elements in column 615 : 743
+Nonzero elements in column 616 : 198
+Nonzero elements in column 617 : 204
+Nonzero elements in column 618 : 188
+Nonzero elements in column 619 : 207
+Nonzero elements in column 620 : 176
+Nonzero elements in column 621 : 316
+Nonzero elements in column 622 : 720
+Nonzero elements in column 623 : 236
+Nonzero elements in column 624 : 228
+Nonzero elements in column 625 : 250
+Nonzero elements in column 626 : 458
+Nonzero elements in column 627 : 719
+Nonzero elements in column 628 : 176
+Nonzero elements in column 629 : 164
+Nonzero elements in column 630 : 152
+Nonzero elements in column 631 : 595
+Nonzero elements in column 632 : 619
+Nonzero elements in column 633 : 643
+Nonzero elements in column 634 : 174
+Nonzero elements in column 635 : 174
+Nonzero elements in column 636 : 171
+Nonzero elements in column 637 : 139
+Nonzero elements in column 638 : 194
+Nonzero elements in column 639 : 287
+Nonzero elements in column 640 : 565
+Nonzero elements in column 641 : 190
+Nonzero elements in column 642 : 164
+Nonzero elements in column 643 : 180
+Nonzero elements in column 644 : 231
+Nonzero elements in column 645 : 576
+Nonzero elements in column 646 : 225
+Nonzero elements in column 647 : 208
+Nonzero elements in column 648 : 188
+Nonzero elements in column 649 : 623
+Nonzero elements in column 650 : 940
+Nonzero elements in column 651 : 233
+Nonzero elements in column 652 : 241
+Nonzero elements in column 653 : 236
+Nonzero elements in column 654 : 864
+Nonzero elements in column 655 : 785
+Nonzero elements in column 656 : 880
+Nonzero elements in column 657 : 241
+Nonzero elements in column 658 : 265
+Nonzero elements in column 659 : 229
+Nonzero elements in column 660 : 226
+Nonzero elements in column 661 : 213
+Nonzero elements in column 662 : 436
+Nonzero elements in column 663 : 1009
+Nonzero elements in column 664 : 332
+Nonzero elements in column 665 : 334
+Nonzero elements in column 666 : 290
+Nonzero elements in column 667 : 393
+Nonzero elements in column 668 : 892
+Nonzero elements in column 669 : 299
+Nonzero elements in column 670 : 275
+Nonzero elements in column 671 : 318
+Nonzero elements in column 672 : 573
+Nonzero elements in column 673 : 871
+Nonzero elements in column 674 : 227
+Nonzero elements in column 675 : 230
+Nonzero elements in column 676 : 262
+Nonzero elements in column 677 : 800
+Nonzero elements in column 678 : 890
+Nonzero elements in column 679 : 824
+Nonzero elements in column 680 : 228
+Nonzero elements in column 681 : 249
+Nonzero elements in column 682 : 212
+Nonzero elements in column 683 : 249
+Nonzero elements in column 684 : 258
+Nonzero elements in column 685 : 309
+Nonzero elements in column 686 : 794
+Nonzero elements in column 687 : 270
+Nonzero elements in column 688 : 249
+Nonzero elements in column 689 : 228
+Nonzero elements in column 690 : 273
+Nonzero elements in column 691 : 615
+Nonzero elements in column 692 : 224
+Nonzero elements in column 693 : 204
+Nonzero elements in column 694 : 228
+Nonzero elements in column 695 : 461
+Nonzero elements in column 696 : 726
+Nonzero elements in column 697 : 201
+Nonzero elements in column 698 : 170
+Nonzero elements in column 699 : 176
+Nonzero elements in column 700 : 573
+Nonzero elements in column 701 : 644
+Nonzero elements in column 702 : 637
+Nonzero elements in column 703 : 158
+Nonzero elements in column 704 : 157
+Nonzero elements in column 705 : 168
+Nonzero elements in column 706 : 168
+Nonzero elements in column 707 : 164
+Nonzero elements in column 708 : 205
+Nonzero elements in column 709 : 491
+Nonzero elements in column 710 : 173
+Nonzero elements in column 711 : 134
+Nonzero elements in column 712 : 189
+Nonzero elements in column 713 : 287
+Nonzero elements in column 714 : 759
+Nonzero elements in column 715 : 175
+Nonzero elements in column 716 : 233
+Nonzero elements in column 717 : 224
+Nonzero elements in column 718 : 529
+Nonzero elements in column 719 : 850
+Nonzero elements in column 720 : 175
+Nonzero elements in column 721 : 174
+Nonzero elements in column 722 : 175
+Nonzero elements in column 723 : 693
+Nonzero elements in column 724 : 697
+Nonzero elements in column 725 : 618
+Nonzero elements in column 726 : 143
+Nonzero elements in column 727 : 139
+Nonzero elements in column 728 : 164
+Nonzero elements in column 729 : 172
+Nonzero elements in column 730 : 126
+Nonzero elements in column 731 : 444
+Nonzero elements in column 732 : 978
+Nonzero elements in column 733 : 276
+Nonzero elements in column 734 : 332
+Nonzero elements in column 735 : 293
+Nonzero elements in column 736 : 448
+Nonzero elements in column 737 : 992
+Nonzero elements in column 738 : 310
+Nonzero elements in column 739 : 287
+Nonzero elements in column 740 : 323
+Nonzero elements in column 741 : 548
+Nonzero elements in column 742 : 912
+Nonzero elements in column 743 : 212
+Nonzero elements in column 744 : 190
+Nonzero elements in column 745 : 195
+Nonzero elements in column 746 : 641
+Nonzero elements in column 747 : 689
+Nonzero elements in column 748 : 764
+Nonzero elements in column 749 : 182
+Nonzero elements in column 750 : 179
+Nonzero elements in column 751 : 160
+Nonzero elements in column 752 : 187
+Nonzero elements in column 753 : 190
+Nonzero elements in column 754 : 479
+Nonzero elements in column 755 : 1035
+Nonzero elements in column 756 : 300
+Nonzero elements in column 757 : 327
+Nonzero elements in column 758 : 342
+Nonzero elements in column 759 : 364
+Nonzero elements in column 760 : 897
+Nonzero elements in column 761 : 275
+Nonzero elements in column 762 : 292
+Nonzero elements in column 763 : 291
+Nonzero elements in column 764 : 197
+Nonzero elements in column 765 : 506
+Nonzero elements in column 766 : 148
+Nonzero elements in column 767 : 193
+Nonzero elements in column 768 : 184
+Nonzero elements in column 769 : 277
+Nonzero elements in column 770 : 674
+Nonzero elements in column 771 : 190
+Nonzero elements in column 772 : 183
+Nonzero elements in column 773 : 186
+Nonzero elements in column 774 : 491
+Nonzero elements in column 775 : 740
+Nonzero elements in column 776 : 186
+Nonzero elements in column 777 : 188
+Nonzero elements in column 778 : 161
+Nonzero elements in column 779 : 610
+Nonzero elements in column 780 : 665
+Nonzero elements in column 781 : 661
+Nonzero elements in column 782 : 180
+Nonzero elements in column 783 : 178
+Nonzero elements in column 784 : 162
+Nonzero elements in column 785 : 165
+Nonzero elements in column 786 : 176
+Nonzero elements in column 787 : 517
+Nonzero elements in column 788 : 777
+Nonzero elements in column 789 : 233
+Nonzero elements in column 790 : 215
+Nonzero elements in column 791 : 201
+Nonzero elements in column 792 : 725
+Nonzero elements in column 793 : 773
+Nonzero elements in column 794 : 711
+Nonzero elements in column 795 : 208
+Nonzero elements in column 796 : 202
+Nonzero elements in column 797 : 197
+Nonzero elements in column 798 : 185
+Nonzero elements in column 799 : 227
+Nonzero elements in column 800 : 423
+Nonzero elements in column 801 : 707
+Nonzero elements in column 802 : 204
+Nonzero elements in column 803 : 200
+Nonzero elements in column 804 : 220
+Nonzero elements in column 805 : 632
+Nonzero elements in column 806 : 621
+Nonzero elements in column 807 : 711
+Nonzero elements in column 808 : 168
+Nonzero elements in column 809 : 169
+Nonzero elements in column 810 : 195
+Nonzero elements in column 811 : 173
+Nonzero elements in column 812 : 198
+Nonzero elements in column 813 : 505
+Nonzero elements in column 814 : 760
+Nonzero elements in column 815 : 208
+Nonzero elements in column 816 : 186
+Nonzero elements in column 817 : 198
+Nonzero elements in column 818 : 628
+Nonzero elements in column 819 : 708
+Nonzero elements in column 820 : 734
+Nonzero elements in column 821 : 179
+Nonzero elements in column 822 : 165
+Nonzero elements in column 823 : 179
+Nonzero elements in column 824 : 154
+Nonzero elements in column 825 : 201
+Nonzero elements in column 826 : 253
+Nonzero elements in column 827 : 550
+Nonzero elements in column 828 : 185
+Nonzero elements in column 829 : 199
+Nonzero elements in column 830 : 187
+Nonzero elements in column 831 : 287
+Nonzero elements in column 832 : 715
+Nonzero elements in column 833 : 212
+Nonzero elements in column 834 : 244
+Nonzero elements in column 835 : 173
+Nonzero elements in column 836 : 521
+Nonzero elements in column 837 : 762
+Nonzero elements in column 838 : 188
+Nonzero elements in column 839 : 174
+Nonzero elements in column 840 : 189
+Nonzero elements in column 841 : 633
+Nonzero elements in column 842 : 612
+Nonzero elements in column 843 : 648
+Nonzero elements in column 844 : 187
+Nonzero elements in column 845 : 191
+Nonzero elements in column 846 : 159
+Nonzero elements in column 847 : 160
+Nonzero elements in column 848 : 176
+Nonzero elements in column 849 : 282
+Nonzero elements in column 850 : 654
+Nonzero elements in column 851 : 228
+Nonzero elements in column 852 : 232
+Nonzero elements in column 853 : 221
+Nonzero elements in column 854 : 408
+Nonzero elements in column 855 : 899
+Nonzero elements in column 856 : 243
+Nonzero elements in column 857 : 278
+Nonzero elements in column 858 : 304
+Nonzero elements in column 859 : 412
+Nonzero elements in column 860 : 640
+Nonzero elements in column 861 : 160
+Nonzero elements in column 862 : 150
+Nonzero elements in column 863 : 166
+Nonzero elements in column 864 : 686
+Nonzero elements in column 865 : 618
+Nonzero elements in column 866 : 724
+Nonzero elements in column 867 : 148
+Nonzero elements in column 868 : 162
+Nonzero elements in column 869 : 150
+Nonzero elements in column 870 : 172
+Nonzero elements in column 871 : 160
+Nonzero elements in column 872 : 275
+Nonzero elements in column 873 : 601
+Nonzero elements in column 874 : 195
+Nonzero elements in column 875 : 183
+Nonzero elements in column 876 : 212
+Nonzero elements in column 877 : 287
+Nonzero elements in column 878 : 601
+Nonzero elements in column 879 : 189
+Nonzero elements in column 880 : 176
+Nonzero elements in column 881 : 236
+Nonzero elements in column 882 : 337
+Nonzero elements in column 883 : 623
+Nonzero elements in column 884 : 122
+Nonzero elements in column 885 : 109
+Nonzero elements in column 886 : 126
+Nonzero elements in column 887 : 405
+Nonzero elements in column 888 : 439
+Nonzero elements in column 889 : 446
+Nonzero elements in column 890 : 127
+Nonzero elements in column 891 : 100
+Nonzero elements in column 892 : 87
+Nonzero elements in column 893 : 99
+Nonzero elements in column 894 : 121
+Nonzero elements in column 895 : 475
+Nonzero elements in column 896 : 717
+Nonzero elements in column 897 : 189
+Nonzero elements in column 898 : 164
+Nonzero elements in column 899 : 196
+Nonzero elements in column 900 : 571
+Nonzero elements in column 901 : 682
+Nonzero elements in column 902 : 633
+Nonzero elements in column 903 : 158
+Nonzero elements in column 904 : 134
+Nonzero elements in column 905 : 129
+Nonzero elements in column 906 : 142
+Nonzero elements in column 907 : 176
+Nonzero elements in column 908 : 231
+Nonzero elements in column 909 : 578
+Nonzero elements in column 910 : 206
+Nonzero elements in column 911 : 205
+Nonzero elements in column 912 : 187
+Nonzero elements in column 913 : 263
+Nonzero elements in column 914 : 650
+Nonzero elements in column 915 : 207
+Nonzero elements in column 916 : 198
+Nonzero elements in column 917 : 198
+Nonzero elements in column 918 : 390
+Nonzero elements in column 919 : 635
+Nonzero elements in column 920 : 165
+Nonzero elements in column 921 : 154
+Nonzero elements in column 922 : 156
+Nonzero elements in column 923 : 620
+Nonzero elements in column 924 : 507
+Nonzero elements in column 925 : 655
+Nonzero elements in column 926 : 140
+Nonzero elements in column 927 : 158
+Nonzero elements in column 928 : 129
+Nonzero elements in column 929 : 160
+Nonzero elements in column 930 : 127
+Nonzero elements in column 931 : 362
+Nonzero elements in column 932 : 601
+Nonzero elements in column 933 : 122
+Nonzero elements in column 934 : 137
+Nonzero elements in column 935 : 138
+Nonzero elements in column 936 : 464
+Nonzero elements in column 937 : 440
+Nonzero elements in column 938 : 654
+Nonzero elements in column 939 : 101
+Nonzero elements in column 940 : 134
+Nonzero elements in column 941 : 124
+Nonzero elements in column 942 : 152
+Nonzero elements in column 943 : 125
+Nonzero elements in column 944 : 382
+Nonzero elements in column 945 : 812
+Nonzero elements in column 946 : 227
+Nonzero elements in column 947 : 259
+Nonzero elements in column 948 : 218
+Nonzero elements in column 949 : 366
+Nonzero elements in column 950 : 575
+Nonzero elements in column 951 : 116
+Nonzero elements in column 952 : 118
+Nonzero elements in column 953 : 126
+Nonzero elements in column 954 : 427
+Nonzero elements in column 955 : 436
+Nonzero elements in column 956 : 601
+Nonzero elements in column 957 : 104
+Nonzero elements in column 958 : 138
+Nonzero elements in column 959 : 121
+Nonzero elements in column 960 : 119
+Nonzero elements in column 961 : 123
+Nonzero elements in column 962 : 231
+Nonzero elements in column 963 : 663
+Nonzero elements in column 964 : 162
+Nonzero elements in column 965 : 161
+Nonzero elements in column 966 : 221
+Nonzero elements in column 967 : 329
+Nonzero elements in column 968 : 513
+Nonzero elements in column 969 : 91
+Nonzero elements in column 970 : 92
+Nonzero elements in column 971 : 115
+Nonzero elements in column 972 : 555
+Nonzero elements in column 973 : 497
+Nonzero elements in column 974 : 441
+Nonzero elements in column 975 : 93
+Nonzero elements in column 976 : 121
+Nonzero elements in column 977 : 109
+Nonzero elements in column 978 : 108
+Nonzero elements in column 979 : 94
+Nonzero elements in column 980 : 176
+Nonzero elements in column 981 : 456
+Nonzero elements in column 982 : 148
+Nonzero elements in column 983 : 121
+Nonzero elements in column 984 : 172
+Nonzero elements in column 985 : 297
+Nonzero elements in column 986 : 463
+Nonzero elements in column 987 : 93
+Nonzero elements in column 988 : 79
+Nonzero elements in column 989 : 105
+Nonzero elements in column 990 : 534
+Nonzero elements in column 991 : 375
+Nonzero elements in column 992 : 527
+Nonzero elements in column 993 : 93
+Nonzero elements in column 994 : 103
+Nonzero elements in column 995 : 99
+Nonzero elements in column 996 : 129
+Nonzero elements in column 997 : 94
+Nonzero elements in column 998 : 140
+Nonzero elements in column 999 : 419
+Nonzero elements in column 1000 : 112
+Nonzero elements in column 1001 : 111
+Nonzero elements in column 1002 : 170
+Nonzero elements in column 1003 : 100
+Nonzero elements in column 1004 : 273
+Nonzero elements in column 1005 : 154
+Nonzero elements in column 1006 : 113
+Nonzero elements in column 1007 : 111
+Nonzero elements in column 1008 : 122
+Nonzero elements in column 1009 : 270
+Nonzero elements in column 1010 : 141
+Nonzero elements in column 1011 : 116
+Nonzero elements in column 1012 : 130
+Nonzero elements in column 1013 : 288
+Nonzero elements in column 1014 : 544
+Nonzero elements in column 1015 : 124
+Nonzero elements in column 1016 : 96
+Nonzero elements in column 1017 : 98
+Nonzero elements in column 1018 : 268
+Nonzero elements in column 1019 : 388
+Nonzero elements in column 1020 : 432
+Nonzero elements in column 1021 : 139
+Nonzero elements in column 1022 : 139
+Nonzero elements in column 1023 : 58
+Nonzero elements in column 1024 : 50
+Nonzero elements in column 1025 : 132
+Nonzero elements in column 1026 : 280
+Nonzero elements in column 1027 : 799
+Nonzero elements in column 1028 : 198
+Nonzero elements in column 1029 : 268
+Nonzero elements in column 1030 : 179
+Nonzero elements in column 1031 : 260
+Nonzero elements in column 1032 : 697
+Nonzero elements in column 1033 : 146
+Nonzero elements in column 1034 : 162
+Nonzero elements in column 1035 : 184
+Nonzero elements in column 1036 : 213
+Nonzero elements in column 1037 : 408
+Nonzero elements in column 1038 : 95
+Nonzero elements in column 1039 : 101
+Nonzero elements in column 1040 : 76
+Nonzero elements in column 1041 : 267
+Nonzero elements in column 1042 : 224
+Nonzero elements in column 1043 : 237
+Nonzero elements in column 1044 : 83
+Nonzero elements in column 1045 : 69
+Nonzero elements in column 1046 : 75
+Nonzero elements in column 1047 : 76
+Nonzero elements in column 1048 : 50
+Nonzero elements in column 1049 : 197
+Nonzero elements in column 1050 : 325
+Nonzero elements in column 1051 : 99
+Nonzero elements in column 1052 : 102
+Nonzero elements in column 1053 : 76
+Nonzero elements in column 1054 : 220
+Nonzero elements in column 1055 : 557
+Nonzero elements in column 1056 : 191
+Nonzero elements in column 1057 : 162
+Nonzero elements in column 1058 : 151
+Nonzero elements in column 1059 : 231
+Nonzero elements in column 1060 : 385
+Nonzero elements in column 1061 : 112
+Nonzero elements in column 1062 : 82
+Nonzero elements in column 1063 : 84
+Nonzero elements in column 1064 : 272
+Nonzero elements in column 1065 : 210
+Nonzero elements in column 1066 : 272
+Nonzero elements in column 1067 : 69
+Nonzero elements in column 1068 : 85
+Nonzero elements in column 1069 : 58
+Nonzero elements in column 1070 : 79
+Nonzero elements in column 1071 : 83
+Nonzero elements in column 1072 : 241
+Nonzero elements in column 1073 : 583
+Nonzero elements in column 1074 : 140
+Nonzero elements in column 1075 : 151
+Nonzero elements in column 1076 : 177
+Nonzero elements in column 1077 : 173
+Nonzero elements in column 1078 : 426
+Nonzero elements in column 1079 : 119
+Nonzero elements in column 1080 : 145
+Nonzero elements in column 1081 : 117
+Nonzero elements in column 1082 : 265
+Nonzero elements in column 1083 : 475
+Nonzero elements in column 1084 : 94
+Nonzero elements in column 1085 : 107
+Nonzero elements in column 1086 : 101
+Nonzero elements in column 1087 : 361
+Nonzero elements in column 1088 : 297
+Nonzero elements in column 1089 : 282
+Nonzero elements in column 1090 : 97
+Nonzero elements in column 1091 : 88
+Nonzero elements in column 1092 : 109
+Nonzero elements in column 1093 : 105
+Nonzero elements in column 1094 : 75
+Nonzero elements in column 1095 : 276
+Nonzero elements in column 1096 : 660
+Nonzero elements in column 1097 : 184
+Nonzero elements in column 1098 : 218
+Nonzero elements in column 1099 : 175
+Nonzero elements in column 1100 : 245
+Nonzero elements in column 1101 : 580
+Nonzero elements in column 1102 : 180
+Nonzero elements in column 1103 : 181
+Nonzero elements in column 1104 : 181
+Nonzero elements in column 1105 : 175
+Nonzero elements in column 1106 : 357
+Nonzero elements in column 1107 : 86
+Nonzero elements in column 1108 : 74
+Nonzero elements in column 1109 : 94
+Nonzero elements in column 1110 : 233
+Nonzero elements in column 1111 : 223
+Nonzero elements in column 1112 : 232
+Nonzero elements in column 1113 : 83
+Nonzero elements in column 1114 : 50
+Nonzero elements in column 1115 : 75
+Nonzero elements in column 1116 : 64
+Nonzero elements in column 1117 : 85
+Nonzero elements in column 1118 : 144
+Nonzero elements in column 1119 : 454
+Nonzero elements in column 1120 : 146
+Nonzero elements in column 1121 : 88
+Nonzero elements in column 1122 : 126
+Nonzero elements in column 1123 : 165
+Nonzero elements in column 1124 : 497
+Nonzero elements in column 1125 : 87
+Nonzero elements in column 1126 : 183
+Nonzero elements in column 1127 : 125
+Nonzero elements in column 1128 : 254
+Nonzero elements in column 1129 : 492
+Nonzero elements in column 1130 : 87
+Nonzero elements in column 1131 : 102
+Nonzero elements in column 1132 : 112
+Nonzero elements in column 1133 : 271
+Nonzero elements in column 1134 : 270
+Nonzero elements in column 1135 : 278
+Nonzero elements in column 1136 : 88
+Nonzero elements in column 1137 : 67
+Nonzero elements in column 1138 : 82
+Nonzero elements in column 1139 : 82
+Nonzero elements in column 1140 : 76
+Nonzero elements in column 1141 : 311
+Nonzero elements in column 1142 : 716
+Nonzero elements in column 1143 : 158
+Nonzero elements in column 1144 : 178
+Nonzero elements in column 1145 : 203
+Nonzero elements in column 1146 : 213
+Nonzero elements in column 1147 : 456
+Nonzero elements in column 1148 : 137
+Nonzero elements in column 1149 : 116
+Nonzero elements in column 1150 : 144
+Nonzero elements in column 1151 : 235
+Nonzero elements in column 1152 : 383
+Nonzero elements in column 1153 : 104
+Nonzero elements in column 1154 : 103
+Nonzero elements in column 1155 : 137
+Nonzero elements in column 1156 : 285
+Nonzero elements in column 1157 : 347
+Nonzero elements in column 1158 : 333
+Nonzero elements in column 1159 : 86
+Nonzero elements in column 1160 : 72
+Nonzero elements in column 1161 : 89
+Nonzero elements in column 1162 : 76
+Nonzero elements in column 1163 : 91
+Nonzero elements in column 1164 : 263
+Nonzero elements in column 1165 : 625
+Nonzero elements in column 1166 : 150
+Nonzero elements in column 1167 : 222
+Nonzero elements in column 1168 : 167
+Nonzero elements in column 1169 : 213
+Nonzero elements in column 1170 : 484
+Nonzero elements in column 1171 : 121
+Nonzero elements in column 1172 : 145
+Nonzero elements in column 1173 : 142

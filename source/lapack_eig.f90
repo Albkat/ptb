@@ -1,9 +1,11 @@
 module gtb_lapack_eig
   use gtb_accuracy, only: ik, sp, dp
+  use accel_lib, only : cuda_dsyevd, cuda_ssyevd, cuda_dsygvd
+  use cuda_, only : ctx
   implicit none
   private
 
-  public :: la_syev, la_syevx, la_sygvx, la_sygvd
+  public :: la_syev, la_syevd, la_syevx, la_sygvx, la_sygvd
 
   !> Computes all eigenvalues and, optionally, eigenvectors of a
   !> real symmetric matrix A.
@@ -35,6 +37,43 @@ module gtb_lapack_eig
       integer(ik), intent(in) :: lwork
     end subroutine dsyev
   end interface la_syev
+  
+  !> Computes all eigenvalues and, optionally, eigenvectors of a
+  !> real symmetric matrix A with divide and conquer algorithm
+  interface la_syevd
+    pure subroutine ssyevd(jobz, uplo, n, a, lda, w, work, lwork, iwork, liwork, info)
+      import :: ik, sp
+      integer, parameter :: wp = sp
+      real(wp), intent(inout) :: a(lda, *)
+      real(wp), intent(out) :: w(*)
+      character(len=1), intent(in) :: jobz
+      character(len=1), intent(in) :: uplo
+      integer(ik), intent(out) :: info
+      integer(ik), intent(in) :: n
+      integer(ik), intent(in) :: lda
+      real(wp), intent(inout) :: work(*)
+      integer(ik), intent(in) :: lwork
+      integer(ik), intent(inout) :: iwork(*)
+      integer(ik), intent(in) :: liwork
+    end subroutine ssyevd
+    pure subroutine dsyevd(jobz, uplo, n, a, lda, w, work, lwork, iwork, liwork, info)
+      import :: ik, dp
+      integer, parameter :: wp = dp
+      real(wp), intent(inout) :: a(lda, *)
+      real(wp), intent(out) :: w(*)
+      character(len=1), intent(in) :: jobz
+      character(len=1), intent(in) :: uplo
+      integer(ik), intent(out) :: info
+      integer(ik), intent(in) :: n
+      integer(ik), intent(in) :: lda
+      real(wp), intent(inout) :: work(*)
+      integer(ik), intent(in) :: lwork
+      integer(ik), intent(inout) :: iwork(*)
+      integer(ik), intent(in) :: liwork
+    end subroutine dsyevd
+    module procedure :: la_syevd_rdp
+    module procedure :: la_syevd_rsp
+  end interface la_syevd
 
   !> Computes selected eigenvalues and, optionally, eigenvectors
   !> of a real symmetric matrix A.  Eigenvalues and eigenvectors can be
@@ -202,6 +241,204 @@ module gtb_lapack_eig
       integer(ik), intent(inout) :: iwork(*)
       integer(ik), intent(in) :: liwork
     end subroutine dsygvd
+    module procedure :: la_sygvd_rdp
+    module procedure :: la_sygvd_rsp
   end interface la_sygvd
+
+contains
+
+subroutine la_sygvd_rsp(a, b, w, info, itype, jobz, uplo)
+   integer, parameter :: wp = sp
+   real(wp), intent(inout) :: a(:,:)
+   real(wp), intent(inout) :: b(:,:)
+   real(wp), intent(out) :: w(:)
+   integer(ik), intent(out) :: info
+   integer(ik), intent(in), optional :: itype
+   character(len=1), intent(in), optional :: jobz
+   character(len=1), intent(in), optional :: uplo
+
+   character(len=1) :: job, upl
+   integer(ik) :: n, lwork, liwork, ityp
+
+   !> workspace
+   real(wp), allocatable :: work(:)
+   integer(ik), allocatable :: iwork(:)
+
+   !  eigenvalue problem type !
+   ityp = 1
+   if (present(itype)) ityp =  itype
+
+   ! if eigenvalues or eigenvalues + eigenvectors!
+   job = 'V'
+   if (present(jobz)) job = jobz
+
+   ! upper or lower triangle to use !
+   upl = 'U'
+   if (present(uplo)) upl = uplo
+   n = size(a, 2)
+
+   ! if (allocated(ctx)) then
+   !    call cuda_ssygvd(ctx, n, a, w, info)
+   ! else
+      lwork = -1
+      liwork = -1
+      w = 0.0_wp
+      allocate(work(1))
+      allocate(iwork(1))
+      call la_sygvd(ityp, job, upl, n, a, n, b, n, w, work, lwork, iwork, liwork, info)
+      
+      lwork = int(work(1))
+      liwork = iwork(1)
+      deallocate(work, iwork)
+      allocate(work(lwork))
+      allocate(iwork(liwork))
+      call la_sygvd(ityp, job, upl, n, a, n, b, n, w, work, lwork, iwork, liwork, info)
+   ! endif 
+   
+end subroutine la_sygvd_rsp
+
+subroutine la_sygvd_rdp(a, b, w, info, itype, jobz, uplo)
+   integer, parameter :: wp = dp
+   real(wp), intent(inout) :: a(:,:)
+   real(wp), intent(inout) :: b(:,:)
+   real(wp), intent(out) :: w(:)
+   integer(ik), intent(out) :: info
+   integer(ik), intent(in), optional :: itype
+   character(len=1), intent(in), optional :: jobz
+   character(len=1), intent(in), optional :: uplo
+
+   character(len=1) :: job, upl
+   integer :: n, lwork, liwork, ityp
+
+   !> workspace
+   real(wp), allocatable :: work(:)
+   integer(ik), allocatable :: iwork(:)
+
+   !  eigenvalue problem type !
+   ityp = 1
+   if (present(itype)) ityp =  itype
+   
+   ! if eigenvalues or eigenvalues + eigenvectors!
+   job = 'V'
+   if (present(jobz)) job = jobz
+
+   ! upper or lower triangle to use !
+   upl = 'U'
+   if (present(uplo)) upl = uplo
+   n = size(a, 2)
+
+   if (allocated(ctx)) then
+      call cuda_dsygvd(ctx, n, a, b, w, info)
+   else
+      lwork = -1
+      liwork = -1
+      w = 0.0_wp
+      allocate(work(1))
+      allocate(iwork(1))
+      call la_sygvd(ityp, job, upl, n, a, n, b, n, w, work, lwork, iwork, liwork, info)
+      
+      lwork = idint(work(1))
+      liwork = iwork(1)
+      deallocate(work, iwork)
+      allocate(work(lwork))
+      allocate(iwork(liwork))
+      call la_sygvd(ityp, job, upl, n, a, n, b, n, w, work, lwork, iwork, liwork, info)
+
+   endif 
+   
+end subroutine la_sygvd_rdp
+
+
+
+subroutine la_syevd_rsp(a, w, info, jobz, uplo)
+   integer, parameter :: wp = sp
+   real(wp), intent(inout) :: a(:,:)
+   real(wp), intent(out) :: w(:)
+   integer(ik), intent(out) :: info
+   character(len=1), intent(in), optional :: jobz
+   character(len=1), intent(in), optional :: uplo
+
+   character(len=1) :: job, upl
+   integer(ik) :: n, lwork, liwork
+
+   !> workspace
+   real(wp), allocatable :: work(:)
+   integer(ik), allocatable :: iwork(:)
+
+   ! if eigenvalues or eigenvalues + eigenvectors!
+   job = 'V'
+   if (present(jobz)) job = jobz
+
+   ! upper or lower triangle to use !
+   upl = 'U'
+   if (present(uplo)) upl = uplo
+   n = size(a, 2)
+
+   if (allocated(ctx)) then
+      call cuda_ssyevd(ctx, n, a, w, info)
+   else
+      lwork = -1
+      liwork = -1
+      w = 0.0_wp
+      allocate(work(1))
+      allocate(iwork(1))
+      call la_syevd(job, upl, n, a, n, w, work, lwork, iwork, liwork, info)
+      
+      lwork = int(work(1))
+      liwork = iwork(1)
+      deallocate(work, iwork)
+      allocate(work(lwork))
+      allocate(iwork(liwork))
+      call la_syevd(job, upl, n, a, n, w, work, lwork, iwork, liwork, info)
+   endif 
+   
+end subroutine la_syevd_rsp
+
+subroutine la_syevd_rdp(a, w, info, jobz, uplo)
+   integer, parameter :: wp = dp
+   real(wp), intent(inout) :: a(:,:)
+   real(wp), intent(out) :: w(:)
+   integer(ik), intent(out) :: info
+   character(len=1), intent(in), optional :: jobz
+   character(len=1), intent(in), optional :: uplo
+
+   character(len=1) :: job, upl
+   integer :: n, lwork, liwork
+
+   !> workspace
+   real(wp), allocatable :: work(:)
+   integer(ik), allocatable :: iwork(:)
+
+   ! if eigenvalues or eigenvalues + eigenvectors!
+   job = 'V'
+   if (present(jobz)) job = jobz
+
+   ! upper or lower triangle to use !
+   upl = 'U'
+   if (present(uplo)) upl = uplo
+   n = size(a, 2)
+
+   if (allocated(ctx)) then
+      call cuda_dsyevd(ctx, n, a, w, info)
+   else
+      lwork = -1
+      liwork = -1
+      w = 0.0_wp
+      allocate(work(1))
+      allocate(iwork(1))
+      call la_syevd(job, upl, n, a, n, w, work, lwork, iwork, liwork, info)
+      
+      lwork = idint(work(1))
+      liwork = iwork(1)
+      deallocate(work, iwork)
+      allocate(work(lwork))
+      allocate(iwork(liwork))
+      call la_syevd(job, upl, n, a, n, w, work, lwork, iwork, liwork, info)
+
+   endif 
+   
+end subroutine la_syevd_rdp
+
+
 
 end module gtb_lapack_eig
