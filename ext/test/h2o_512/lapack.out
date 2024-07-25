@@ -1,0 +1,30 @@
+ 
+       ==============================================
+       |                 P T B                      |
+       |                S.Grimme                    |
+       |          Universitaet Bonn, MCTC           |
+       ==============================================
+       Version 3.7, Do 28. Apr 14:28:45 CEST 2022
+ 
+       Cite work conducted with this code as
+       S. Grimme, M. Mueller, A. Hansen, unpublished.
+ 
+ ~/.atompara                                                                    
+  
+          =========================
+          reading ... struc.xyz
+          =========================
+ basis read done.
+ ncao        12288
+ nsao        11776
+ npr         32768
+ basis setup done. Ndim       11776
+ coreat          512
+ cncao           512
+ cnsao           512
+ cnpr           3072
+ 
+ nalpha         2048
+ nbeta          2048
+ ntotal         4096
+ nopen             0

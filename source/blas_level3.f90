@@ -1,6 +1,8 @@
 !> Interfaces to level 3 BLAS routines.
 module gtb_la_level3
+   use accel_lib, only : cuda_dgemm
   use gtb_accuracy, only : ik, sp, dp
+  use cuda_, only : ctx, cuda_context
   implicit none
   private
 
@@ -87,6 +89,23 @@ module gtb_la_level3
       complex(wp), intent(in) :: beta
       complex(wp), intent(inout) :: c(ldc, *)
     end subroutine zgemm
+   ! subroutine cuda_dgemm(ctx, transa, transb, m, n, k, alpha, a, b, beta, c, err)
+   !    import :: cuda_context
+   !    import :: dp
+   !    integer, parameter :: wp = dp
+   !    type(cuda_context), intent(in) :: ctx
+   !    character, intent(in) :: transa
+   !    character, intent(in) :: transb
+   !    integer, intent(in) :: m
+   !    integer, intent(in) :: n
+   !    integer, intent(in) :: k
+   !    integer, intent(in) :: err
+   !    real(wp), intent(in) :: alpha
+   !    real(wp), intent(in) :: beta
+   !    real(wp), intent(in) :: a(m,k)
+   !    real(wp), intent(in) :: b(k,n)
+   !    real(wp), intent(in) :: c(m,n)
+   ! end subroutine cuda_dgemm
 
     module procedure :: la_gemm_rsp
     module procedure :: la_gemm_csp
@@ -675,40 +694,45 @@ contains
     call la_gemm(tra, trb, m, n, k, a, amat, lda, bmat, ldb, b, cmat, ldc)
   end subroutine la_gemm_csp
 
-  pure subroutine la_gemm_rdp(amat, bmat, cmat, transa, transb, alpha, beta)
-    integer, parameter :: wp = dp
-    real(wp), contiguous, intent(in) :: amat(:, :)
-    real(wp), contiguous, intent(in) :: bmat(:, :)
-    real(wp), contiguous, intent(inout) :: cmat(:, :)
-    character, intent(in), optional :: transa
-    character, intent(in), optional :: transb
-    real(wp), intent(in), optional :: alpha
-    real(wp), intent(in), optional :: beta
+subroutine la_gemm_rdp(amat, bmat, cmat, transa, transb, alpha, beta)
+   integer, parameter :: wp = dp
+   real(wp), contiguous, intent(in) :: amat(:, :)
+   real(wp), contiguous, intent(in) :: bmat(:, :)
+   real(wp), contiguous, intent(inout) :: cmat(:, :)
+   character, intent(in), optional :: transa
+   character, intent(in), optional :: transb
+   real(wp), intent(in), optional :: alpha
+   real(wp), intent(in), optional :: beta
 
-    character :: tra, trb
-    real(wp) :: a, b
-    integer(ik) :: m, n, k, lda, ldb, ldc
+   character :: tra, trb
+   real(wp) :: a, b
+   integer(ik) :: m, n, k, lda, ldb, ldc
+   integer :: err
 
-    a = 1.0_wp
-    if (present(alpha)) a = alpha
-    b = 0.0_wp
-    if (present(beta)) b = beta
-    tra = 'n'
-    if (present(transa)) tra = transa
-    trb = 'n'
-    if (present(transb)) trb = transb
-    if ((tra == 'n'.or.tra == 'N')) then
-      k = size(amat, 2)
-    else
-      k = size(amat, 1)
-    end if
-    lda = max(1, size(amat, 1))
-    ldb = max(1, size(bmat, 1))
-    ldc = max(1, size(cmat, 1))
-    m = size(cmat, 1)
-    n = size(cmat, 2)
-    call la_gemm(tra, trb, m, n, k, a, amat, lda, bmat, ldb, b, cmat, ldc)
-  end subroutine la_gemm_rdp
+   a = 1.0_wp
+   if (present(alpha)) a = alpha
+   b = 0.0_wp
+   if (present(beta)) b = beta
+   tra = 'n'
+   if (present(transa)) tra = transa
+   trb = 'n'
+   if (present(transb)) trb = transb
+   if ((tra == 'n'.or.tra == 'N')) then
+   k = size(amat, 2)
+   else
+   k = size(amat, 1)
+   end if
+   lda = max(1, size(amat, 1))
+   ldb = max(1, size(bmat, 1))
+   ldc = max(1, size(cmat, 1))
+   m = size(cmat, 1)
+   n = size(cmat, 2)
+   if (allocated(ctx)) then
+      call cuda_dgemm(ctx, tra, trb, m, n, k, a, amat, bmat, b, cmat, err)
+   else
+      call la_gemm(tra, trb, m, n, k, a, amat, lda, bmat, ldb, b, cmat, ldc)
+   endif 
+end subroutine la_gemm_rdp
 
   pure subroutine la_gemm_cdp(amat, bmat, cmat, transa, transb, alpha, beta)
     integer, parameter :: wp = dp
